@@ -21,8 +21,9 @@ import tWZ.Tools.user as user
 
 # Tools for systematics
 from tWZ.Tools.helpers             import closestOSDLMassToMZ, deltaR, deltaPhi, bestDRMatchInCollection, nonEmptyFile, getSortedZCandidates, cosThetaStar, m3, getMinDLMass
-from tWZ.Tools.objectSelection     import getMuons, getElectrons, muonSelector, eleSelector, getGoodMuons, getGoodElectrons, isBJet, getGenPartsAll, getJets, genLepFromZ, mvaTopWP
-from tWZ.Tools.objectSelection     import getGenZs
+from tWZ.Tools.objectSelection_UL     import getMuons, getElectrons, muonSelector, eleSelector, getGoodMuons, getGoodElectrons, isBJet, getGenPartsAll, getJets, genLepFromZ, mvaTopWP
+from tWZ.Tools.objectSelection_UL     import getGenZs
+from tWZ.Tools.mvaTOPreader  import mvaTOPreader
 
 from tWZ.Tools.overlapRemovalTTG   import hasMesonMother, getParentIds
 from tWZ.Tools.triggerEfficiency   import triggerEfficiency
@@ -81,11 +82,13 @@ options = get_parser().parse_args()
 if options.year not in [ 'UL2016', 'UL2016_preVFP', 'UL2017', 'UL2018' ]:
     raise Exception("Year %s not known"%year)
 yearint = 2018 
-if "2016" in options.year: 
+if "UL2016" == options.year: 
     yearint = 2016 
-elif "2017" in options.year:
+if "UL2016_preVFP" == options.year: 
+    yearint = 2016
+elif "UL2017" == options.year:
     yearint = 2017 
-elif "2018" in options.year:
+elif "UL2018" == options.year:
     yearint = 2018
 
 # Logging
@@ -144,21 +147,21 @@ if options.small:
     options.nJobs = 10000 # set high to just run over 1 input file
 
 if options.year == "UL2016":
-    from Samples.nanoAOD.UL16_nanoAODv9         import allSamples as mcSamples
-    # allSamples = mcSamples + dataSamples
-    allSamples = mcSamples
+    from Samples.nanoAOD.UL16_nanoAODv9           import allSamples as mcSamples
+    from Samples.nanoAOD.UL16_DATA_nanoAODv9      import allSamples as dataSamples
+    allSamples = mcSamples + dataSamples
 elif options.year == "UL2016_preVFP": #AODAPV samples
-    from Samples.nanoAOD.UL16_nanoAODAPVv9         import allSamples as mcSamples
-    # allSamples = mcSamples + dataSamples
-    allSamples = mcSamples
+    from Samples.nanoAOD.UL16_nanoAODAPVv9        import allSamples as mcSamples
+    from Samples.nanoAOD.UL16_DATA_nanoAODAPVv9   import allSamples as dataSamples
+    allSamples = mcSamples + dataSamples
 elif options.year == "UL2017":
     from Samples.nanoAOD.UL17_nanoAODv9           import allSamples as mcSamples
-    # allSamples = mcSamples + dataSamples
-    allSamples = mcSamples
+    from Samples.nanoAOD.UL17_DATA_nanoAODv9      import allSamples as dataSamples
+    allSamples = mcSamples + dataSamples
 elif options.year == "UL2018":
     from Samples.nanoAOD.UL18_nanoAODv9           import allSamples as mcSamples
-    # allSamples = mcSamples + dataSamples
-    allSamples = mcSamples
+    from Samples.nanoAOD.UL18_DATA_nanoAODv9      import allSamples as dataSamples
+    allSamples = mcSamples + dataSamples
 
 samples = []
 for selected in options.samples:
@@ -280,8 +283,8 @@ addSystematicVariations = (not isData) and (not options.skipSystematicVariations
 # B tagging SF
 # CHECK FOR UL FILES
 b_tagger = "DeepJet"
-from Analysis.Tools.BTagEfficiency import BTagEfficiency
-btagEff = BTagEfficiency( fastSim = False, year=yearint, tagger=b_tagger )
+from Analysis.Tools.BTagEfficiencyUL import BTagEfficiency
+btagEff = BTagEfficiency( fastSim = False, year=options.year, tagger=b_tagger )
 
 ################################################################################
 # tmp_output_directory
@@ -326,7 +329,7 @@ treeFormulas = {}
 if options.triggerSelection and isTriLep:
     # Trigger selection
     from tWZ.Tools.triggerSelector import triggerSelector
-    ts           = triggerSelector(options.year)
+    ts           = triggerSelector(yearint)
     triggerCond  = ts.getSelection(options.samples[0] if isData else "MC", triggerList = ts.getTriggerList(sample) )
     treeFormulas["triggerDecision"] =  {'string':triggerCond}
     if isData:
@@ -404,7 +407,7 @@ if options.year == "2017":
 
 #branches to be kept for MC samples only
 branchKeepStrings_MC = [ "Generator_*", "GenPart_*", "nGenPart", "genWeight", "Pileup_nTrueInt","GenMET_*", "nGenJet", "GenJet_*", "genTtbarId"]
-#branchKeepStrings_MC.extend([ "*LHEScaleWeight", "*LHEPdfWeight", "LHEWeight_originalXWGTUP"])
+branchKeepStrings_MC.extend(["LHEWeight_originalXWGTUP", "nLHEPdfWeight", "LHEPdfWeight", "nLHEScaleWeight", "LHEScaleWeight"])
 
 #branches to be kept for data only
 branchKeepStrings_DATA = [ ]
@@ -432,7 +435,7 @@ jetVarNames     = [x.split('/')[0] for x in jetVars]
 genLepVars      = ['pt/F', 'phi/F', 'eta/F', 'pdgId/I', 'genPartIdxMother/I', 'status/I', 'statusFlags/I'] # some might have different types
 genLepVarNames  = [x.split('/')[0] for x in genLepVars]
 # those are for writing leptons
-lepVars         = ['pt/F','eta/F','phi/F','pdgId/I','cutBased/I','miniPFRelIso_all/F','pfRelIso03_all/F','mvaFall17V2Iso_WP90/O', 'mvaTOP/F', 'sip3d/F','lostHits/I','convVeto/I','dxy/F','dz/F','charge/I','deltaEtaSC/F','mediumId/I','eleIndex/I','muIndex/I']
+lepVars         = ['pt/F','eta/F','phi/F','pdgId/I','cutBased/I','miniPFRelIso_all/F','pfRelIso03_all/F','mvaFall17V2Iso_WP90/O', 'mvaTTH/F', 'sip3d/F','lostHits/I','convVeto/I','dxy/F','dz/F','charge/I','deltaEtaSC/F','mediumId/I','eleIndex/I','muIndex/I','mvaTOP/F','mvaTOPv2/F','mvaTOPWP/I','mvaTOPv2WP/I']
 lepVarNames     = [x.split('/')[0] for x in lepVars]
 
 read_variables = map(TreeVariable.fromString, [ 'MET_pt/F', 'MET_phi/F', 'run/I', 'luminosityBlock/I', 'event/l', 'PV_npvs/I', 'PV_npvsGood/I'] )
@@ -440,14 +443,15 @@ if options.year == "2017":
     read_variables += map(TreeVariable.fromString, [ 'METFixEE2017_pt/F', 'METFixEE2017_phi/F', 'METFixEE2017_pt_nom/F', 'METFixEE2017_phi_nom/F'])
     if isMC:
         read_variables += map(TreeVariable.fromString, [ 'METFixEE2017_pt_jesTotalUp/F', 'METFixEE2017_pt_jesTotalDown/F', 'METFixEE2017_pt_jerUp/F', 'METFixEE2017_pt_jerDown/F', 'METFixEE2017_pt_unclustEnDown/F', 'METFixEE2017_pt_unclustEnUp/F', 'METFixEE2017_phi_jesTotalUp/F', 'METFixEE2017_phi_jesTotalDown/F', 'METFixEE2017_phi_jerUp/F', 'METFixEE2017_phi_jerDown/F', 'METFixEE2017_phi_unclustEnDown/F', 'METFixEE2017_phi_unclustEnUp/F', 'METFixEE2017_pt_jer/F', 'METFixEE2017_phi_jer/F'])
-else:
-    read_variables += map(TreeVariable.fromString, [ 'MET_pt_nom/F', 'MET_phi_nom/F' ])
-    if isMC:
-        read_variables += map(TreeVariable.fromString, [ 'MET_pt_jesTotalUp/F', 'MET_pt_jesTotalDown/F', 'MET_pt_jerUp/F', 'MET_pt_jerDown/F', 'MET_pt_unclustEnDown/F', 'MET_pt_unclustEnUp/F', 'MET_phi_jesTotalUp/F', 'MET_phi_jesTotalDown/F', 'MET_phi_jerUp/F', 'MET_phi_jerDown/F', 'MET_phi_unclustEnDown/F', 'MET_phi_unclustEnUp/F', 'MET_pt_jer/F', 'MET_phi_jer/F'])
+# else:
+    # These variables don't exist anymore in UL, MET variations are calculated with JMECorrector
+    # read_variables += map(TreeVariable.fromString, [ 'MET_pt_nom/F', 'MET_phi_nom/F' ])
+    # if isMC:
+    #     read_variables += map(TreeVariable.fromString, [ 'MET_pt_jesTotalUp/F', 'MET_pt_jesTotalDown/F', 'MET_pt_jerUp/F', 'MET_pt_jerDown/F', 'MET_pt_unclustEnDown/F', 'MET_pt_unclustEnUp/F', 'MET_phi_jesTotalUp/F', 'MET_phi_jesTotalDown/F', 'MET_phi_jerUp/F', 'MET_phi_jerDown/F', 'MET_phi_unclustEnDown/F', 'MET_phi_unclustEnUp/F', 'MET_pt_jer/F', 'MET_phi_jer/F'])
 if isMC:
     read_variables += map(TreeVariable.fromString, [ 'GenMET_pt/F', 'GenMET_phi/F' ])
 
-new_variables = [ 'weight/F', 'year/I']
+new_variables = [ 'weight/F', 'year/I', 'preVFP/O']
 
 if options.triggerSelection and isTriLep:
     new_variables+= ['triggerDecision/I']
@@ -470,9 +474,9 @@ if isMC:
 
 read_variables += [\
     TreeVariable.fromString('nElectron/I'),
-    VectorTreeVariable.fromString('Electron[pt/F,eta/F,phi/F,pdgId/I,cutBased/I,miniPFRelIso_all/F,pfRelIso03_all/F,sip3d/F,lostHits/b,mvaFall17V2Iso_WP80/O,mvaFall17V2Iso_WP90/O,convVeto/O,dxy/F,dz/F,charge/I,deltaEtaSC/F,vidNestedWPBitmap/I,mvaTTH/F]'),
+    VectorTreeVariable.fromString('Electron[pt/F,eta/F,phi/F,pdgId/I,cutBased/I,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,sip3d/F,lostHits/b,mvaFall17V2noIso/F,mvaFall17V2Iso_WP80/O,mvaFall17V2Iso_WP90/O,convVeto/O,dxy/F,dz/F,charge/I,deltaEtaSC/F,vidNestedWPBitmap/I,mvaTTH/F,jetNDauCharged/b,jetPtRelv2/F,jetRelIso/F]'),
     TreeVariable.fromString('nMuon/I'),
-    VectorTreeVariable.fromString('Muon[pt/F,eta/F,phi/F,pdgId/I,mediumId/O,miniPFRelIso_all/F,pfRelIso03_all/F,sip3d/F,dxy/F,dz/F,charge/I,mvaTTH/F]'),
+    VectorTreeVariable.fromString('Muon[pt/F,eta/F,phi/F,pdgId/I,mediumId/O,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,sip3d/F,dxy/F,dz/F,charge/I,mvaTTH/F,jetNDauCharged/b,jetPtRelv2/F,jetRelIso/F,segmentComp/F,isGlobal/O,isTracker/O]'),
     TreeVariable.fromString('nJet/I'),
     VectorTreeVariable.fromString('Jet[%s]'% ( ','.join(jetVars) ) ) ]
 if addReweights:
@@ -481,22 +485,22 @@ if addReweights:
 new_variables += [\
     'overlapRemoval/I','nlep/I',
     'JetGood[%s]'% ( ','.join(jetVars+['index/I']) + ',genPt/F' ),
-    'met_pt/F', 'met_phi/F', 'met_pt_min/F'
+    'met_pt/F', 'met_phi/F',
 ]
 
 if sample.isData: new_variables.extend( ['jsonPassed/I','isData/I'] )
 new_variables.extend( ['nBTag/I', 'm3/F', 'minDLmass/F'] )
 
-new_variables.append( 'lep[%s]'% ( ','.join(lepVars) + ',mvaTOPWP/I' ) )
+new_variables.append( 'lep[%s]'% ( ','.join(lepVars) + ',jetBTag/F' + ',mvaTOP/F' + ',mvaTOPv2/F' + ',jetPtRatio/F' +',jetNDauCharged/I'+',jetRelIso/F') ) 
 
 if isTriLep or isDiLep or isSingleLep:
     new_variables.extend( ['nGoodMuons/I', 'nGoodElectrons/I', 'nGoodLeptons/I' ] )
-    new_variables.extend( ['l1_pt/F', 'l1_mvaTOP/F', 'l1_mvaTOPWP/I', 'l1_eta/F', 'l1_phi/F', 'l1_pdgId/I', 'l1_index/I', 'l1_jetPtRelv2/F', 'l1_jetPtRatiov2/F', 'l1_miniRelIso/F', 'l1_relIso03/F', 'l1_dxy/F', 'l1_dz/F', 'l1_mIsoWP/I', 'l1_eleIndex/I', 'l1_muIndex/I' ] )
+    new_variables.extend( ['l1_pt/F', 'l1_mvaTOP/F', 'l1_mvaTOPWP/I', 'l1_mvaTOPv2/F', 'l1_mvaTOPv2WP/I', 'l1_eta/F', 'l1_phi/F', 'l1_pdgId/I', 'l1_index/I', 'l1_jetPtRelv2/F', 'l1_jetPtRatio/F', 'l1_miniRelIso/F', 'l1_relIso03/F', 'l1_dxy/F', 'l1_dz/F', 'l1_mIsoWP/I', 'l1_eleIndex/I', 'l1_muIndex/I'] )
     new_variables.extend( ['mlmZ_mass/F'])
     if isMC:
         new_variables.extend(['reweightLeptonSF/F', 'reweightLeptonSFUp/F', 'reweightLeptonSFDown/F'])
 if isTriLep or isDiLep:
-    new_variables.extend( ['l2_pt/F', 'l2_mvaTOP/F', 'l2_mvaTOPWP/I', 'l2_eta/F', 'l2_phi/F', 'l2_pdgId/I', 'l2_index/I', 'l2_jetPtRelv2/F', 'l2_jetPtRatiov2/F', 'l2_miniRelIso/F', 'l2_relIso03/F', 'l2_dxy/F', 'l2_dz/F', 'l2_mIsoWP/I', 'l2_eleIndex/I', 'l2_muIndex/I' ] )
+    new_variables.extend( ['l2_pt/F', 'l2_mvaTOP/F', 'l2_mvaTOPWP/I', 'l2_mvaTOPv2/F', 'l2_mvaTOPv2WP/I', 'l2_eta/F', 'l2_phi/F', 'l2_pdgId/I', 'l2_index/I', 'l2_jetPtRelv2/F', 'l2_jetPtRatio/F', 'l2_miniRelIso/F', 'l2_relIso03/F', 'l2_dxy/F', 'l2_dz/F', 'l2_mIsoWP/I', 'l2_eleIndex/I', 'l2_muIndex/I'] )
     if isMC: new_variables.extend( \
         [   'genZ1_pt/F', 'genZ1_eta/F', 'genZ1_phi/F',
             'genZ2_pt/F', 'genZ1_eta/F', 'genZ1_phi/F',
@@ -504,7 +508,8 @@ if isTriLep or isDiLep:
             'reweightLeptonTrackingSF/F',
          ] )
 if isTriLep:
-    new_variables.extend( ['l3_pt/F', 'l3_mvaTOP/F', 'l3_mvaTOPWP/I', 'l3_eta/F', 'l3_phi/F', 'l3_pdgId/I', 'l3_index/I', 'l3_jetPtRelv2/F', 'l3_jetPtRatiov2/F', 'l3_miniRelIso/F', 'l3_relIso03/F', 'l3_dxy/F', 'l3_dz/F', 'l3_mIsoWP/I', 'l3_eleIndex/I', 'l3_muIndex/I' ] )
+    new_variables.extend( ['l3_pt/F', 'l3_mvaTOP/F', 'l3_mvaTOPWP/I', 'l3_mvaTOPv2/F', 'l3_mvaTOPv2WP/I', 'l3_eta/F', 'l3_phi/F', 'l3_pdgId/I', 'l3_index/I', 'l3_jetPtRelv2/F', 'l3_jetPtRatio/F', 'l3_miniRelIso/F', 'l3_relIso03/F', 'l3_dxy/F', 'l3_dz/F', 'l3_mIsoWP/I', 'l3_eleIndex/I', 'l3_muIndex/I'] )
+    new_variables.extend( ['l4_pt/F', 'l4_mvaTOP/F', 'l4_mvaTOPWP/I', 'l4_mvaTOPv2/F', 'l4_mvaTOPv2WP/I', 'l4_eta/F', 'l4_phi/F', 'l4_pdgId/I', 'l4_index/I', 'l4_jetPtRelv2/F', 'l4_jetPtRatio/F', 'l4_miniRelIso/F', 'l4_relIso03/F', 'l4_dxy/F', 'l4_dz/F', 'l4_mIsoWP/I', 'l4_eleIndex/I', 'l4_muIndex/I'] )
 
 if addReweights:
 #    sample.chain.SetAlias("nLHEReweighting",       "nLHEReweightingWeight")
@@ -525,7 +530,7 @@ if addSystematicVariations:
     for var in ['jesTotalUp', 'jesTotalDown', 'jerUp', 'jer', 'jerDown', 'unclustEnUp', 'unclustEnDown']:
         if not var.startswith('unclust'):
             new_variables.extend( ['nJetGood_'+var+'/I', 'nBTag_'+var+'/I'] )
-        new_variables.extend( ['met_pt_'+var+'/F', 'met_phi_'+var+'/F'] )
+        # new_variables.extend( ['met_pt_'+var+'/F', 'met_phi_'+var+'/F'] ) # MET variations are calculated with JMECorrector
 
 
 # Btag weights Method 1a
@@ -564,24 +569,19 @@ if not options.skipNanoTools:
 
     runPeriod = None
     if sample.isData:
-        runString = sample.name.split('_')[1]
-        assert str(options.year) in runString, "Could not obtain run period from sample name %s" % sample.name
+        runString = sample.name 
+        runString = runString.replace("_preVFP", "")
+        runString = runString.replace("ver1", "")
+        runString = runString.replace("ver2", "")
+        runString = runString.split('_')[1]
+        assert str(yearint) in runString, "Could not obtain run period from sample name %s" % sample.name
         runPeriod = runString[-1]
 
     logger.info("Starting nanoAOD postprocessing")
-    year = "2018"
-    if "2016" in options.year:
-        year = "2016"
-    elif "2017" in options.year:
-        year = "2017"
-    elif "2018" in options.year:
-        year = "2018"
-    logger.info("For FASTSIM no UL tags available for JEC, use old tags for now, FIX IT once FastSim UL Tags are available!!!")
-    logger.info("Using dataYear = %s" %(year))
     for f in sample.files:
         JMECorrector = createJMECorrector(
             isMC        = (not sample.isData),
-            dataYear    = year,
+            dataYear    = options.year,
             runPeriod   = runPeriod,
             jesUncert   = "Total",
             jetType     = "AK4PFchs",
@@ -602,6 +602,9 @@ if not options.skipNanoTools:
     sample.files = newFileList
     sample.clear()
 
+# Define mvaTOP reader 
+mvaTOPreader_ = mvaTOPreader(year = options.year)
+
 # Define a reader
 
 logger.info( "Running with selectionString %s", selectionString )
@@ -611,10 +614,10 @@ reader = sample.treeReader( \
     )
 
 # using miniRelIso 0.2 as baseline
-#eleSelector_ = eleSelector( "CBtight", year = options.year )
-#muSelector_  = muonSelector("medium",  year = options.year )
-eleSelector_ = eleSelector( "mvaTOPVL", year = options.year )
-muSelector_  = muonSelector("mvaTOPVL", year = options.year )
+# eleSelector_ = eleSelector( "mvaTOPVL", year = options.year )
+# muSelector_  = muonSelector("mvaTOPVL", year = options.year )
+eleSelector_ = eleSelector( "presel", year = yearint )
+muSelector_  = muonSelector("presel", year = yearint )
 
 ################################################################################
 # FILL EVENT INFO HERE
@@ -625,6 +628,9 @@ def filler( event ):
     #workaround  = (r.run, r.luminosityBlock, r.event) # some fastsim files seem to have issues, apparently solved by this.
     event.isData = s.isData
     event.year   = yearint
+    event.preVFP = False
+    if options.year == "UL2016_preVFP":
+        event.preVFP = True
     event.overlapRemoval = 1
 
     if isMC:
@@ -707,8 +713,8 @@ def filler( event ):
 
     allSlimmedJets      = getJets(r)
     event.reweightL1Prefire, event.reweightL1PrefireUp, event.reweightL1PrefireDown = r.L1PreFiringWeight_Nom, r.L1PreFiringWeight_Up, r.L1PreFiringWeight_Dn
-
-    # get leptons before jets in order to clean jets
+    
+    # get electrons and muons
     electrons_pt10  = getGoodElectrons(r, ele_selector = eleSelector_)
     muons_pt10      = getGoodMuons    (r, mu_selector  = muSelector_ )
 
@@ -716,45 +722,74 @@ def filler( event ):
         e['pdgId']      = int( -11*e['charge'] )
         e['eleIndex']   = e['index']
         e['muIndex']    = -1
+        
     for m in muons_pt10:
         m['pdgId']      = int( -13*m['charge'] )
         m['muIndex']    = m['index']
         m['eleIndex']   = -1
-
-    # make list of leptons
+        
+    # make list of leptons 
     leptons = electrons_pt10+muons_pt10
     leptons.sort(key = lambda p:-p['pt'])
 
-    for iLep, lep in enumerate(leptons):
-        lep['index']    = iLep
-        lep['mvaTOP']   = lep['mvaTTH']
-        lep['mvaTOPWP'] = mvaTopWP(lep['mvaTOP'], lep['pdgId'])
-
-    fill_vector_collection( event, "lep", lepVarNames, leptons)
-    event.nlep = len(leptons)
-
-    event.minDLmass = getMinDLMass(leptons)
-
-    # now get jets, cleaned against good leptons
+    # Get all jets because they are needed to calculate the lepton mvaTOP
     all_jets     = getJets(r, jetVars=jetVarNames)
+    
+    # Calculate variables for mvaTOP and get mvaTOP score 
+    for iLep, lep in enumerate(leptons):
+        # closest jet 
+        dRmin = 0.4
+        bscore_nextjet = 0
+        # ptratio_nextjet = 0
+        for j in all_jets:
+            deta = j['eta'] - lep['eta']
+            dphi = j['phi'] - lep['phi']
+            dR = sqrt( deta*deta + dphi*dphi )
+            if dR < dRmin:
+                dRmin = dR
+                bscore_nextjet = j['btagDeepFlavB']
+        lep['jetBTag'] = bscore_nextjet
+        lep['jetPtRatio'] = 1/(lep['jetRelIso']+1)
+        mvaScore, WPv1, mvaScorev2, WPv2 = mvaTOPreader_.getmvaTOPScore(lep)
+        lep['mvaTOP'] = mvaScore
+        lep['mvaTOPWP'] = WPv1
+        lep['mvaTOPv2'] = mvaScorev2
+        lep['mvaTOPv2WP'] = WPv2
+    
+    # Remove leptons that do not fulfil quality criteria
+    all_leptons = list(leptons) # Copy list to not loop over the list from which we remove entries 
+    for lep in all_leptons:
+        if lep['mvaTOPWP'] < 1:
+            leptons.remove(lep)
+            
+    # Now set index corresponding to cleaned list
+    for iLep, lep in enumerate(leptons):
+        lep['index'] = iLep
+    
+    # Now create cleaned jets, b jets, ...
     clean_jets,_ = cleanJetsAndLeptons( all_jets, leptons )
     clean_jets_acc = filter(lambda j:abs(j['eta'])<2.4, clean_jets)
     jets         = filter(lambda j:j['pt']>30, clean_jets_acc)
     bJets        = filter(lambda j:isBJet(j, tagger=b_tagger, year=options.year) and abs(j['eta'])<=2.4    , jets)
     nonBJets     = filter(lambda j:not ( isBJet(j, tagger=b_tagger, year=options.year) and abs(j['eta'])<=2.4 ), jets)
 
-    # store the correct MET (EE Fix for 2017, MET_min as backup in 2017)
+
+                
+        
+    fill_vector_collection( event, "lep", lepVarNames, leptons)
+    event.nlep = len(leptons)
+    event.minDLmass = getMinDLMass(leptons)
+    
+    
+    # store the correct MET (EE Fix for 2017)
 
     if options.year == 2017:# and not options.fastSim:
         # v2 recipe. Could also use our own recipe
         event.met_pt    = r.METFixEE2017_pt_nom
         event.met_phi   = r.METFixEE2017_phi_nom
-        #event.met_pt_min = r.MET_pt_min not done anymore
     else:
-        event.met_pt    = r.MET_pt_nom
-        event.met_phi   = r.MET_phi_nom
-
-        event.met_pt_min = 0
+        event.met_pt    = r.MET_pt
+        event.met_phi   = r.MET_phi
 
     # Filling jets
     maxNJet = 100
@@ -791,8 +826,9 @@ def filler( event ):
 
     if addSystematicVariations:
         for var in ['jesTotalUp', 'jesTotalDown', 'jerUp', 'jerDown', 'unclustEnUp', 'unclustEnDown']: # don't use 'jer' as of now
-            setattr(event, 'met_pt_'+var,  getattr(r, 'METFixEE2017_pt_'+var)  if options.year == 2017 else getattr(r, 'MET_pt_'+var) )
-            setattr(event, 'met_phi_'+var, getattr(r, 'METFixEE2017_phi_'+var) if options.year == 2017 else getattr(r, 'MET_phi_'+var) )
+            # MET variations are calculated with JMECorrector, not here
+            # setattr(event, 'met_pt_'+var,  getattr(r, 'METFixEE2017_pt_'+var)  if options.year == 2017 else getattr(r, 'MET_pt_'+var) )
+            # setattr(event, 'met_phi_'+var, getattr(r, 'METFixEE2017_phi_'+var) if options.year == 2017 else getattr(r, 'MET_phi_'+var) )
             if not var.startswith('unclust'):
                 corrFactor = 'corr_JER' if var == 'jer' else None
                 jets_sys[var]       = filter(lambda j:j['pt_'+var]>30, clean_jets_acc)
@@ -811,6 +847,8 @@ def filler( event ):
             event.l1_pt         = leptons[0]['pt']
             event.l1_mvaTOP     = leptons[0]['mvaTOP']
             event.l1_mvaTOPWP   = leptons[0]['mvaTOPWP']
+            event.l1_mvaTOPv2   = leptons[0]['mvaTOPv2']
+            event.l1_mvaTOPv2WP = leptons[0]['mvaTOPv2WP']
             event.l1_eta        = leptons[0]['eta']
             event.l1_phi        = leptons[0]['phi']
             event.l1_pdgId      = leptons[0]['pdgId']
@@ -846,6 +884,8 @@ def filler( event ):
             event.l2_pt         = leptons[1]['pt']
             event.l2_mvaTOP     = leptons[1]['mvaTOP']
             event.l2_mvaTOPWP   = leptons[1]['mvaTOPWP']
+            event.l2_mvaTOPv2   = leptons[1]['mvaTOPv2']
+            event.l2_mvaTOPv2WP = leptons[1]['mvaTOPv2WP']
             event.l2_eta        = leptons[1]['eta']
             event.l2_phi        = leptons[1]['phi']
             event.l2_pdgId      = leptons[1]['pdgId']
@@ -922,6 +962,8 @@ def filler( event ):
             event.l3_pt         = leptons[2]['pt']
             event.l3_mvaTOP     = leptons[2]['mvaTOP']
             event.l3_mvaTOPWP   = leptons[2]['mvaTOPWP']
+            event.l3_mvaTOPv2   = leptons[2]['mvaTOPv2']
+            event.l3_mvaTOPv2WP = leptons[2]['mvaTOPv2WP']
             event.l3_eta        = leptons[2]['eta']
             event.l3_phi        = leptons[2]['phi']
             event.l3_pdgId      = leptons[2]['pdgId']
@@ -932,6 +974,23 @@ def filler( event ):
             event.l3_dz         = leptons[2]['dz']
             event.l3_eleIndex   = leptons[2]['eleIndex']
             event.l3_muIndex    = leptons[2]['muIndex']
+
+        if len(leptons)>=4:
+            event.l4_pt         = leptons[3]['pt']
+            event.l4_mvaTOP     = leptons[3]['mvaTOP']
+            event.l4_mvaTOPWP   = leptons[3]['mvaTOPWP']
+            event.l4_mvaTOPv2   = leptons[3]['mvaTOPv2']
+            event.l4_mvaTOPv2WP = leptons[3]['mvaTOPv2WP']
+            event.l4_eta        = leptons[3]['eta']
+            event.l4_phi        = leptons[3]['phi']
+            event.l4_pdgId      = leptons[3]['pdgId']
+            event.l4_index      = leptons[3]['index']
+            event.l4_miniRelIso = leptons[3]['miniPFRelIso_all']
+            event.l4_relIso03   = leptons[3]['pfRelIso03_all']
+            event.l4_dxy        = leptons[3]['dxy']
+            event.l4_dz         = leptons[3]['dz']
+            event.l4_eleIndex   = leptons[3]['eleIndex']
+            event.l4_muIndex    = leptons[3]['muIndex']
 
     #if addSystematicVariations:
     # B tagging weights method 1a
@@ -1019,7 +1078,7 @@ for ievtRange, eventRange in enumerate( eventRanges ):
     outputfile.Close()
     logger.info( "Written %s", outfilename)
 
-  # Destroy the TTree
+    # Destroy the TTree
     maker.clear()
     sample.clear()
 
