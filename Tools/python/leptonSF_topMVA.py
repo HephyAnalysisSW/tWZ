@@ -69,6 +69,7 @@ class leptonSF_topMVA:
 
         elif abs(pdgId)==13:
             lepton = "muon"
+            eta = abs(eta)
             if eta > 2.4:
                 eta = 2.39 
             if pt > 120:
@@ -78,9 +79,6 @@ class leptonSF_topMVA:
           
         etabin = self.SFmaps[lepton]["SF"].GetXaxis().FindBin(eta)
         ptbin  = self.SFmaps[lepton]["SF"].GetYaxis().FindBin(pt)
-        
         SF = self.SFmaps[lepton]["SF"].GetBinContent(etabin, ptbin)
         err = self.SFmaps[lepton][uncert].GetBinContent(etabin, ptbin)
-        
-        
         return SF+sigma*err
