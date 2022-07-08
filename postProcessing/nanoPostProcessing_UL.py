@@ -9,7 +9,7 @@ import subprocess
 import shutil
 import uuid
 
-from array import array
+import array as arr
 from operator import mul
 from math import sqrt, atan2, sin, cos
 
@@ -407,7 +407,7 @@ if options.year == "2017":
 
 #branches to be kept for MC samples only
 branchKeepStrings_MC = [ "Generator_*", "GenPart_*", "nGenPart", "genWeight", "Pileup_nTrueInt","GenMET_*", "nGenJet", "GenJet_*", "genTtbarId"]
-branchKeepStrings_MC.extend(["LHEWeight_originalXWGTUP", "nLHEPdfWeight", "LHEPdfWeight", "nLHEScaleWeight", "LHEScaleWeight"])
+branchKeepStrings_MC.extend(["LHEWeight_originalXWGTUP"])
 
 #branches to be kept for data only
 branchKeepStrings_DATA = [ ]
@@ -481,6 +481,9 @@ read_variables += [\
     VectorTreeVariable.fromString('Jet[%s]'% ( ','.join(jetVars) ) ) ]
 if addReweights:
     read_variables.extend( ["nLHEReweightingWeight/I" ] )#, "nLHEReweighting/I", "LHEReweighting[Weight/F]" ] ) # need to set alias later
+if isMC:
+    read_variables.extend( ["nLHEScaleWeight/I" ] )
+    read_variables.extend( ["nLHEPdfWeight/I" ] )
 
 new_variables += [\
     'overlapRemoval/I','nlep/I',
@@ -518,6 +521,11 @@ if addReweights:
     new_variables[-1].nMax = HyperPoly.get_ndof(weightInfo.nvar, options.interpolationOrder)
     new_variables.append( "chi2_ndof/F" )
 
+if isMC:
+    new_variables.append( TreeVariable.fromString("nScale/I") )
+    new_variables.append( TreeVariable.fromString("Scale[Weight/F]") )
+    new_variables.append( TreeVariable.fromString("nPDF/I") )
+    new_variables.append( VectorTreeVariable.fromString("PDF[Weight/F]", nMax=150) ) # There are more than 100 PDF weights
 ## ttZ related variables
 new_variables.extend( ['Z1_l1_index/I', 'Z1_l2_index/I', 'Z2_l1_index/I', 'Z2_l2_index/I', 'nonZ1_l1_index/I', 'nonZ1_l2_index/I'] )
 for i in [1,2]:
@@ -682,6 +690,23 @@ def filler( event ):
     if options.triggerSelection and isTriLep:
         event.triggerDecision = int(treeFormulas['triggerDecision']['TTreeFormula'].EvalInstance())
 
+
+
+    ################################################################################
+    # Store Scale and PDF weights in a format that is readable with HEPHY framework
+    if isMC:
+        scale_weights = [reader.sample.chain.GetLeaf("LHEScaleWeight").GetValue(i_weight) for i_weight in range(r.nLHEScaleWeight)]
+        for i,w in enumerate(scale_weights):
+            event.Scale_Weight[i] = w
+        event.nScale = r.nLHEScaleWeight
+        
+        pdf_weights = [reader.sample.chain.GetLeaf("LHEPdfWeight").GetValue(i_weight) for i_weight in range(r.nLHEPdfWeight)]
+        for i,w in enumerate(pdf_weights):
+            event.PDF_Weight[i] = w
+        event.nPDF = r.nLHEPdfWeight
+        
+    ################################################################################
+    # reweights        
     if addReweights:
 
         include_missing_refpoint = False
@@ -759,7 +784,7 @@ def filler( event ):
     # Remove leptons that do not fulfil quality criteria
     all_leptons = list(leptons) # Copy list to not loop over the list from which we remove entries 
     for lep in all_leptons:
-        if lep['mvaTOPWP'] < 1:
+        if lep['mvaTOPv2WP'] < 1:
             leptons.remove(lep)
             
     # Now set index corresponding to cleaned list

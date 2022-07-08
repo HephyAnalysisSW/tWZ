@@ -11,15 +11,20 @@ from tWZ.samples.color import color
 # Data directory
 try:
     directory_ = sys.modules['__main__'].directory_
+    directory_singlelep_ = sys.modules['__main__'].directory_singlelep_
 except:
     import tWZ.samples.UL_nanoAODv9_locations as locations
     directory_ = locations.mc_UL2018
+    directory_singlelep_ = locations.mc_singlep_UL2018
 
 logger.info("Loading MC samples from directory %s", directory_)
 
 def make_dirs( dirs ):
     return [ os.path.join( directory_, dir_ ) for dir_ in dirs ]
 
+def make_dirs_singlelep( dirs ):
+    return [ os.path.join( directory_singlelep_, dir_ ) for dir_ in dirs ]
+    
 dirs = {}
 
 dirs['WZ']               = ["WZ"]
@@ -31,6 +36,8 @@ ZZ = Sample.fromDirectory(name="ZZ", treeName="Events", isData=False, color=colo
 dirs['WW']               = ["WW"]
 # dirs['VVTo2L2Nu']        = ["VVTo2L2Nu"] # NOT YET THERE IN UL
 
+dirs['WZTo3LNu']               = ["WZTo3LNu"]
+WZTo3LNu = Sample.fromDirectory(name="WZTo3LNu", treeName="Events", isData=False, color=color.WZ, texName="WZ", directory=make_dirs( dirs['WZTo3LNu']))
 
 
 dirs['triBoson']         = ["WWW_4F","WWZ_4F","WZZ","ZZZ"]
@@ -83,3 +90,47 @@ dirs['nonprompt_3l']    = dirs['WW'] + dirs['singleTop'] + dirs['DY_LO'] + dirs[
 dirs['nonprompt_4l']    = dirs['WW'] + dirs['singleTop'] + dirs['TZQ'] + dirs["WZ"] + dirs['DY_LO'] + dirs['TTLep'] 
 nonprompt_3l = Sample.fromDirectory(name="nonprompt_3l", treeName="Events", isData=False, color=color.nonprompt, texName="nonprompt_3l", directory=make_dirs( dirs['nonprompt_3l']))
 nonprompt_4l = Sample.fromDirectory(name="nonprompt_4l", treeName="Events", isData=False, color=color.nonprompt, texName="nonprompt_4l", directory=make_dirs( dirs['nonprompt_4l']))
+
+
+# QCD 
+dirs['QCD_MuEnriched'] =  [
+    'QCD_MuEnriched_15to20',
+    'QCD_MuEnriched_20to30',
+    'QCD_MuEnriched_30to50',
+    'QCD_MuEnriched_50to80',
+    'QCD_MuEnriched_80to120',
+    'QCD_MuEnriched_120to170',
+    'QCD_MuEnriched_170to300',
+    'QCD_MuEnriched_300to470',
+    'QCD_MuEnriched_470to600',
+    'QCD_MuEnriched_600to800',
+    'QCD_MuEnriched_800to1000',
+    'QCD_MuEnriched_1000toInf',
+]
+
+dirs['QCD_EMEnriched'] =  [
+    'QCD_EMEnriched_15to20',
+    'QCD_EMEnriched_20to30',
+    'QCD_EMEnriched_30to50',
+    'QCD_EMEnriched_50to80',
+    'QCD_EMEnriched_80to120',
+    'QCD_EMEnriched_120to170',
+    'QCD_EMEnriched_170to300',
+    'QCD_EMEnriched_300toInf',
+]
+
+dirs['QCD_bcToE'] =  [
+    'QCD_bcToE_15to20',
+    'QCD_bcToE_20to30',
+    'QCD_bcToE_30to80',
+    'QCD_bcToE_80to170',
+    # 'QCD_bcToE_170to250',
+    'QCD_bcToE_250toInf',
+]
+
+dirs['QCD'] = dirs['QCD_MuEnriched'] + dirs['QCD_EMEnriched'] + dirs['QCD_bcToE']
+
+QCD_MuEnriched = Sample.fromDirectory(name="QCD_MuEnriched", treeName="Events", isData=False, color=color.QCD, texName="QCD multijet", directory=make_dirs_singlelep( dirs['QCD_MuEnriched']))
+QCD_EMEnriched = Sample.fromDirectory(name="QCD_EMEnriched", treeName="Events", isData=False, color=color.QCD, texName="QCD multijet", directory=make_dirs_singlelep( dirs['QCD_EMEnriched']))
+QCD_bcToE      = Sample.fromDirectory(name="QCD_bcToE", treeName="Events", isData=False, color=color.QCD, texName="QCD multijet", directory=make_dirs_singlelep( dirs['QCD_bcToE']))
+QCD            = Sample.fromDirectory(name="QCD", treeName="Events", isData=False, color=color.QCD, texName="QCD multijet", directory=make_dirs_singlelep( dirs['QCD']))

@@ -48,7 +48,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v1')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v2')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -74,6 +74,7 @@ variations = [
     "BTag_l_UP", "BTag_l_DOWN",
     "PU_UP", "PU_DOWN",
     "JES_UP", "JES_DOWN",
+    "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN",
 ]
 
 jet_variations = {
@@ -165,6 +166,35 @@ def metSelectionModifier( sys, returntype = 'func'):
         return list
 
 ################################################################################
+# get scale weight
+def getScaleWeight(event, sys):
+    # Sometimes the nominal entry [4] is missing, so be careful
+    weights_9point = {
+        "Scale_DOWNDOWN": 0,
+        "Scale_DOWNNONE": 1,
+        "Scale_NONEDOWN": 3,
+        "Scale_NONEUP"  : 5,
+        "Scale_UPNONE"  : 7,
+        "Scale_UPUP"    : 8,
+    }
+    weights_8point = {
+        "Scale_DOWNDOWN": 0,
+        "Scale_DOWNNONE": 1,
+        "Scale_NONEDOWN": 3,
+        "Scale_NONEUP"  : 4,
+        "Scale_UPNONE"  : 6,
+        "Scale_UPUP"    : 7,
+    }
+    index = -1
+    if event.nScale == 9:
+        index = weights_9point[sys]
+    elif event.nScale == 8:
+        index = weights_8point[sys]
+    else:
+        print "UNEXPECTED NUMBER OF SCALE WEIGHTS:", event.nScale,", not applying any weight"
+        return 1.0
+    return event.Scale_Weight[index]
+################################################################################
 # Add a selection selectionModifier
 
 if args.sys in jet_variations.keys():
@@ -177,22 +207,23 @@ else:
 from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
 
 if args.era == "UL2016":
-    mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZ, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
+    mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2016preVFP":
-    mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZ, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
+    mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2017":
-    mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZ, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
+    mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2018":
-    mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZ, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
+    mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
+    # mc = [UL2018.TTZ]
     samples_eft = []
     # if args.nicePlots:
     #     samples_eft = []
     #     mc = [SMEFTsim_fast.tWZToLL01j_lepWFilter, Autumn18.TTX_rare, Autumn18.TZQ, Autumn18.triBoson, Autumn18.nonprompt_3l, SMEFTsim_fast.ZZ, SMEFTsim_fast.WZ, SMEFTsim_fast.ttZ01j_lepWFilter]
 elif args.era == "ULRunII":
-    mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZ, triBoson, ZZ, nonprompt_3l]
+    mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
     samples_eft = []
 
 ################################################################################
@@ -355,6 +386,9 @@ if args.small:
 LeptonWP = "tight"
 if "trilepVL" in args.selection:
     LeptonWP = "VL"
+    
+### TODO: SETUP SF FOR MEDIUM WP
+    
 leptonSF16 = leptonSF_topMVA(2016, LeptonWP)
 leptonSF17 = leptonSF_topMVA(2017, LeptonWP)
 leptonSF18 = leptonSF_topMVA(2018, LeptonWP)
@@ -519,12 +553,20 @@ def getLeptonSF(sample, event):
 sequence.append( getLeptonSF )
 
 # def getSYSweight(sample, event):
-#     print event.LHEScaleWeight[0], event.LHEScaleWeight[4], event.LHEScaleWeight[8]
+#     print "-------------------"
+#     print sample.files
+#     print getScaleWeight(event, "Scale_UPUP")
+#     print getScaleWeight(event, "Scale_UPNONE")
+#     print getScaleWeight(event, "Scale_NONEUP")
+#     print getScaleWeight(event, "Scale_DOWNDOWN")
+#     print getScaleWeight(event, "Scale_DOWNNONE")
+#     print getScaleWeight(event, "Scale_NONEDOWN")
+# 
 # sequence.append( getSYSweight )
 
 def getMlb(sample, event):
     lepton = ROOT.TLorentzVector()
-    if not 'nLeptons4' in args.selection:
+    if not 'qualep' in args.selection:
         lepton.SetPtEtaPhiM(event.lep_pt[event.nonZ1_l1_index], event.lep_eta[event.nonZ1_l1_index], event.lep_phi[event.nonZ1_l1_index], 0)
     else:
         lepton.SetPtEtaPhiM(0,0,0,0)
@@ -581,7 +623,7 @@ def getDiBosonAngles(sample, event):
     lep2.SetPtEtaPhiM(event.lep_pt[idx_l2], event.lep_eta[idx_l2], event.lep_phi[idx_l2], lepmass)
 
     # For 2nd boson distinguish between cases
-    if "nLeptons4" in args.selection:
+    if "qualep" in args.selection:
         boson.SetPtEtaPhiM(event.Z2_pt, event.Z2_eta, event.Z2_phi, event.Z2_mass)
     elif "deepjet0" in args.selection:
         Wleps = getWlep(event)
@@ -702,6 +744,15 @@ def getTTbarReco( event, sample ):
             event.minimax = minimax
 sequence.append( getTTbarReco )
 
+def Nlep( event, sample ):
+    Nlep_tight = 0
+    if event.l1_mvaTOPv2WP >= 4: Nlep_tight+=1
+    if event.l2_mvaTOPv2WP >= 4: Nlep_tight+=1
+    if event.l3_mvaTOPv2WP >= 4: Nlep_tight+=1
+    if event.l4_mvaTOPv2WP >= 4: Nlep_tight+=1
+    event.Nlep_tight = Nlep_tight
+sequence.append( Nlep )
+
 ################################################################################
 # Read variables
 
@@ -710,6 +761,7 @@ read_variables = [
     "l1_pt/F", "l1_eta/F" , "l1_phi/F", "l1_mvaTOP/F", "l1_mvaTOPv2/F", "l1_mvaTOPWP/I", "l1_mvaTOPv2WP/I", "l1_index/I",
     "l2_pt/F", "l2_eta/F" , "l2_phi/F", "l2_mvaTOP/F", "l2_mvaTOPv2/F", "l2_mvaTOPWP/I", "l2_mvaTOPv2WP/I", "l2_index/I",
     "l3_pt/F", "l3_eta/F" , "l3_phi/F", "l3_mvaTOP/F", "l3_mvaTOPv2/F", "l3_mvaTOPWP/I", "l3_mvaTOPv2WP/I", "l3_index/I",
+    "l4_pt/F", "l4_eta/F" , "l4_phi/F", "l4_mvaTOP/F", "l4_mvaTOPv2/F", "l4_mvaTOPWP/I", "l4_mvaTOPv2WP/I", "l4_index/I",
     "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I]",
     "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F]",
     "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O]",
@@ -719,7 +771,7 @@ read_variables = [
     "Electron[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,vidNestedWPBitmap/I,deltaEtaSC/F]",
 ]
 
-if "nLeptons4" in args.selection:
+if "qualep" in args.selection:
     read_variables.append("Z2_phi/F")
     read_variables.append("Z2_pt/F")
     read_variables.append("Z2_eta/F")
@@ -731,7 +783,8 @@ read_variables_MC = [
     "Muon[genPartFlav/I]",
     VectorTreeVariable.fromString( "GenPart[pt/F,mass/F,phi/F,eta/F,pdgId/I,genPartIdxMother/I,status/I,statusFlags/I]", nMax=1000),
     'nGenPart/I',
-    # 'LHEScaleWeight/F',
+    'nScale/I', 'Scale[Weight/F]',
+    'nPDF/I', VectorTreeVariable.fromString('PDF[Weight/F]',nMax=150),    
 ]
 
 read_variables_eft = [
@@ -747,9 +800,9 @@ read_variables_eft = [
 if "lepVeto" in args.selection:
     mu_string  = lepString('mu','VL')
 else:
-    mu_string  = lepString('mu','T') + "&&lep_mediumId"
+    mu_string  = lepString('mu','L') + "&&lep_mediumId"
     
-ele_string = lepString('ele','T')
+ele_string = lepString('ele','L')
 
 # print mu_string
 # print ele_string
@@ -768,7 +821,7 @@ yields     = {}
 allPlots   = {}
 allPlots_SM= {}
 allModes   = ['mumumu', 'mumue', 'muee', 'eee']
-if 'nLeptons4' in args.selection:
+if 'qualep' in args.selection:
     allModes = ['mumumumu','mumuee','eeee']
 
 print "Working on channels:", allModes
@@ -789,7 +842,7 @@ for i_mode, mode in enumerate(allModes):
         read_variables_MC += new_variables
         read_variables    += new_variables
 
-    weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonMVA']
+    weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger'] # 'reweightLeptonMVA'
     # weightnames = ['weight']
     sys_weights = {
         "BTag_b_UP"     : ('reweightBTag_SF','reweightBTag_SF_b_Up'),
@@ -826,6 +879,10 @@ for i_mode, mode in enumerate(allModes):
             yearstring = "2018"
         lumi_weight = lumi_year[yearstring]/1000.
         w *= lumi_weight
+        # Multiply Scale weight 
+        if "Scale_" in args.sys:
+            scale_weight = getScaleWeight(event, args.sys)
+            w *= scale_weight
         return w
 
 
@@ -877,6 +934,13 @@ for i_mode, mode in enumerate(allModes):
         texX = 'M(3l) (GeV)', texY = 'Number of Events',
         attribute = lambda event, sample:event.m3l,
         binning=[25,0,500],
+    ))
+    
+    plots.append(Plot(
+        name = "N_LepID",
+        texX = 'Number of leptons passing the tight ID', texY = 'Number of Events',
+        attribute = lambda event, sample: event.Nlep_tight,
+        binning=[5,-0.5,4.5],
     ))
     
     if args.doTTbarReco:
@@ -1083,7 +1147,7 @@ for i_mode, mode in enumerate(allModes):
             for i, l in enumerate(plot.histos):
                 for j, h in enumerate(l):
                     yields[mode][plot.stack[i][j].name] = h.GetBinContent(h.FindBin(0.5+i_mode))
-                    if 'nLeptons4' in args.selection:
+                    if 'qualep' in args.selection:
                         h.GetXaxis().SetBinLabel(1, "#mu#mu#mu#mu")
                         h.GetXaxis().SetBinLabel(2, "#mu#muee")
                         h.GetXaxis().SetBinLabel(3, "eeee")
@@ -1129,54 +1193,57 @@ if args.nicePlots:
     drawPlots(allPlots['all'], "all", dataMCScale)
 
 plots_root = ["Z1_pt", "M3l"]
-if not args.nicePlots:
-    # Write Result Hist in root file
-    plot_dir = os.path.join(plot_directory, 'analysisPlots', args.plot_directory, args.era, "all", args.selection)
-    if not os.path.exists(plot_dir):
-        try:
-            os.makedirs(plot_dir)
-        except:
-            print 'Could not crete', plot_dir
-    outfilename = plot_dir+'/Results.root'
-    if args.twoD: 
-        outfilename = plot_dir+'/Results_twoD.root'
-        if args.triplet:
-            outfilename = plot_dir+'/Results_twoD_triplet.root'
-    outfile = ROOT.TFile(outfilename, 'recreate')
-    outfile.cd()
-    for plot in allPlots['all']:
-        if plot.name in plots_root:
-            for idx, histo_list in enumerate(plot.histos):
-                for j, h in enumerate(histo_list):
-                    histname = h.GetName()
-                    if "TWZ_NLO_DR" in histname: process = "tWZ"
-                    elif "tWZToLL01j_lepWFilter" in histname: process = "tWZ"
-                    elif "TTZ" in histname: process = "ttZ"
-                    elif "ttZ01j" in histname: process = "ttZ"
-                    elif "ttZ01j_lepWFilter" in histname: process = "ttZ"
-                    elif "TTX_rare" in histname: process = "ttX"
-                    elif "TZQ" in histname: process = "tZq"
-                    elif "WZ" in histname: process = "WZ"
-                    elif "ZZ" in histname: process = "ZZ"
-                    elif "triBoson" in histname: process = "triBoson"
-                    elif "nonprompt" in histname: process = "nonprompt"
-                    elif "data" in histname: process = "data"
-                    # Also add a string for the eft signal samples
-                    n_noneft = len(noneftidxs)
-                    if idx not in noneftidxs:
-                        h.Write(plot.name+"__"+process+"__"+params[idx-n_noneft]['legendText'])
-                        if args.twoD:
-                            string = params[idx-n_noneft]['legendText']
-                            if string.count('=0.0000') == 2:
-                                h_SM = h.Clone()
-                                h_SM.Write(plot.name+"__"+process)
-                        else:
-                            if "=0.0000" in params[idx-n_noneft]['legendText']:
-                                h_SM = h.Clone()
-                                h_SM.Write(plot.name+"__"+process)
+
+# Write Result Hist in root file
+print "Now write results in root file."
+plot_dir = os.path.join(plot_directory, 'analysisPlots', args.plot_directory, args.era, "all", args.selection)
+if not os.path.exists(plot_dir):
+    try:
+        os.makedirs(plot_dir)
+    except:
+        print 'Could not create', plot_dir
+outfilename = plot_dir+'/Results.root'
+if args.twoD: 
+    outfilename = plot_dir+'/Results_twoD.root'
+    if args.triplet:
+        outfilename = plot_dir+'/Results_twoD_triplet.root'
+print "Saving in", outfilename
+outfile = ROOT.TFile(outfilename, 'recreate')
+outfile.cd()
+for plot in allPlots['all']:
+    if plot.name in plots_root:
+        for idx, histo_list in enumerate(plot.histos):
+            for j, h in enumerate(histo_list):
+                histname = h.GetName()
+                if "TWZ_NLO_DR" in histname: process = "tWZ"
+                elif "tWZToLL01j_lepWFilter" in histname: process = "tWZ"
+                elif "TTZ" in histname: process = "ttZ"
+                elif "ttZ01j" in histname: process = "ttZ"
+                elif "ttZ01j_lepWFilter" in histname: process = "ttZ"
+                elif "TTX_rare" in histname: process = "ttX"
+                elif "TZQ" in histname: process = "tZq"
+                elif "WZTo3LNu" in histname: process = "WZ"
+                elif "WZ" in histname: process = "WZ"
+                elif "ZZ" in histname: process = "ZZ"
+                elif "triBoson" in histname: process = "triBoson"
+                elif "nonprompt" in histname: process = "nonprompt"
+                elif "data" in histname: process = "data"
+                # Also add a string for the eft signal samples
+                n_noneft = len(noneftidxs)
+                if not args.nicePlots and idx not in noneftidxs:
+                    h.Write(plot.name+"__"+process+"__"+params[idx-n_noneft]['legendText'])
+                    if args.twoD:
+                        string = params[idx-n_noneft]['legendText']
+                        if string.count('=0.0000') == 2:
+                            h_SM = h.Clone()
+                            h_SM.Write(plot.name+"__"+process)
                     else:
-                        h.Write(plot.name+"__"+process)
-    outfile.Close()
+                        if "=0.0000" in params[idx-n_noneft]['legendText']:
+                            h_SM = h.Clone()
+                            h_SM.Write(plot.name+"__"+process)
+                else:
+                    h.Write(plot.name+"__"+process)
+outfile.Close()
 
 
 
