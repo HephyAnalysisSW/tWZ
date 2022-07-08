@@ -31,6 +31,8 @@ ZZ = Sample.fromDirectory(name="ZZ", treeName="Events", isData=False, color=colo
 dirs['WW']               = ["WW"]
 # dirs['VVTo2L2Nu']        = ["VVTo2L2Nu"] # NOT YET THERE IN UL
 
+dirs['WZTo3LNu']               = ["WZTo3LNu"]
+WZTo3LNu = Sample.fromDirectory(name="WZTo3LNu", treeName="Events", isData=False, color=color.WZ, texName="WZ", directory=make_dirs( dirs['WZTo3LNu']))
 
 
 dirs['triBoson']         = ["WWW_4F","WWZ_4F","WZZ","ZZZ"]

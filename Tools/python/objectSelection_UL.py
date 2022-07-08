@@ -104,17 +104,17 @@ def get_index_str( index ):
 
 ## MVA TOP lepton thresholds ##
 # mvaTOP = {'mu':{'VL':-0.45, 'L':0.05, 'M':0.65, 'T':0.90}, 'ele':{'VL':-0.55, 'L':0.00, 'M':0.60, 'T':0.90}} # EOY
-mvaTOP = {'mu':{'VL': 0.20, 'L':0.41, 'M':0.64, 'T':0.81}, 'ele':{'VL': 0.20, 'L':0.41, 'M':0.64, 'T':0.81}} # UL
-# mvaTOP = {'mu':{'VL': 0.59, 'L':0.81, 'M':0.90, 'T':0.94}, 'ele':{'VL': 0.59, 'L':0.81, 'M':0.90, 'T':0.94}} # ULv2
+# mvaTOP = {'mu':{'VL': 0.20, 'L':0.41, 'M':0.64, 'T':0.81}, 'ele':{'VL': 0.20, 'L':0.41, 'M':0.64, 'T':0.81}} # UL
+mvaTOP = {'mu':{'VL': 0.59, 'L':0.81, 'M':0.90, 'T':0.94}, 'ele':{'VL': 0.59, 'L':0.81, 'M':0.90, 'T':0.94}} # ULv2
 muon_deepjet_FO_threshold   = {2016:0.015, 2017:0.02, 2018:0.02}
 muon_jetRelIso_FO_threshold = {2016:0.5, 2017:0.6, 2018:0.5}
 
 def lepString( eleMu = None, WP = 'VL', idx = None):
     idx_str = "[%s]"%idx if idx is not None else ""
     if eleMu=='ele':
-        return "lep_pt{idx_str}>10&&abs(lep_eta{idx_str})<2.5&&abs(lep_pdgId{idx_str})==11&&lep_mvaTOP{idx_str}>{threshold}".format( threshold = mvaTOP['ele'][WP], idx_str=idx_str )
+        return "lep_pt{idx_str}>10&&abs(lep_eta{idx_str})<2.5&&abs(lep_pdgId{idx_str})==11&&lep_mvaTOPv2{idx_str}>{threshold}".format( threshold = mvaTOP['ele'][WP], idx_str=idx_str )
     elif eleMu=='mu':
-        return "lep_pt{idx_str}>10&&abs(lep_eta{idx_str})<2.4&&abs(lep_pdgId{idx_str})==13&&lep_mvaTOP{idx_str}>{threshold}".format( threshold = mvaTOP['mu'][WP], idx_str=idx_str )
+        return "lep_pt{idx_str}>10&&abs(lep_eta{idx_str})<2.4&&abs(lep_pdgId{idx_str})==13&&lep_mvaTOPv2{idx_str}>{threshold}".format( threshold = mvaTOP['mu'][WP], idx_str=idx_str )
     else:
         return '('+lepString( 'ele', WP, idx=idx) + ')||(' + lepString( 'mu', WP, idx=idx) + ')'
 
@@ -189,19 +189,19 @@ def muonSelector( lepton_selection, year, ptCut = 10):
             return \
                 l["pt"]                 >= ptCut \
                 and abs(l["eta"])       < 2.5 \
-                and l["mvaTOP"]         > mvaTOP['mu']['VL']
+                and l["mvaTOPv2"]         > mvaTOP['mu']['VL']
     elif lepton_selection == 'mvaTOPL':
         def func(l):
             return \
                 l["pt"]                 >= ptCut \
                 and abs(l["eta"])       < 2.5 \
-                and l["mvaTOP"]         > mvaTOP['mu']['L']
+                and l["mvaTOPv2"]         > mvaTOP['mu']['L']
     elif lepton_selection == 'mvaTOPM':
         def func(l):
             return \
                 l["pt"]                 >= ptCut \
                 and abs(l["eta"])       < 2.5 \
-                and l["mvaTOP"]         > mvaTOP['mu']['M']
+                and l["mvaTOPv2"]         > mvaTOP['mu']['M']
     elif lepton_selection == 'mvaTOPT':
         def func(l):
             return \
@@ -212,7 +212,7 @@ def muonSelector( lepton_selection, year, ptCut = 10):
                 and l["sip3d"]          < 8.0 \
                 and l['pfRelIso04_all'] < 0.40 \
                 and l['mediumId'] \
-                and (l['mvaTOP'] > mvaTOP['mu']['T']) \
+                and (l['mvaTOPv2'] > mvaTOP['mu']['T']) \
                 and l['isGlobal'] or l['isTracker']
     elif lepton_selection == 'hybridIso':
         def func(l):
@@ -480,25 +480,25 @@ def eleSelector( lepton_selection, year, ptCut = 10):
             return \
                 l["pt"]                 >= ptCut \
                 and abs(l["eta"])       < 2.5 \
-                and l["mvaTOP"]         > mvaTOP['ele']['VL']
+                and l["mvaTOPv2"]         > mvaTOP['ele']['VL']
     elif lepton_selection == 'mvaTOPL':
         def func(l):
             return \
                 l["pt"]                 >= ptCut \
                 and abs(l["eta"])       < 2.5 \
-                and l["mvaTOP"]         > mvaTOP['ele']['L']
+                and l["mvaTOPv2"]         > mvaTOP['ele']['L']
     elif lepton_selection == 'mvaTOPM':
         def func(l):
             return \
                 l["pt"]                 >= ptCut \
                 and abs(l["eta"])       < 2.5 \
-                and l["mvaTOP"]         > mvaTOP['ele']['M']
+                and l["mvaTOPv2"]         > mvaTOP['ele']['M']
     elif lepton_selection == 'mvaTOPT':
         def func(l):
             return \
                 l["pt"]                 >= ptCut \
                 and abs(l["eta"])       < 2.5 \
-                and l["mvaTOP"]         > mvaTOP['ele']['T'] \
+                and l["mvaTOPv2"]         > mvaTOP['ele']['T'] \
                 and abs(l["dxy"])       < 0.05 \
                 and abs(l["dz"])        < 0.1 \
                 and l["sip3d"]          < 8.0 \
