@@ -28,6 +28,7 @@ from tWZ.Tools.cutInterpreter            import cutInterpreter
 from tWZ.Tools.objectSelection_UL        import lepString, lepStringNoMVA
 from tWZ.Tools.helpers                   import getCollection, cosThetaStarNew, getTheta, gettheta, getphi
 from tWZ.Tools.leptonSF_topMVA           import leptonSF_topMVA
+from tWZ.Tools.triggerPrescale           import triggerPrescale
 
 # Analysis
 from Analysis.Tools.helpers              import deltaPhi, deltaR
@@ -50,12 +51,9 @@ argParser.add_argument('--small',          action='store_true', help='Run only o
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
 argParser.add_argument('--plot_directory', action='store', default='FakeRate_v1')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
-argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
+argParser.add_argument('--selection',      action='store', default='singlelepVL-vetoMET')
 argParser.add_argument('--sys',            action='store', default='central')
-argParser.add_argument('--nicePlots',      action='store_true', default=False)
-argParser.add_argument('--twoD',           action='store_true', default=False)
-argParser.add_argument('--triplet',        action='store_true', default=False)
-argParser.add_argument('--doTTbarReco',    action='store_true', default=False)
+argParser.add_argument('--channel',        action='store', default='muon')
 args = argParser.parse_args()
 
 ################################################################################
@@ -70,8 +68,6 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 variations = [
     "Trigger_UP", "Trigger_DOWN",
     "LepID_UP", "LepID_DOWN",
-    "BTag_b_UP", "BTag_b_DOWN",
-    "BTag_l_UP", "BTag_l_DOWN",
     "PU_UP", "PU_DOWN",
     "JES_UP", "JES_DOWN",
     "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN",
@@ -108,21 +104,18 @@ if args.dataMCScaling:
 else:
     logger.info( "Data/MC scaling not active")
 
-if args.nicePlots:
-    logger.info( "Only draw the plots")
-else:
-    logger.info( "Only saving into root file")
-
-if args.twoD:
-    logger.info( "Create EFT points in 2D")
-else:
-    logger.info( "Create EFT points in 1D")
-
 if args.noData:
     logger.info( "Running without data")
 else:
     logger.info( "Data included in analysis cycle")
 
+if args.channel == "muon":
+    logger.info( "Running MUON channel")
+elif args.channel == "elec":
+    logger.info( "Running ELECTRON channel")
+else:
+    logger.info( "Channel %s not defined!", args.channel)
+    
 ################################################################################
 # Selection modifier
 def jetSelectionModifier( sys, returntype = "func"):
@@ -204,7 +197,7 @@ else:
 
 ################################################################################
 # Define the MC samples
-from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
+from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed_singlelep import *
 
 if args.era == "UL2016":
     mc = []
@@ -213,7 +206,10 @@ elif args.era == "UL2016preVFP":
 elif args.era == "UL2017":
     mc = []
 elif args.era == "UL2018":
-    mc = []
+    if args.channel == "muon":
+        mc = [UL2018.QCD_MuEnriched, UL2018.WZTo3LNu, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY]
+    elif args.channel == "elec":
+        mc = [UL2018.QCD_EMEnriched, UL2018.QCD_bcToE, UL2018.WZTo3LNu, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY]
 elif args.era == "ULRunII":
     mc = []
 
@@ -282,6 +278,12 @@ leptonSF17 = leptonSF_topMVA(2017, LeptonWP)
 leptonSF18 = leptonSF_topMVA(2018, LeptonWP)
 
 ################################################################################
+# Trigger prescale weights for MC
+prescale16 = triggerPrescale(2016)
+prescale17 = triggerPrescale(2017)
+prescale18 = triggerPrescale(2018)
+
+################################################################################
 # Text on the plots
 tex = ROOT.TLatex()
 tex.SetNDC()
@@ -299,14 +301,14 @@ def drawObjects( plotData, lumi_scale ):
     if "mt2ll100" in args.selection and args.noData: lines += [(0.55, 0.5, 'M_{T2}(ll) > 100 GeV')] # Manually put the mt2ll > 100 GeV label
     return [tex.DrawLatex(*l) for l in lines]
 
-def drawPlots(plots, mode):
+def drawPlots(plots):
     for log in [False, True]:
-        plot_directory_ = os.path.join(plot_directory, 'FakeRate', args.plot_directory, args.era, mode + ("_log" if log else ""), args.selection)
+        plot_directory_ = os.path.join(plot_directory, 'FakeRate', args.plot_directory, args.era, args.channel + ("_log" if log else ""), args.selection)
         for plot in plots:
             if not max(l.GetMaximum() for l in sum(plot.histos,[])): continue # Empty plot
             if not args.noData:
-                if mode == "all": plot.histos[1][0].legendText = "Data"
-                if mode == "SF":  plot.histos[1][0].legendText = "Data (SF)"
+                plot.histos[1][0].legendText = "Data"
+
 
             _drawObjects = []
             n_stacks=len(plot.histos)
@@ -321,12 +323,88 @@ def drawPlots(plots, mode):
                   drawObjects = drawObjects( not args.noData, lumi_scale ) + _drawObjects,
                   copyIndexPHP = True, extensions = ["png", "pdf", "root"],
                 )
+                
+def getPassedTriggers( event ):
+    triggerlist = ["HLT_Ele8_CaloIdM_TrackIdM_PFJet30","HLT_Ele17_CaloIdM_TrackIdM_PFJet30","HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17","HLT_Mu20","HLT_Mu27"]
+    if event.year == 2016:
+        triggerlist = ["HLT_Ele8_CaloIdM_TrackIdM_PFJet30","HLT_Ele17_CaloIdM_TrackIdM_PFJet30","HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17"]
+    passedtriggers = {
+        "HLT_Ele8_CaloIdM_TrackIdM_PFJet30": event.HLT_Ele8_CaloIdM_TrackIdM_PFJet30,
+        "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": event.HLT_Ele17_CaloIdM_TrackIdM_PFJet30,
+        "HLT_Mu3_PFJet40": event.HLT_Mu3_PFJet40,
+        "HLT_Mu8": event.HLT_Mu8,
+        "HLT_Mu17": event.HLT_Mu17,
+        "HLT_Mu20": event.HLT_Mu20,
+        "HLT_Mu27": event.HLT_Mu27,
+    }
+    passedlist = []
+    for trigger in triggerlist:
+        if passedtriggers[trigger]:
+            passedlist.append(trigger)
+    return passedlist
 ################################################################################
 # Define sequences
 sequence       = []
 
+def leptonVariables(event, sample):
+    pdgid = event.lep_pdgId[event.l1_index]
+    event.pdgid = pdgid
+    
+sequence.append(leptonVariables)
 
 
+def applyTriggerPrescales(sample, event):
+    passedlist = getPassedTriggers(event)        
+    weight = 1.0
+    if event.year == 2016:
+        weight *= prescale16.getWeight(passedlist)
+    elif event.year == 2017:
+        weight *= prescale17.getWeight(passedlist)
+    elif event.year == 2018:
+        weight *= prescale18.getWeight(passedlist)
+    event.reweightTriggerPrescale = weight
+    # print "-----------------------------"
+    # print passedlist
+    # print weight
+sequence.append( applyTriggerPrescales )
+
+def applyAdditionalCuts(sample, event):
+    passedlist = getPassedTriggers(event)
+    # cuts: Triggername : (ptcone_min, ptcone_max, leppt_min, jetpt_min)
+    cuts = {
+        "HLT_Ele8_CaloIdM_TrackIdM_PFJet30": (15,45,8,30),
+        "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": (25,100,17,30),
+        "HLT_Mu3_PFJet40": (10,32,3,45),
+        "HLT_Mu8": (15,100,8,30),
+        "HLT_Mu17": (32,100,17,30),
+        "HLT_Mu20": (32,100,20,30),
+        "HLT_Mu27": (45,100,27,30),  
+    }   
+    passedAll = True
+    for trigger in passedlist:
+        # get cut values 
+        (ptcone_min, ptcone_max, leppt_min, jetpt_min) = cuts[trigger]
+        # store max pt of a jet that is well separated from the lepton
+        maxjet_pt_separated = 0
+        for i in range(event.nJetGood):
+            dEta = event.l1_eta - event.JetGood_eta[i]
+            dPhi = event.l1_phi - event.JetGood_phi[i]
+            if sqrt(dEta*dEta+dPhi*dPhi) > 0.7:
+                if event.JetGood_pt[i] > maxjet_pt_separated:
+                    maxjet_pt_separated = event.JetGood_pt[i]
+        # get conept 
+        ptcone = event.lep_ptCone[event.l1_index]
+        print ptcone
+        # check cuts 
+        passed = (ptcone > ptcone_min) and (ptcone < ptcone_max) and (event.l1_pt > leppt_min) and (maxjet_pt_separated > jetpt_min)
+        if not passed:
+            passedAll = False
+    event.passedCuts = passedAll
+    event.passedMedium = event.passedCuts and event.l1_mvaTOPv2WP>=3
+    event.passedTight = event.passedCuts and event.l1_mvaTOPv2WP>=4
+    
+sequence.append( applyAdditionalCuts )
+    
 ################################################################################
 # Read variables
 
@@ -338,16 +416,17 @@ read_variables = [
     # "l4_pt/F", "l4_eta/F" , "l4_phi/F", "l4_mvaTOP/F", "l4_mvaTOPv2/F", "l4_mvaTOPWP/I", "l4_mvaTOPv2WP/I", "l4_index/I",
     "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I]",
     "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F]",
-    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O]",
+    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F]",
     # "Z1_l1_index/I", "Z1_l2_index/I", "nonZ1_l1_index/I", "nonZ1_l2_index/I",
     # "Z1_phi/F", "Z1_pt/F", "Z1_mass/F", "Z1_cosThetaStar/F", "Z1_eta/F", "Z1_lldPhi/F", "Z1_lldR/F",
     "Muon[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,segmentComp/F,nStations/I,nTrackerLayers/I,mediumId/O,tightId/O,isPFcand/B,isTracker/B,isGlobal/B]",
     "Electron[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,vidNestedWPBitmap/I,deltaEtaSC/F]",
+    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30/O","HLT_Ele17_CaloIdM_TrackIdM_PFJet30/O","HLT_Mu3_PFJet40/O","HLT_Mu8/O","HLT_Mu17/O","HLT_Mu20/O","HLT_Mu27/O",
 ]
 
 read_variables_MC = [
-    "weight/F", 'reweightBTag_SF/F', 'reweightPU/F', 'reweightL1Prefire/F', 'reweightTrigger/F',
-    "genZ1_pt/F", "genZ1_eta/F", "genZ1_phi/F",
+    "weight/F", 'reweightBTag_SF/F', 'reweightPU/F', 'reweightL1Prefire/F', #'reweightTrigger/F',
+    # "genZ1_pt/F", "genZ1_eta/F", "genZ1_phi/F",
     "Muon[genPartFlav/I]",
     VectorTreeVariable.fromString( "GenPart[pt/F,mass/F,phi/F,eta/F,pdgId/I,genPartIdxMother/I,status/I,statusFlags/I]", nMax=1000),
     'nGenPart/I',
@@ -365,7 +444,6 @@ read_variables_MC = [
 
 if not args.noData:
     data_sample.texName = "data"
-    data_sample.setSelectionString([getLeptonSelection(mode)])
     data_sample.name           = "data"
     data_sample.style          = styles.errorStyle(ROOT.kBlack)
 
@@ -377,13 +455,9 @@ if args.sys in jet_variations:
     read_variables_MC += new_variables
     read_variables    += new_variables
 
-weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger'] # 'reweightLeptonMVA'
+weightnames = ['weight', 'reweightPU', 'reweightL1Prefire', 'reweightTriggerPrescale'] #'reweightTrigger'] # 'reweightLeptonMVA'
 # weightnames = ['weight']
 sys_weights = {
-    "BTag_b_UP"     : ('reweightBTag_SF','reweightBTag_SF_b_Up'),
-    "BTag_b_DOWN"   : ('reweightBTag_SF','reweightBTag_SF_b_Down'),
-    "BTag_l_UP"     : ('reweightBTag_SF','reweightBTag_SF_l_Up'),
-    "BTag_l_DOWN"   : ('reweightBTag_SF','reweightBTag_SF_l_Down'),
     'Trigger_UP'    : ('reweightTrigger','reweightTriggerUp'),
     'Trigger_DOWN'  : ('reweightTrigger','reweightTriggerDown'),
     'PU_UP'         : ('reweightPU','reweightPUUp'),
@@ -423,7 +497,6 @@ def weight_function( event, sample):
 
 for sample in mc:
     sample.read_variables = read_variables_MC
-    sample.setSelectionString([getLeptonSelection(mode)])
     sample.weight = weight_function
 
 
@@ -435,34 +508,100 @@ else:
 
 # Use some defaults
 selection_string = cutInterpreter.cutString(args.selection)
+if args.channel == "muon":
+    selection_string += "&&(abs(lep_pdgId[l1_index])==13)"
+elif args.channel == "elec":
+    selection_string += "&&(abs(lep_pdgId[l1_index])==11)"
+
 Plot.setDefaults(stack = stack, weight = plotweights, selectionString = selection_string)
+Plot2D.setDefaults(stack = stack, weight = plotweights, selectionString = selection_string)
 
 ################################################################################
 # Now define the plots
 
 plots = []
+plots2D = []
 
 plots.append(Plot(
-    name = "l1_pt",
-    texX = 'Leading lepton p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
+    name = "lep_pt",
+    texX = 'Lepton p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
     attribute = TreeVariable.fromString( "l1_pt/F" ),
-    binning=[25, 0, 1000],
+    binning=[25, 0, 400],
 ))
-           
 
-plotting.fill(plots, read_variables = read_variables, sequence = sequence)
+plots.append(Plot(
+    name = "cone_pt",
+    texX = 'Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.lep_ptCone[event.l1_index],
+    binning=[25, 0, 400],
+))
+
+plots.append(Plot(
+    name = "lep_eta",
+    texX = 'Lepton #eta', texY = 'Number of Events',
+    attribute = lambda event, sample: event.l1_eta,
+    binning=[30, -3, 3],
+))
+
+binning_pt  = Binning.fromThresholds([0, 20, 30, 45, 65, 1000])
+binning_eta = Binning.fromThresholds([0, 1.2, 2.1, 2.4])
+
+
+plots2D.append(Plot2D(
+    name = "lep_pt_eta",
+    texX = 'Lepton cone p_{T} (GeV)', texY = 'Lepton #eta',
+    attribute = (
+        lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedCuts else float('nan'), 
+        lambda event, sample: abs(event.l1_eta)                if event.passedCuts else float('nan'),
+    ),
+    binning = [binning_pt, binning_eta],
+))
+
+plots2D.append(Plot2D(
+    name = "lep_pt_eta_medium",
+    texX = 'Lepton cone p_{T} (GeV)', texY = 'Lepton #eta',
+    attribute = (
+        lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedMedium else float('nan'), 
+        lambda event, sample: abs(event.l1_eta)                if event.passedMedium else float('nan'),
+    ),
+    binning = [binning_pt, binning_eta],
+))
+
+plots2D.append(Plot2D(
+    name = "lep_pt_eta_tight",
+    texX = 'Lepton cone p_{T} (GeV)', texY = 'Lepton #eta',
+    attribute = (
+        lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedTight else float('nan'), 
+        lambda event, sample: abs(event.l1_eta)                if event.passedTight else float('nan'),
+    ),
+    binning = [binning_pt, binning_eta],
+))
+
+       
+
+plotting.fill(plots+plots2D, read_variables = read_variables, sequence = sequence)
 
 
 ################################################################################
 # Draw Plots
-drawPlots(plots, mode)
+drawPlots(plots)
+
+# for plot in plots2D:
+# 	plotting.draw2D(
+# 			plot=plot,
+# 		    plot_directory=os.path.join(plot_directory, 'FakeRate', args.plot_directory, args.era, args.channel + ("_log" if log else ""), args.selection) ,
+# 			logX = False, logY = False, logZ = False,
+# 			drawObjects = drawObjects( True, float('nan')),
+# 			)
+
+################################################################################
 
 
-plots_root = ["l1_pt"]
+plots_root = ["lep_pt", "lep_eta", "cone_pt", "lep_pt_eta", "lep_pt_eta_medium", "lep_pt_eta_tight"]
 
 # Write Result Hist in root file
 print "Now write results in root file."
-plot_dir = os.path.join(plot_directory, 'FakeRate', args.plot_directory, args.era, args.selection)
+plot_dir = os.path.join(plot_directory, 'FakeRate', args.plot_directory, args.era, args.channel, args.selection)
 if not os.path.exists(plot_dir):
     try:
         os.makedirs(plot_dir)
@@ -472,11 +611,12 @@ outfilename = plot_dir+'/Results.root'
 print "Saving in", outfilename
 outfile = ROOT.TFile(outfilename, 'recreate')
 outfile.cd()
-for plot in plots:
+for plot in plots+plots2D:
     if plot.name in plots_root:
         for idx, histo_list in enumerate(plot.histos):
             for j, h in enumerate(histo_list):
                 histname = h.GetName()
+                process = histname
                 if "TWZ_NLO_DR" in histname: process = "tWZ"
                 elif "tWZToLL01j_lepWFilter" in histname: process = "tWZ"
                 elif "TTZ" in histname: process = "ttZ"
@@ -490,6 +630,12 @@ for plot in plots:
                 elif "triBoson" in histname: process = "triBoson"
                 elif "nonprompt" in histname: process = "nonprompt"
                 elif "data" in histname: process = "data"
+                elif "MuEnriched" in histname: process = "QCD_MuEnriched"
+                elif "EMEnriched" in histname: process = "QCD_EMEnriched"
+                elif "bcToE" in histname: process = "QCD_bcToE"
+                elif "DY" in histname: process = "DY"
+                elif "WW" in histname: process = "WW"
+                elif "TTbar" in histname: process = "TTbar"
                 h.Write(plot.name+"__"+process)
 outfile.Close()
 
