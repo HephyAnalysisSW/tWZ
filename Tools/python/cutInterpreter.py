@@ -11,6 +11,8 @@ mIsoWP = { "VT":5, "T":4, "M":3 , "L":2 , "VL":1, 0:"None" }
 
 from tWZ.Tools.objectSelection import lepString
 special_cuts = {
+    "singlelepVL":       "l1_pt>10",
+    "singlelepM":        "l1_pt>10&&l1_mvaTOPv2WP>=3",
     "trilepVL":        "l1_pt>40&&l2_pt>20&&l3_pt>10",
     "trilepL" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=2&&l2_mvaTOPv2WP>=2&&l3_mvaTOPv2WP>=2",
     "trilepM" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3",
@@ -40,6 +42,7 @@ special_cuts = {
     "trilep": "l1_pt>40&&l2_pt>20&&l3_pt>10",
     "triMuon": "Sum$(lep_pt>40&&abs(lep_eta)<2.4&&lep_mediumId&&abs(lep_pdgId)==13)>=1 && Sum$(lep_pt>20&&abs(lep_eta)<2.4&&lep_mediumId&&abs(lep_pdgId)==13)>=2 && Sum$(lep_pt>10&&abs(lep_eta)<2.4&&lep_mediumId&&abs(lep_pdgId)==13)==3",
     "vetoElec": "Sum$(lep_pt>10&&abs(lep_eta)<2.4&&abs(lep_pdgId)==11)==0",
+    "vetoMET" : "met_pt<20"
   }
 
 continous_variables = [ ('ht','Sum$(JetGood_pt*(JetGood_pt>30&&abs(JetGood_eta)<2.4))'), ("met", "met_pt"), ("Z2mass", "Z2_mass"), ("Z1mass", "Z1_mass"), ("minDLmass", "minDLmass"), ("mT", "mT")]
