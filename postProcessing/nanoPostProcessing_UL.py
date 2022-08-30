@@ -774,7 +774,7 @@ def filler( event ):
         ptCone = 0.67*lep['pt']*(1+lep['jetRelIso']) # if no jet in 0.4, jetRelIso = pfRelIso04_all
         for j in all_jets:
             deta = j['eta'] - lep['eta']
-            dphi = j['phi'] - lep['phi']
+            dphi = deltaPhi(j['phi'], lep['phi']) # deltaPhi has to be between -pi and +pi
             dR = sqrt( deta*deta + dphi*dphi )
             if dR < dRmin:
                 dRmin = dR

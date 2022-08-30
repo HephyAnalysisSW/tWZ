@@ -388,13 +388,12 @@ def applyAdditionalCuts(sample, event):
         maxjet_pt_separated = 0
         for i in range(event.nJetGood):
             dEta = event.l1_eta - event.JetGood_eta[i]
-            dPhi = event.l1_phi - event.JetGood_phi[i]
+            dPhi = deltaPhi(event.l1_phi, event.JetGood_phi[i])
             if sqrt(dEta*dEta+dPhi*dPhi) > 0.7:
                 if event.JetGood_pt[i] > maxjet_pt_separated:
                     maxjet_pt_separated = event.JetGood_pt[i]
         # get conept 
         ptcone = event.lep_ptCone[event.l1_index]
-        print ptcone
         # check cuts 
         passed = (ptcone > ptcone_min) and (ptcone < ptcone_max) and (event.l1_pt > leppt_min) and (maxjet_pt_separated > jetpt_min)
         if not passed:
