@@ -3,7 +3,7 @@ eval `scram runtime -sh`
 cd $CMSSW_BASE/src
 
 # nanoAOD tools (for MET Significance, JEC/JER...)
-git clone -b stopsDilepton https://github.com/HephyAnalysisSW/nanoAOD-tools.git PhysicsTools/NanoAODTools
+git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
 cd $CMSSW_BASE/src
 
 # RootTools (for plotting, sample handling, processing)
