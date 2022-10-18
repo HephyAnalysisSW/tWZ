@@ -1,8 +1,21 @@
 import os
 
-# filenames = os.listdir(dir+sample)
-fileDir = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v1/UL2018/singlelep/"
-submitFileName = "/users/dennis.schwarz/CMSSW_10_6_28/src/tWZ/postProcessing/nanoPostProcessing_UL18_nanoAODv9_SingleLep.sh"
+import argparse
+argParser = argparse.ArgumentParser(description = "Argument parser")
+argParser.add_argument('--year',      action='store', default='UL2018')
+args = argParser.parse_args()
+
+shortyear = args.year.replace("20", "")
+
+if args.year == "UL2016_preVFP":
+    shortyear = "UL16preVFP"
+
+
+
+fileDir = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v1/"+args.year+"/singlelep/"
+submitFileName = "/users/dennis.schwarz/CMSSW_10_6_28/src/tWZ/postProcessing/nanoPostProcessing_"+shortyear+"_nanoAODv9_SingleLep.sh"
+
+
 submitFile = open(submitFileName, 'r')
 Lines = submitFile.readlines()
 counter = 0
@@ -18,11 +31,13 @@ for line in Lines:
         if "#SPLIT" in word:
             numberString = word.replace("#SPLIT", "")
             nJobs = int(numberString)
+    if i_sample == -1: 
+        continue
     sampleName = words[i_sample]
     Nfiles += nJobs
     if nJobs != 0:
         for i in range(nJobs):
-            fileName = fileDir+sampleName+"/"+sampleName+"_"+str(i)+".root"
+            fileName = fileDir+"/"+sampleName+"/"+sampleName+"_"+str(i)+".root"
             if not os.path.exists(fileName):
                 print fileName
                 counter += 1
@@ -31,12 +46,14 @@ for line in Lines:
 print "----------------------------------------"
 print "%i/%i files missing" %(counter, Nfiles)
 
-f = open("missingFiles.sh", "w")
+missingfilesname = "missingFiles_"+shortyear+".sh"
+f = open(missingfilesname, "w")
 for (sampleName, i, nJobs) in missing:
-    writeline = "python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --year UL2018 --processingEra tWZ_UL_nAODv9_v1 --sample "
+    writeline = "python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --year "+args.year+" --processingEra tWZ_UL_nAODv9_v1 --sample "
     writeline += sampleName+" --nJobs="+str(nJobs)+" --job="+str(i)+"\n"   
     f.write(writeline)
 f.close()
+print "Created new submit file", missingfilesname
             
                 
     

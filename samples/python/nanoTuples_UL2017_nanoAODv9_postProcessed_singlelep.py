@@ -13,7 +13,7 @@ try:
     directory_ = sys.modules['__main__'].directory_
 except:
     import tWZ.samples.UL_nanoAODv9_locations as locations
-    directory_ = locations.mc_singlelep_UL2018
+    directory_ = locations.mc_singlelep_UL2017
 
 logger.info("Loading MC samples from directory %s", directory_)
 
@@ -77,7 +77,7 @@ dirs['QCD_bcToE'] =  [
     'QCD_bcToE_20to30',
     'QCD_bcToE_30to80',
     'QCD_bcToE_80to170',
-    # 'QCD_bcToE_170to250',
+    'QCD_bcToE_170to250',
     'QCD_bcToE_250toInf',
 ]
 
