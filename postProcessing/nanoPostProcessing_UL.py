@@ -351,7 +351,7 @@ selectionString = '&&'.join(skimConds)
 
 ################################################################################
 # top pt reweighting
-from tWZ.Tools.topPtReweighting import getUnscaledTopPairPtReweightungFunction, getTopPtDrawString, getTopPtsForReweighting
+from Analysis.Tools.topPtReweighting import getUnscaledTopPairPtReweightungFunction, getTopPtDrawString, getTopPtsForReweighting
 # Decision based on sample name -> whether TTJets or TTLep is in the sample name
 isTT = sample.name.startswith("TTJets") or sample.name.startswith("TTLep") or sample.name.startswith("TT_pow")
 doTopPtReweighting = isTT and not options.noTopPtReweighting
@@ -380,7 +380,7 @@ else:
 ################################################################################
 # CR reweighting 
 if options.doCRReweighting:
-    from tWZ.Tools.colorReconnectionReweighting import getCRWeight, getCRDrawString
+    from Analysis.Tools.colorReconnectionReweighting import getCRWeight, getCRDrawString
     logger.info( "Sample will have CR reweighting." )
     #norm = sample.getYieldFromDraw( selectionString = selectionString, weightString = "genWeight" )
     norm = float(sample.chain.GetEntries(selectionString))

@@ -376,7 +376,7 @@ sample.chain.SetBranchStatus("*",1)
 selectionString = '&&'.join(skimConds)
 
 # top pt reweighting
-from tWZ.Tools.topPtReweighting import getUnscaledTopPairPtReweightungFunction, getTopPtDrawString, getTopPtsForReweighting
+from Analysis.Tools.topPtReweighting import getUnscaledTopPairPtReweightungFunction, getTopPtDrawString, getTopPtsForReweighting
 # Decision based on sample name -> whether TTJets or TTLep is in the sample name
 isTT = sample.name.startswith("TTJets") or sample.name.startswith("TTLep") or sample.name.startswith("TT_pow")
 doTopPtReweighting = isTT and not options.noTopPtReweighting
