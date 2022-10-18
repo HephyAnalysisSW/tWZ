@@ -27,9 +27,9 @@ from tWZ.Tools.objectSelection     import getGenZs, getGenPhoton
 from tWZ.Tools.overlapRemovalTTG   import photonFromTopDecay, hasMesonMother, getParentIds, isIsolatedPhoton, getPhotonCategory
 from tWZ.Tools.triggerEfficiency   import triggerEfficiency
 from tWZ.Tools.leptonSF            import leptonSF as leptonSF_
-from tWZ.Tools.mcTools import pdgToName, GenSearch, B_mesons, D_mesons, B_mesons_abs, D_mesons_abs
-genSearch = GenSearch()
 
+from Analysis.Tools.mcTools import pdgToName, GenSearch, B_mesons, D_mesons, B_mesons_abs, D_mesons_abs
+genSearch = GenSearch()
 from Analysis.Tools.metFilters               import getFilterCut
 from Analysis.Tools.puProfileDirDB           import puProfile
 from Analysis.Tools.L1PrefireWeight          import L1PrefireWeight
