@@ -403,7 +403,7 @@ else:
     logger.info( "Sample will NOT have top pt reweighting. topScaleF=%f",topScaleF )
 
 if options.doCRReweighting:
-    from tWZ.Tools.colorReconnectionReweighting import getCRWeight, getCRDrawString
+    from Analysis.Tools.colorReconnectionReweighting import getCRWeight, getCRDrawString
     logger.info( "Sample will have CR reweighting." )
     #norm = sample.getYieldFromDraw( selectionString = selectionString, weightString = "genWeight" )
     norm = float(sample.chain.GetEntries(selectionString))
