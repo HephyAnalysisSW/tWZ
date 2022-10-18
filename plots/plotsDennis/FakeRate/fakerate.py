@@ -49,11 +49,12 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='FakeRate_v1')
+argParser.add_argument('--plot_directory', action='store', default='FakeRate_v3')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
-argParser.add_argument('--selection',      action='store', default='singlelepVL-vetoMET')
+argParser.add_argument('--selection',      action='store', default='singlelepL-vetoMET')
 argParser.add_argument('--sys',            action='store', default='central')
 argParser.add_argument('--channel',        action='store', default='muon')
+argParser.add_argument('--noPreScale',     action='store_true')
 args = argParser.parse_args()
 
 ################################################################################
@@ -95,6 +96,7 @@ else:
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
 if args.noData:                       args.plot_directory += "_noData"
+if args.noPreScale:                   args.plot_directory += "_noPreScale"
 if args.sys is not 'central':         args.plot_directory += "_%s" %(args.sys)
 
 
@@ -115,6 +117,16 @@ elif args.channel == "elec":
     logger.info( "Running ELECTRON channel")
 else:
     logger.info( "Channel %s not defined!", args.channel)
+    
+################################################################################
+# Define trigger list based on channel
+triggerlist = []
+if args.channel == "muon":
+    triggerlist = ["HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17","HLT_Mu20","HLT_Mu27"]
+    if args.era == "UL2016" or args.era == "UL2016preVFP":
+        triggerlist = ["HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17"]
+elif args.channel == "elec":
+    triggerlist = ["HLT_Ele8_CaloIdM_TrackIdM_PFJet30","HLT_Ele17_CaloIdM_TrackIdM_PFJet30"]
     
 ################################################################################
 # Selection modifier
@@ -207,11 +219,16 @@ elif args.era == "UL2017":
     mc = []
 elif args.era == "UL2018":
     if args.channel == "muon":
-        mc = [UL2018.QCD_MuEnriched, UL2018.WZTo3LNu, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY]
+        mc = [UL2018.QCD_MuEnriched, UL2018.WZTo3LNu, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY, UL2018.WJetsToLNu]
     elif args.channel == "elec":
-        mc = [UL2018.QCD_EMEnriched, UL2018.QCD_bcToE, UL2018.WZTo3LNu, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY]
+        mc = [UL2018.QCD_EMEnriched, UL2018.QCD_bcToE, UL2018.WZTo3LNu, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY, UL2018.WJetsToLNu]
 elif args.era == "ULRunII":
     mc = []
+
+################################################################################
+# Binning for Maps
+boundaries_pt = [0, 20, 30, 45, 65, 120]
+boundaries_eta = [0, 1.2, 2.1, 2.4]
 
 ################################################################################
 # Creating a list of weights
@@ -267,15 +284,15 @@ if args.small:
         
 ################################################################################
 # Lepton SF
-LeptonWP = "tight"
-if "trilepVL" in args.selection:
-    LeptonWP = "VL"
+# LeptonWP = "loose"
+# if "trilepVL" in args.selection:
+#     LeptonWP = "VL"
     
 ### TODO: SETUP SF FOR MEDIUM WP
     
-leptonSF16 = leptonSF_topMVA(2016, LeptonWP)
-leptonSF17 = leptonSF_topMVA(2017, LeptonWP)
-leptonSF18 = leptonSF_topMVA(2018, LeptonWP)
+# leptonSF16 = leptonSF_topMVA(2016, LeptonWP)
+# leptonSF17 = leptonSF_topMVA(2017, LeptonWP)
+# leptonSF18 = leptonSF_topMVA(2018, LeptonWP)
 
 ################################################################################
 # Trigger prescale weights for MC
@@ -325,9 +342,6 @@ def drawPlots(plots):
                 )
                 
 def getPassedTriggers( event ):
-    triggerlist = ["HLT_Ele8_CaloIdM_TrackIdM_PFJet30","HLT_Ele17_CaloIdM_TrackIdM_PFJet30","HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17","HLT_Mu20","HLT_Mu27"]
-    if event.year == 2016:
-        triggerlist = ["HLT_Ele8_CaloIdM_TrackIdM_PFJet30","HLT_Ele17_CaloIdM_TrackIdM_PFJet30","HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17"]
     passedtriggers = {
         "HLT_Ele8_CaloIdM_TrackIdM_PFJet30": event.HLT_Ele8_CaloIdM_TrackIdM_PFJet30,
         "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": event.HLT_Ele17_CaloIdM_TrackIdM_PFJet30,
@@ -342,6 +356,38 @@ def getPassedTriggers( event ):
         if passedtriggers[trigger]:
             passedlist.append(trigger)
     return passedlist
+    
+def passedOfflineCut( event, triggername ):
+    cuts = {
+        "HLT_Ele8_CaloIdM_TrackIdM_PFJet30": (15,45,8,30),
+        "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": (25,100,17,30),
+        "HLT_Mu3_PFJet40": (10,32,3,45),
+        "HLT_Mu8": (15,100,8,30),
+        "HLT_Mu17": (32,100,17,30),
+        "HLT_Mu20": (32,100,20,30),
+        "HLT_Mu27": (45,100,27,30),  
+    }   
+    if triggername not in cuts.keys():
+        raise RuntimeError( "Trigger %s not defined for additional cuts", triggername)
+    (ptcone_min, ptcone_max, leppt_min, jetpt_min) = cuts[triggername]
+    
+    # get max pt of a jet that is well separated from the lepton
+    maxjet_pt_separated = 0
+    for i in range(event.nJetGood):
+        dEta = event.l1_eta - event.JetGood_eta[i]
+        dPhi = deltaPhi(event.l1_phi, event.JetGood_phi[i])
+        if sqrt(dEta*dEta+dPhi*dPhi) > 0.7:
+            if event.JetGood_pt[i] > maxjet_pt_separated:
+                maxjet_pt_separated = event.JetGood_pt[i]
+    # get conept 
+    ptcone = event.lep_ptCone[event.l1_index]
+    # check cuts 
+    if (ptcone > ptcone_min) and (ptcone < ptcone_max) and (event.l1_pt > leppt_min) and (maxjet_pt_separated > jetpt_min):
+        return True 
+    else:
+        return False
+    
+    
 ################################################################################
 # Define sequences
 sequence       = []
@@ -354,56 +400,103 @@ sequence.append(leptonVariables)
 
 
 def applyTriggerPrescales(sample, event):
-    passedlist = getPassedTriggers(event)        
-    weight = 1.0
-    if event.year == 2016:
-        weight *= prescale16.getWeight(passedlist)
-    elif event.year == 2017:
-        weight *= prescale17.getWeight(passedlist)
-    elif event.year == 2018:
-        weight *= prescale18.getWeight(passedlist)
-    event.reweightTriggerPrescale = weight
-    # print "-----------------------------"
-    # print passedlist
-    # print weight
+    if args.noPreScale or sample.isData:
+        event.reweightTriggerPrescale = 1.0
+    else:
+        passedlist = getPassedTriggers(event)
+        passedlist_plusOffline = []
+        for trigger in passedlist:
+            if passedOfflineCut(event, trigger):
+                passedlist_plusOffline.append(trigger)          
+        weight = 1.0
+        if event.year == 2016:
+            weight = prescale16.getWeight(passedlist_plusOffline)
+        elif event.year == 2017:
+            weight = prescale17.getWeight(passedlist_plusOffline)
+        elif event.year == 2018:
+            weight = prescale18.getWeight(passedlist_plusOffline)
+        event.reweightTriggerPrescale = weight
+        # print "-----------------------------"
+        # print passedlist
+        # print passedlist_plusOffline
+        # print weight
 sequence.append( applyTriggerPrescales )
 
 def applyAdditionalCuts(sample, event):
+    # print "----------------"
     passedlist = getPassedTriggers(event)
-    # cuts: Triggername : (ptcone_min, ptcone_max, leppt_min, jetpt_min)
-    cuts = {
-        "HLT_Ele8_CaloIdM_TrackIdM_PFJet30": (15,45,8,30),
-        "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": (25,100,17,30),
-        "HLT_Mu3_PFJet40": (10,32,3,45),
-        "HLT_Mu8": (15,100,8,30),
-        "HLT_Mu17": (32,100,17,30),
-        "HLT_Mu20": (32,100,20,30),
-        "HLT_Mu27": (45,100,27,30),  
-    }   
-    passedAll = True
+    passedTriggersAndCuts = []
+
     for trigger in passedlist:
-        # get cut values 
-        (ptcone_min, ptcone_max, leppt_min, jetpt_min) = cuts[trigger]
-        # store max pt of a jet that is well separated from the lepton
-        maxjet_pt_separated = 0
-        for i in range(event.nJetGood):
-            dEta = event.l1_eta - event.JetGood_eta[i]
-            dPhi = deltaPhi(event.l1_phi, event.JetGood_phi[i])
-            if sqrt(dEta*dEta+dPhi*dPhi) > 0.7:
-                if event.JetGood_pt[i] > maxjet_pt_separated:
-                    maxjet_pt_separated = event.JetGood_pt[i]
-        # get conept 
-        ptcone = event.lep_ptCone[event.l1_index]
-        # check cuts 
-        passed = (ptcone > ptcone_min) and (ptcone < ptcone_max) and (event.l1_pt > leppt_min) and (maxjet_pt_separated > jetpt_min)
-        if not passed:
-            passedAll = False
-    event.passedCuts = passedAll
-    event.passedMedium = event.passedCuts and event.l1_mvaTOPv2WP>=3
-    event.passedTight = event.passedCuts and event.l1_mvaTOPv2WP>=4
+        if passedOfflineCut(event, trigger):
+            passedTriggersAndCuts.append(trigger)
     
+    event.passedCuts = True if len(passedTriggersAndCuts) > 0 else False
+    id = event.lep_pdgId[event.l1_index]
+    passedMediumId = True if ( abs(id)==11 or (abs(id)==13 and event.lep_mediumId[event.l1_index]) ) else False
+    event.passedLoose = event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=2
+    event.passedMedium = event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=3
+    event.passedTight = event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=4
+    event.tightLepton = passedMediumId and event.l1_mvaTOPv2WP>=4 # also store information about lepton independent from trigger
+    event.passedTriggers = passedTriggersAndCuts
+    # print event.passedTriggers
 sequence.append( applyAdditionalCuts )
     
+def getMTfix(sample, event):
+    pTfix = 35.
+    dphi = deltaPhi(event.MET_phi,event.l1_phi)
+    MTfix = sqrt( 2*pTfix*event.MET_pt*(1-cos(dphi)) )
+    event.MTfix = MTfix
+sequence.append(getMTfix)
+
+def getBin(sample, event):
+    Nbins_pt = len(boundaries_pt)
+    Nbins_eta = len(boundaries_eta)
+    pt = event.lep_ptCone[event.l1_index]
+    eta = event.l1_eta
+    bin_pt = 0
+    bin_eta = 0
+    for i in range(Nbins_pt):
+        if pt > boundaries_pt[i]:
+            bin_pt += 1
+    for j in range(Nbins_eta):
+        if abs(eta) > boundaries_eta[j]:
+            bin_eta += 1
+    event.bin_pt = bin_pt
+    event.bin_eta = bin_eta
+    # print "----------------------------"
+    # print boundaries_pt, boundaries_eta
+    # print pt, eta, event.bin_pt, event.bin_eta
+sequence.append(getBin)
+
+def getMediumID(sample, event):
+    mediumId = -1
+    if abs(event.lep_pdgId[event.l1_index]) == 13:
+        if event.lep_mediumId[event.l1_index]:
+            mediumId = 1
+        else:
+            mediumId = 0
+    event.mediumID = mediumId
+sequence.append(getMediumID)
+
+
+def getClosestJetFlavor(sample, event):
+    mindR = 0.7
+    bscore_closest = 0.0
+    foundjet = False
+    for i in range(event.nJetGood):
+        dEta = event.l1_eta - event.JetGood_eta[i]
+        dPhi = deltaPhi(event.l1_phi, event.JetGood_phi[i])
+        dR = sqrt(dEta*dEta+dPhi*dPhi)
+        if dR < mindR:
+            mindR = dR
+            bscore_closest = event.JetGood_btagDeepFlavB[i]
+            foundjet = True
+    event.dR_closest = mindR 
+    event.bscore_closest = bscore_closest
+    # compare with event.lep_jetBTag[event.l1_index]
+    # don't forget to include in "read_variables"!
+sequence.append(getClosestJetFlavor)
 ################################################################################
 # Read variables
 
@@ -413,6 +506,7 @@ read_variables = [
     # "l2_pt/F", "l2_eta/F" , "l2_phi/F", "l2_mvaTOP/F", "l2_mvaTOPv2/F", "l2_mvaTOPWP/I", "l2_mvaTOPv2WP/I", "l2_index/I",
     # "l3_pt/F", "l3_eta/F" , "l3_phi/F", "l3_mvaTOP/F", "l3_mvaTOPv2/F", "l3_mvaTOPWP/I", "l3_mvaTOPv2WP/I", "l3_index/I",
     # "l4_pt/F", "l4_eta/F" , "l4_phi/F", "l4_mvaTOP/F", "l4_mvaTOPv2/F", "l4_mvaTOPWP/I", "l4_mvaTOPv2WP/I", "l4_index/I",
+    "MET_pt/F", "MET_phi/F",
     "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I]",
     "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F]",
     "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F]",
@@ -508,7 +602,7 @@ else:
 # Use some defaults
 selection_string = cutInterpreter.cutString(args.selection)
 if args.channel == "muon":
-    selection_string += "&&(abs(lep_pdgId[l1_index])==13)"
+    selection_string += "&&(abs(lep_pdgId[l1_index])==13)&&lep_mediumId[l1_index]"
 elif args.channel == "elec":
     selection_string += "&&(abs(lep_pdgId[l1_index])==11)"
 
@@ -522,36 +616,282 @@ plots = []
 plots2D = []
 
 plots.append(Plot(
-    name = "lep_pt",
+    name = "dR_closest",
+    texX = '#Delta R(lepton, next jet)', texY = 'Number of Events',
+    attribute = lambda event, sample: event.dR_closest if event.passedLoose else float('nan'),
+    addOverFlowBin='upper',
+    binning=[10, 0, 1.0],
+))
+
+plots.append(Plot(
+    name = "bscore_closest",
+    texX = 'b tag score closest jet', texY = 'Number of Events',
+    attribute = lambda event, sample: event.bscore_closest if event.passedLoose else float('nan'),
+    addOverFlowBin='upper',
+    binning=[10, 0, 1.0],
+))
+
+plots.append(Plot(
+    name = "Weight",
+    texX = 'Weight', texY = 'Number of Events',
+    attribute = lambda event, sample: event.weight,
+    addOverFlowBin='upper',
+    binning=[100, 0, 1.1],
+))
+
+plots.append(Plot(
+    name = "Weight_large",
+    texX = 'Weight (large range)', texY = 'Number of Events',
+    attribute = lambda event, sample: event.weight,
+    addOverFlowBin='upper',
+    binning=[100, 0, 100],
+))
+
+plots.append(Plot(
+    name = "LargeWeight_lep_pt",
     texX = 'Lepton p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = TreeVariable.fromString( "l1_pt/F" ),
+    attribute = lambda event, sample: event.l1_pt if event.passedLoose and event.weight > 100. else float('nan'),
     binning=[25, 0, 400],
 ))
 
 plots.append(Plot(
-    name = "cone_pt",
-    texX = 'Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = lambda event, sample: event.lep_ptCone[event.l1_index],
-    binning=[25, 0, 400],
-))
-
-plots.append(Plot(
-    name = "lep_eta",
+    name = "LargeWeight_lep_eta",
     texX = 'Lepton #eta', texY = 'Number of Events',
-    attribute = lambda event, sample: event.l1_eta,
+    attribute = lambda event, sample: event.l1_eta if event.passedLoose and event.weight > 100.  else float('nan'),
     binning=[30, -3, 3],
 ))
 
-binning_pt  = Binning.fromThresholds([0, 20, 30, 45, 65, 1000])
-binning_eta = Binning.fromThresholds([0, 1.2, 2.1, 2.4])
+plots.append(Plot(
+    name = "LargeWeight_mvaWP",
+    texX = 'MVA WP', texY = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.l1_mvaTOPv2WP if event.passedLoose and event.weight > 100. else float('nan'),
+    binning=[5, -0.5, 4.5],
+))
 
+plots.append(Plot(
+    name = "Prescale",
+    texX = 'Trigger prescale weight', texY = 'Number of Events',
+    attribute = lambda event, sample: event.reweightTriggerPrescale,
+    binning=[100, 0, 1.1],
+))
+
+plots.append(Plot(
+    name = "L_MediumId",
+    texX = 'Medium ID', texY = 'Number of Events',
+    attribute = lambda event, sample: event.mediumID if event.passedLoose else float('nan'),
+    binning=[3, -1.5, 1.5],
+))
+
+plots.append(Plot(
+    name = "L_lep_pt",
+    texX = 'Loose Lepton p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.l1_pt if event.passedLoose else float('nan'),
+    binning=[25, 0, 400],
+))
+
+plots.append(Plot(
+    name = "L_cone_pt",
+    texX = 'Loose Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedLoose else float('nan'),
+    binning=[25, 0, 150],
+))
+
+plots.append(Plot(
+    name = "L_lep_eta",
+    texX = 'Loose Lepton #eta', texY = 'Number of Events',
+    attribute = lambda event, sample: event.l1_eta if event.passedLoose else float('nan'),
+    binning=[30, -3, 3],
+))
+
+plots.append(Plot(
+    name = "L_MTfix",
+    texX = 'Loose m_{T}^{fix}', texY = 'Number of Events',
+    attribute = lambda event, sample: event.MTfix if event.passedLoose else float('nan'),
+    binning=[10, 0, 140],
+))
+
+###############################
+
+plots.append(Plot(
+    name = "M_MediumId",
+    texX = 'Medium ID', texY = 'Number of Events',
+    attribute = lambda event, sample: event.mediumID if event.passedMedium else float('nan'),
+    binning=[3, -1.5, 1.5],
+))
+
+plots.append(Plot(
+    name = "M_lep_pt",
+    texX = 'Medium Lepton p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.l1_pt if event.passedMedium else float('nan'),
+    binning=[25, 0, 400],
+))
+
+plots.append(Plot(
+    name = "M_cone_pt",
+    texX = 'Medium Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedMedium else float('nan'),
+    binning=[25, 0, 150],
+))
+
+plots.append(Plot(
+    name = "M_lep_eta",
+    texX = 'Medium Lepton #eta', texY = 'Number of Events',
+    attribute = lambda event, sample: event.l1_eta if event.passedMedium else float('nan'),
+    binning=[30, -3, 3],
+))
+
+plots.append(Plot(
+    name = "M_MTfix",
+    texX = 'Medium m_{T}^{fix}', texY = 'Number of Events',
+    attribute = lambda event, sample: event.MTfix if event.passedMedium else float('nan'),
+    binning=[10, 0, 140],
+))
+
+###############################
+
+plots.append(Plot(
+    name = "T_MediumId",
+    texX = 'Medium ID', texY = 'Number of Events',
+    attribute = lambda event, sample: event.mediumID if event.passedTight else float('nan'),
+    binning=[3, -1.5, 1.5],
+))
+
+plots.append(Plot(
+    name = "T_lep_pt",
+    texX = 'Tight Lepton p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.l1_pt if event.passedTight else float('nan'),
+    binning=[25, 0, 400],
+))
+
+plots.append(Plot(
+    name = "T_cone_pt",
+    texX = 'Tight Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedTight else float('nan'),
+    binning=[25, 0, 150],
+))
+
+plots.append(Plot(
+    name = "T_lep_eta",
+    texX = 'Tight Lepton #eta', texY = 'Number of Events',
+    attribute = lambda event, sample: event.l1_eta if event.passedTight else float('nan'),
+    binning=[30, -3, 3],
+))
+
+plots.append(Plot(
+    name = "T_MTfix",
+    texX = 'Tight m_{T}^{fix}', texY = 'Number of Events',
+    attribute = lambda event, sample: event.MTfix if event.passedTight else float('nan'),
+    binning=[10, 0, 140],
+))
+###############################
+list_of_binned_plots = []
+for i in range(len(boundaries_pt)):
+    for j in range(len(boundaries_eta)):
+        ptbin = i+1
+        etabin = j+1
+        suffix = "__BIN_pt%s_eta%s" %(ptbin, etabin)
+        plots.append(Plot(
+            name = "L_lep_pt"+suffix,
+            texX = 'Loose Lepton p_{T} (GeV)', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_pt if (event.passedLoose and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[25, 0, 400],
+        ))
+        
+        plots.append(Plot(
+            name = "L_cone_pt"+suffix,
+            texX = 'Loose Lepton cone p_{T} (GeV)', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.lep_ptCone[event.l1_index]  if (event.passedLoose and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[25, 0, 150],
+        ))
+        
+        plots.append(Plot(
+            name = "L_lep_eta"+suffix,
+            texX = 'Loose Lepton #eta', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_eta if (event.passedLoose and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[30, -3, 3],
+        ))
+        plots.append(Plot(
+            name = "L_MTfix"+suffix,
+            texX = 'Loose m_{T}^{fix}', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.MTfix if (event.passedLoose and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[10, 0, 140],
+        ))
+        plots.append(Plot(
+            name = "M_lep_pt"+suffix,
+            texX = 'Medium Lepton p_{T} (GeV)', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_pt if (event.passedMedium and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[25, 0, 400],
+        ))
+        
+        plots.append(Plot(
+            name = "M_cone_pt"+suffix,
+            texX = 'Medium Lepton cone p_{T} (GeV)', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.lep_ptCone[event.l1_index]  if (event.passedMedium and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[25, 0, 150],
+        ))
+        
+        plots.append(Plot(
+            name = "M_lep_eta"+suffix,
+            texX = 'Medium Lepton #eta', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_eta if (event.passedMedium and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[30, -3, 3],
+        ))
+        plots.append(Plot(
+            name = "M_MTfix"+suffix,
+            texX = 'Medium m_{T}^{fix}', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.MTfix if (event.passedMedium and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[10, 0, 140],
+        ))
+        plots.append(Plot(
+            name = "T_lep_pt"+suffix,
+            texX = 'Tight Lepton p_{T} (GeV)', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_pt if (event.passedTight and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[25, 0, 400],
+        ))
+        
+        plots.append(Plot(
+            name = "T_cone_pt"+suffix,
+            texX = 'Tight Lepton cone p_{T} (GeV)', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.lep_ptCone[event.l1_index]  if (event.passedTight and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[25, 0, 150],
+        ))
+        
+        plots.append(Plot(
+            name = "T_lep_eta"+suffix,
+            texX = 'Tight Lepton #eta', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_eta if (event.passedTight and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[30, -3, 3],
+        ))
+        plots.append(Plot(
+            name = "T_MTfix"+suffix,
+            texX = 'Tight m_{T}^{fix}', texY = 'Number of Events',
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.MTfix if (event.passedTight and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            binning=[10, 0, 140],
+        ))
+        list_of_binned_plots.append("L_MTfix"+suffix)
+        list_of_binned_plots.append("M_MTfix"+suffix)
+        list_of_binned_plots.append("T_MTfix"+suffix)
+###############################
+list_of_trigger_plots = []
+for trigger in triggerlist:
+    suffix = "__TRIGGER_"+trigger
+    plots.append(Plot(
+        name = "T_MTfix"+suffix,
+        texX = 'Tight m_{T}^{fix}', texY = 'Number of Events',
+        attribute = lambda event, sample, tr=trigger: event.MTfix if (event.tightLepton and tr in event.passedTriggers ) else float('nan'),
+        binning=[10, 0, 140],
+    ))
+    list_of_trigger_plots.append("T_MTfix"+suffix)
+###############################
+binning_pt  = Binning.fromThresholds(boundaries_pt)
+binning_eta = Binning.fromThresholds(boundaries_eta)
 
 plots2D.append(Plot2D(
-    name = "lep_pt_eta",
+    name = "lep_pt_eta_loose",
     texX = 'Lepton cone p_{T} (GeV)', texY = 'Lepton #eta',
     attribute = (
-        lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedCuts else float('nan'), 
-        lambda event, sample: abs(event.l1_eta)                if event.passedCuts else float('nan'),
+        lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedLoose else float('nan'), 
+        lambda event, sample: abs(event.l1_eta)                if event.passedLoose else float('nan'),
     ),
     binning = [binning_pt, binning_eta],
 ))
@@ -585,18 +925,11 @@ plotting.fill(plots+plots2D, read_variables = read_variables, sequence = sequenc
 # Draw Plots
 drawPlots(plots)
 
-# for plot in plots2D:
-# 	plotting.draw2D(
-# 			plot=plot,
-# 		    plot_directory=os.path.join(plot_directory, 'FakeRate', args.plot_directory, args.era, args.channel + ("_log" if log else ""), args.selection) ,
-# 			logX = False, logY = False, logZ = False,
-# 			drawObjects = drawObjects( True, float('nan')),
-# 			)
 
 ################################################################################
 
 
-plots_root = ["lep_pt", "lep_eta", "cone_pt", "lep_pt_eta", "lep_pt_eta_medium", "lep_pt_eta_tight"]
+plots_root = ["lep_pt_eta_loose", "lep_pt_eta_medium", "lep_pt_eta_tight"] + list_of_binned_plots + list_of_trigger_plots
 
 # Write Result Hist in root file
 print "Now write results in root file."
@@ -635,6 +968,7 @@ for plot in plots+plots2D:
                 elif "DY" in histname: process = "DY"
                 elif "WW" in histname: process = "WW"
                 elif "TTbar" in histname: process = "TTbar"
+                elif "WJetsToLNu": process = "Wjets"
                 h.Write(plot.name+"__"+process)
 outfile.Close()
 

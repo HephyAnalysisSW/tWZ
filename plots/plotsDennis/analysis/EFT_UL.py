@@ -28,6 +28,7 @@ from tWZ.Tools.cutInterpreter            import cutInterpreter
 from tWZ.Tools.objectSelection_UL        import lepString, lepStringNoMVA
 from tWZ.Tools.helpers                   import getCollection, cosThetaStarNew, getTheta, gettheta, getphi
 from tWZ.Tools.leptonSF_topMVA           import leptonSF_topMVA
+from tWZ.Tools.leptonFakerate            import leptonFakerate
 
 # Analysis
 from Analysis.Tools.helpers              import deltaPhi, deltaR
@@ -48,7 +49,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v2')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v3')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -56,6 +57,8 @@ argParser.add_argument('--nicePlots',      action='store_true', default=False)
 argParser.add_argument('--twoD',           action='store_true', default=False)
 argParser.add_argument('--triplet',        action='store_true', default=False)
 argParser.add_argument('--doTTbarReco',    action='store_true', default=False)
+argParser.add_argument('--applyFakerate',  action='store_true', default=False)
+argParser.add_argument('--nonpromptOnly',  action='store_true', default=False)
 args = argParser.parse_args()
 
 ################################################################################
@@ -99,6 +102,8 @@ else:
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
 if args.noData:                       args.plot_directory += "_noData"
+if args.nonpromptOnly:                args.plot_directory += "_nonpromptOnly"
+if args.applyFakerate:                args.plot_directory += "_FakeRateSF"
 if args.sys is not 'central':         args.plot_directory += "_%s" %(args.sys)
 
 
@@ -123,6 +128,10 @@ if args.noData:
 else:
     logger.info( "Data included in analysis cycle")
 
+if args.applyFakerate:
+    logger.info( "Apply Fake rate")
+else:
+    logger.info( "Apply Fake Rate")
 ################################################################################
 # Selection modifier
 def jetSelectionModifier( sys, returntype = "func"):
@@ -208,22 +217,28 @@ from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
 
 if args.era == "UL2016":
     mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
+    if args.applyFakerate or args.nonpromptOnly:
+        mc = [UL2016.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2016preVFP":
     mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
+    if args.applyFakerate or args.nonpromptOnly:
+        mc = [UL2016preVFP.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2017":
     mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
+    if args.applyFakerate or args.nonpromptOnly:
+        mc = [UL2017.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2018":
     mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
-    # mc = [UL2018.TTZ]
+    if args.applyFakerate or args.nonpromptOnly:
+        mc = [UL2018.nonprompt_3l]
     samples_eft = []
-    # if args.nicePlots:
-    #     samples_eft = []
-    #     mc = [SMEFTsim_fast.tWZToLL01j_lepWFilter, Autumn18.TTX_rare, Autumn18.TZQ, Autumn18.triBoson, Autumn18.nonprompt_3l, SMEFTsim_fast.ZZ, SMEFTsim_fast.WZ, SMEFTsim_fast.ttZ01j_lepWFilter]
 elif args.era == "ULRunII":
     mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
+    if args.applyFakerate or args.nonpromptOnly:
+        mc = [nonprompt_3l]
     samples_eft = []
 
 ################################################################################
@@ -320,7 +335,6 @@ for i_param, param in enumerate(params):
 
 # Creating a list of weights
 plotweights = []
-weights_SM = []
 # Add MC weights
 weight_mc = []
 for sample in mc:
@@ -392,6 +406,8 @@ if "trilepVL" in args.selection:
 leptonSF16 = leptonSF_topMVA(2016, LeptonWP)
 leptonSF17 = leptonSF_topMVA(2017, LeptonWP)
 leptonSF18 = leptonSF_topMVA(2018, LeptonWP)
+
+leptonFakerate18 = leptonFakerate("UL2018")
 
 ################################################################################
 # Text on the plots
@@ -552,6 +568,27 @@ def getLeptonSF(sample, event):
     event.reweightLeptonMVA = SF
 sequence.append( getLeptonSF )
 
+def getLeptonFakeRate( sample, event ):
+    SF = 1.0
+    Nfakes = 0
+    if args.applyFakerate:
+        idx1 = event.l1_index
+        idx2 = event.l2_index
+        idx3 = event.l3_index
+        for i in [idx1, idx2, idx3]:
+            if event.lep_mvaTOPv2WP[i] < 4:
+                Nfakes += 1
+                pdgId = event.lep_pdgId[i]
+                eta = event.lep_eta[i]
+                pt = event.lep_ptCone[i]
+                sigma = 0
+                fakerate = leptonFakerate18.getFactor(pdgId, pt, eta, "sys", sigma )
+                SF *= fakerate/(1-fakerate)
+    sign = -1 if (Nfakes > 0 and (Nfakes % 2) == 0) else 1 # for two failing leptons there is a negative sign
+    event.reweightLeptonFakerate = sign*SF
+    # print Nfakes, event.reweightLeptonFakerate
+sequence.append(getLeptonFakeRate)
+    
 # def getSYSweight(sample, event):
 #     print "-------------------"
 #     print sample.files
@@ -587,22 +624,27 @@ def getCosThetaStar(sample, event):
     Z.SetPtEtaPhiM(event.Z1_pt, event.Z1_eta, event.Z1_phi, event.Z1_mass)
     idx_l1 = event.Z1_l1_index
     idx_l2 = event.Z1_l2_index
-    if abs(event.lep_pdgId[idx_l1]) == 11:
-        lepmass = 0.0005
-    elif abs(event.lep_pdgId[idx_l1]) == 13:
-        lepmass = 0.1
-    elif abs(event.lep_pdgId[idx_l1]) == 15:
-        lepmass = 1.777
+    if idx_l1 >= 0 and idx_l2 >=0:
+        if abs(event.lep_pdgId[idx_l1]) == 11:
+            lepmass = 0.0005
+        elif abs(event.lep_pdgId[idx_l1]) == 13:
+            lepmass = 0.1
+        elif abs(event.lep_pdgId[idx_l1]) == 15:
+            lepmass = 1.777
+        else:
+            print "Z does not decay into leptons"
+            lepmass = 0
+
+        charge_l1 = event.lep_pdgId[idx_l1]/abs(event.lep_pdgId[idx_l1])
+        charge_l2 = event.lep_pdgId[idx_l2]/abs(event.lep_pdgId[idx_l2])
+        if charge_l1 < 0 and charge_l2 > 0:
+            lepton.SetPtEtaPhiM(event.lep_pt[idx_l1], event.lep_eta[idx_l1], event.lep_phi[idx_l1], lepmass)
+        else:
+            lepton.SetPtEtaPhiM(event.lep_pt[idx_l2], event.lep_eta[idx_l2], event.lep_phi[idx_l2], lepmass)
+            
+        event.cosThetaStar = cosThetaStarNew(lepton, Z)
     else:
-        print "Z does not decay into leptons"
-        lepmass = 0
-
-    charge_l1 = event.lep_pdgId[idx_l1]/abs(event.lep_pdgId[idx_l1])
-    charge_l2 = event.lep_pdgId[idx_l2]/abs(event.lep_pdgId[idx_l2])
-    if charge_l1 < 0 and charge_l2 > 0:
-        lepton.SetPtEtaPhiM(event.lep_pt[idx_l1], event.lep_eta[idx_l1], event.lep_phi[idx_l1], lepmass)
-
-    event.cosThetaStar = cosThetaStarNew(lepton, Z)
+        event.cosThetaStar = float('nan')
 sequence.append( getCosThetaStar )
 
 def getDiBosonAngles(sample, event):
@@ -610,17 +652,18 @@ def getDiBosonAngles(sample, event):
     # Get lep1 and lep2 from Z boson
     idx_l1 = event.Z1_l1_index
     idx_l2 = event.Z1_l2_index
-    if abs(event.lep_pdgId[idx_l1]) == 11:
-        lepmass = 0.0005
-    elif abs(event.lep_pdgId[idx_l1]) == 13:
-        lepmass = 0.1
-    elif abs(event.lep_pdgId[idx_l1]) == 15:
-        lepmass = 1.777
-    else:
-        print "Z does not decay into leptons"
-        lepmass = 0
-    lep1.SetPtEtaPhiM(event.lep_pt[idx_l1], event.lep_eta[idx_l1], event.lep_phi[idx_l1], lepmass)
-    lep2.SetPtEtaPhiM(event.lep_pt[idx_l2], event.lep_eta[idx_l2], event.lep_phi[idx_l2], lepmass)
+    if idx_l1 >= 0 and idx_l2 >=0:
+        if abs(event.lep_pdgId[idx_l1]) == 11:
+            lepmass = 0.0005
+        elif abs(event.lep_pdgId[idx_l1]) == 13:
+            lepmass = 0.1
+        elif abs(event.lep_pdgId[idx_l1]) == 15:
+            lepmass = 1.777
+        else:
+            print "Z does not decay into leptons"
+            lepmass = 0
+        lep1.SetPtEtaPhiM(event.lep_pt[idx_l1], event.lep_eta[idx_l1], event.lep_phi[idx_l1], lepmass)
+        lep2.SetPtEtaPhiM(event.lep_pt[idx_l2], event.lep_eta[idx_l2], event.lep_phi[idx_l2], lepmass)
 
     # For 2nd boson distinguish between cases
     if "qualep" in args.selection:
@@ -636,9 +679,14 @@ def getDiBosonAngles(sample, event):
     else:
         boson.SetPtEtaPhiM(0,0,0,0)
 
-    event.Theta = getTheta(lep1, lep2, boson)
-    event.theta = gettheta(lep1, lep2, boson)
-    event.phi = getphi(lep1, lep2, boson)
+    if idx_l1 >= 0 and idx_l2 >=0:
+        event.Theta = getTheta(lep1, lep2, boson)
+        event.theta = gettheta(lep1, lep2, boson)
+        event.phi = getphi(lep1, lep2, boson)
+    else:
+        event.Theta = float('nan')
+        event.theta = float('nan')
+        event.phi = float('nan')    
 sequence.append( getDiBosonAngles )
 
 # def getZorigin(event, sample):
@@ -764,7 +812,7 @@ read_variables = [
     "l4_pt/F", "l4_eta/F" , "l4_phi/F", "l4_mvaTOP/F", "l4_mvaTOPv2/F", "l4_mvaTOPWP/I", "l4_mvaTOPv2WP/I", "l4_index/I",
     "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I]",
     "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F]",
-    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O]",
+    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F,mvaTOPv2WP/I]",
     "Z1_l1_index/I", "Z1_l2_index/I", "nonZ1_l1_index/I", "nonZ1_l2_index/I",
     "Z1_phi/F", "Z1_pt/F", "Z1_mass/F", "Z1_cosThetaStar/F", "Z1_eta/F", "Z1_lldPhi/F", "Z1_lldR/F",
     "Muon[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,segmentComp/F,nStations/I,nTrackerLayers/I,mediumId/O,tightId/O,isPFcand/B,isTracker/B,isGlobal/B]",
@@ -842,7 +890,7 @@ for i_mode, mode in enumerate(allModes):
         read_variables_MC += new_variables
         read_variables    += new_variables
 
-    weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger'] # 'reweightLeptonMVA'
+    weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate'] # 'reweightLeptonMVA'
     # weightnames = ['weight']
     sys_weights = {
         "BTag_b_UP"     : ('reweightBTag_SF','reweightBTag_SF_b_Up'),
@@ -943,6 +991,30 @@ for i_mode, mode in enumerate(allModes):
         binning=[5,-0.5,4.5],
     ))
     
+    plots.append(Plot(
+        name = "l1_pt",
+        texX = 'Leading lepton p_{T} (GeV)', texY = 'Number of Events / 10 GeV',
+        addOverFlowBin='both',
+        attribute = TreeVariable.fromString( "l1_pt/F" ),
+        binning=[40, 0, 400],
+    ))
+    
+    plots.append(Plot(
+        name = "l2_pt",
+        texX = 'Subleading lepton p_{T} (GeV)', texY = 'Number of Events / 10 GeV',
+        addOverFlowBin='both',
+        attribute = TreeVariable.fromString( "l2_pt/F" ),
+        binning=[40, 0, 400],
+    ))
+    
+    plots.append(Plot(
+        name = "l3_pt",
+        texX = 'Trailing lepton p_{T} (GeV)', texY = 'Number of Events / 10 GeV',
+        addOverFlowBin='both',
+        attribute = TreeVariable.fromString( "l3_pt/F" ),
+        binning=[40, 0, 400],
+    ))
+    
     if args.doTTbarReco:
         plots.append(Plot(
             name = "minimax",
@@ -953,14 +1025,7 @@ for i_mode, mode in enumerate(allModes):
         ))
         
     if args.nicePlots:
-        
-        plots.append(Plot(
-            name = "l1_pt",
-            texX = 'Leading lepton p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-            attribute = TreeVariable.fromString( "l1_pt/F" ),
-            binning=[25, 0, 1000],
-        ))
-        
+            
         plots.append(Plot(
             name = "Z1_pt_rebin2",
             texX = 'p_{T}(Z_{1}) (GeV)', texY = 'Number of Events / 40 GeV',
@@ -1039,6 +1104,14 @@ for i_mode, mode in enumerate(allModes):
             addOverFlowBin='both',
             binning=[50, 0.5, 1.5],
         ))
+        
+        plots.append(Plot(
+            name = "SF_Fakerate",
+            texX = 'Fakerate SF', texY = 'Number of Events',
+            attribute = lambda event, sample: event.reweightLeptonFakerate if not sample.isData else -1,
+            addOverFlowBin='both',
+            binning=[100, -1.0, 1.0],
+        ))
 
         plots.append(Plot(
             name = "SF_Btag",
@@ -1073,16 +1146,30 @@ for i_mode, mode in enumerate(allModes):
         ))              
         
         plots.append(Plot(
-            name = "mvaTOPscore",
+            name = "l1_mvaTOPscore",
             texX = 'Leading lepton MVA score', texY = 'Number of Events',
             attribute = lambda event, sample: event.l1_mvaTOP,
             binning=[30, -1.5, 1.5],
         ))
     
         plots.append(Plot(
-            name = "mvaTOPscore_v2",
+            name = "l1_mvaTOPscore_v2",
             texX = 'Leading lepton MVA v2 score', texY = 'Number of Events',
             attribute = lambda event, sample: event.l1_mvaTOPv2,
+            binning=[30, -1.5, 1.5],
+        ))
+        
+        plots.append(Plot(
+            name = "l2_mvaTOPscore_v2",
+            texX = 'Subleading lepton MVA v2 score', texY = 'Number of Events',
+            attribute = lambda event, sample: event.l2_mvaTOPv2,
+            binning=[30, -1.5, 1.5],
+        ))
+                
+        plots.append(Plot(
+            name = "l3_mvaTOPscore_v2",
+            texX = 'Trailing lepton MVA v2 score', texY = 'Number of Events',
+            attribute = lambda event, sample: event.l3_mvaTOPv2,
             binning=[30, -1.5, 1.5],
         ))
                 
@@ -1192,7 +1279,7 @@ for plot in allPlots['all']:
 if args.nicePlots:
     drawPlots(allPlots['all'], "all", dataMCScale)
 
-plots_root = ["Z1_pt", "M3l"]
+plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt"]
 
 # Write Result Hist in root file
 print "Now write results in root file."
