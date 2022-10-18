@@ -1,7 +1,7 @@
 #!/bin/bash
 npoints=50
-dir=/users/dennis.schwarz/CMSSW_10_6_0/src/tWZ/plots/plotsDennis/DataCards/data
-submitdir=/users/dennis.schwarz/CMSSW_10_6_0/src/tWZ/plots/plotsDennis/DataCards/submitScripts
+dir=/users/dennis.schwarz/CMSSW_10_6_28/src/tWZ/plots/plotsDennis/DataCards/data
+submitdir=/users/dennis.schwarz/CMSSW_10_6_28/src/tWZ/plots/plotsDennis/DataCards/submitScripts
 
 output=submitScript.sh
 
