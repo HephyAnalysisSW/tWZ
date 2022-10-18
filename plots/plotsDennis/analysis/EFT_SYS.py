@@ -80,6 +80,8 @@ variations = [
 jet_variations = {
     "JES_UP": "jesTotalUp",
     "JES_DOWN": "jesTotalDown",
+    "JER_UP": "jerUp",
+    "JER_DOWN": "jerDown",
 }
 ################################################################################
 # Check if we know the variation else don't use data!
@@ -130,10 +132,18 @@ def jetSelectionModifier( sys, returntype = "func"):
         def changeCut_( string ):
             for s in variiedJetObservables:
                 string = string.replace(s, s+'_'+sys)
+                if "met_pt" in string:
+                    string = string.replace("met_pt", "MET_T1_pt")
             return string
         return changeCut_
     elif returntype == "list":
-        return [ v+'_'+sys for v in variiedJetObservables ]
+        list = []
+        for v in variiedJetObservables:
+            string = v+'_'+sys
+            if "met_pt" in string:
+                string = string.replace("met_pt", "MET_T1_pt")
+            list.append(string)    
+        return list
 
 def metSelectionModifier( sys, returntype = 'func'):
     #Need to make sure all MET variations of the following observables are in the ntuple
@@ -142,10 +152,18 @@ def metSelectionModifier( sys, returntype = 'func'):
         def changeCut_( string ):
             for s in variiedMetObservables:
                 string = string.replace(s, s+'_'+sys)
+                if "met_pt" in string:
+                    string = string.replace("met_pt", "MET_T1_pt")
             return string
         return changeCut_
     elif returntype == "list":
-        return [ v+'_'+sys for v in variiedMetObservables ]
+        list = []
+        for v in variiedMetObservables:
+            string = v+'_'+sys
+            if "met_pt" in string:
+                string = string.replace("met_pt", "MET_T1_pt")
+            list.append(string)    
+        return list
 
 ################################################################################
 # Add a selection selectionModifier

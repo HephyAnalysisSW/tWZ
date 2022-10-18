@@ -17,17 +17,18 @@ lumi_year  = {
     # "RunII":       RunII.lumi,
 }
 
-# import tWZ.samples.nanoTuples_UL2016_nanoAODv9_postProcessed_singlelep as UL2016
-# import tWZ.samples.nanoTuples_UL2016preVFP_nanoAODv9_postProcessed_singlelep as UL2016preVFP
-# import tWZ.samples.nanoTuples_UL2017_nanoAODv9_postProcessed_singlelep as UL2017
+import tWZ.samples.nanoTuples_UL2016_nanoAODv9_postProcessed_singlelep as UL2016
+import tWZ.samples.nanoTuples_UL2016preVFP_nanoAODv9_postProcessed_singlelep as UL2016preVFP
+import tWZ.samples.nanoTuples_UL2017_nanoAODv9_postProcessed_singlelep as UL2017
 import tWZ.samples.nanoTuples_UL2018_nanoAODv9_postProcessed_singlelep as UL2018
 
 
-WZTo3LNu       = Sample.combine( "WZTo3LNu", [UL2018.WZTo3LNu] )
-ZZ             = Sample.combine( "ZZ", [UL2018.ZZ] )
-WW             = Sample.combine( "WW", [UL2018.WW] )
-TTbar          = Sample.combine( "TTbar", [UL2018.TTbar], texName = "t/t#bar{t}")
-DY             = Sample.combine( "DY", [UL2018.DY], texName = "Drell-Yan")
-QCD_MuEnriched = Sample.combine( "QCD_MuEnriched", [UL2018.QCD_MuEnriched] )
-QCD_EMEnriched = Sample.combine( "QCD_EMEnriched", [UL2018.QCD_EMEnriched] )
-QCD_bcToE      = Sample.combine( "QCD_bcToE", [UL2018.QCD_bcToE] )
+WZTo3LNu       = Sample.combine( "WZTo3LNu", [UL2016.WZTo3LNu, UL2016preVFP.WZTo3LNu, UL2017.WZTo3LNu, UL2018.WZTo3LNu] )
+ZZ             = Sample.combine( "ZZ", [UL2016.ZZ, UL2016preVFP.ZZ, UL2017.ZZ, UL2018.ZZ] )
+WW             = Sample.combine( "WW", [UL2016.WW, UL2016preVFP.WW, UL2017.WW, UL2018.WW] )
+TTbar          = Sample.combine( "TTbar", [UL2016.TTbar, UL2016preVFP.TTbar, UL2017.TTbar, UL2018.TTbar], texName = "t/t#bar{t}")
+DY             = Sample.combine( "DY", [UL2016.DY, UL2016preVFP.DY, UL2017.DY, UL2018.DY], texName = "Drell-Yan")
+WJetsToLNu     = Sample.combine( "WJetsToLNu", [UL2016.WJetsToLNu, UL2016preVFP.WJetsToLNu, UL2017.WJetsToLNu, UL2018.WJetsToLNu], texName = "W+jets")
+QCD_MuEnriched = Sample.combine( "QCD_MuEnriched", [UL2016.QCD_MuEnriched, UL2016preVFP.QCD_MuEnriched, UL2017.QCD_MuEnriched, UL2018.QCD_MuEnriched] )
+QCD_EMEnriched = Sample.combine( "QCD_EMEnriched", [UL2016.QCD_EMEnriched, UL2016preVFP.QCD_EMEnriched, UL2017.QCD_EMEnriched, UL2018.QCD_EMEnriched] )
+QCD_bcToE      = Sample.combine( "QCD_bcToE", [UL2016.QCD_bcToE, UL2016preVFP.QCD_bcToE, UL2017.QCD_bcToE, UL2018.QCD_bcToE] )
