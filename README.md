@@ -1,8 +1,8 @@
 # tWZ analysis based on NanoAOD
 
 ```
-cmsrel CMSSW_10_6_18
-cd CMSSW_10_6_18/src
+cmsrel CMSSW_10_6_28
+cd CMSSW_10_6_28/src
 cmsenv
 git cms-init
 git clone https://github.com/HephyAnalysisSW/tWZ --branch UL
