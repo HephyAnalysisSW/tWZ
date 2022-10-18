@@ -9,10 +9,42 @@ bJetSelectionM  = "nBTag"
 
 mIsoWP = { "VT":5, "T":4, "M":3 , "L":2 , "VL":1, 0:"None" }
 
+
+################################################################################
+# build string for lepton fake region 
+# first list all the cases of 1, 2 or 3 leptons failing a WP
+leptonTCRstring = ""
+failcases = [
+    (">=", ">=",  "<"),
+    (">=",  "<", ">="),
+    ( "<", ">=", ">="),
+    (">=",  "<",  "<"),
+    ( "<", ">=",  "<"),
+    ( "<",  "<", ">="),
+    ( "<",  "<",  "<"),
+]
+
+WPtight = "4"
+leptonTCRstring += "("
+firstIteration = True
+for (l1cut, l2cut, l3cut) in failcases:
+    if firstIteration:
+        leptonTCRstring += "("
+        firstIteration = False 
+    else:
+        leptonTCRstring += " || ("
+    leptonTCRstring += "l1_mvaTOPv2WP"+l1cut+WPtight+"&&l2_mvaTOPv2WP"+l2cut+WPtight+"&&l3_mvaTOPv2WP"+l3cut+WPtight
+    leptonTCRstring += ")"
+leptonTCRstring += ")"
+################################################################################
+
 from tWZ.Tools.objectSelection import lepString
 special_cuts = {
-    "singlelepVL":       "l1_pt>10",
-    "singlelepM":        "l1_pt>10&&l1_mvaTOPv2WP>=3",
+    "singlelepVL":     "l1_pt>10&&l1_mvaTOPv2WP>=1",
+    "singlelepL":      "l1_pt>10&&l1_mvaTOPv2WP>=2",
+    "singlelepM":      "l1_pt>10&&l1_mvaTOPv2WP>=3",
+    "singlelepT":      "l1_pt>10&&l1_mvaTOPv2WP>=4",
+    "vetoAddLepL":     "Sum$(lep_pt>10&&abs(lep_eta)<2.4&&lep_mvaTOPv2WP>=2)==1",
     "trilepVL":        "l1_pt>40&&l2_pt>20&&l3_pt>10",
     "trilepL" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=2&&l2_mvaTOPv2WP>=2&&l3_mvaTOPv2WP>=2",
     "trilepM" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3",
@@ -20,7 +52,7 @@ special_cuts = {
     "qualepM" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP>=3",
     "qualepT" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP>=4",
     "trilepMCR":       "l1_pt>40&&l2_pt>20&&l3_pt>10&&( (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP<3) || (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP<3&&l3_mvaTOPv2WP>=3) || (l1_mvaTOPv2WP<3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3) )",
-    "trilepTCR":       "l1_pt>40&&l2_pt>20&&l3_pt>10&&( (l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP<4) || (l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP<4&&l3_mvaTOPv2WP>=4) || (l1_mvaTOPv2WP<4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4) )",
+    "trilepTCR":       "l1_pt>40&&l2_pt>20&&l3_pt>10&&"+leptonTCRstring,
     "qualepMCR" :      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&((l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP<3) || (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP<3&&l4_mvaTOPv2WP>=3) || (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP<3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP>=3) || (l1_mvaTOPv2WP<3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP>=3) )",
     "qualepTCR" :      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&((l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP<4) || (l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP<4&&l4_mvaTOPv2WP>=4) || (l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP<4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP>=4) || (l1_mvaTOPv2WP<4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP>=4) )",
     "trilepVetoL":      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP<2&&l2_mvaTOPv2WP<2&&l3_mvaTOPv2WP<2",

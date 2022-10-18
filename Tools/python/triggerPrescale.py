@@ -23,13 +23,13 @@ class triggerPrescale:
             }
         elif year == 2018:
             self.prescales={
-                "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  9318,
-                "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1537,
-                "HLT_Mu3_PFJet40":                    22160,
-                "HLT_Mu8":                            6990,
-                "HLT_Mu17":                           1305,
-                "HLT_Mu20":                           1081,
-                "HLT_Mu27":                           475,
+                "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  7569,
+                "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1194, 
+                "HLT_Mu3_PFJet40":                    10713,
+                "HLT_Mu8":                            7261,
+                "HLT_Mu17":                           974, 
+                "HLT_Mu20":                           755,  
+                "HLT_Mu27":                           301,
             }
         else:
             raise NotImplementedError("Trigger prescaling not implemented for year = %i"%year)
