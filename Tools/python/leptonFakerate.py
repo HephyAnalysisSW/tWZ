@@ -9,18 +9,23 @@ filename = {
 
 
 class leptonFakerate:
-    def __init__(self, year):
+    def __init__(self, year, mode = "SF"):
         # Define maps here 
         self.year = year
+        self.mode = mode
         self.dataDir = "$CMSSW_BASE/src/tWZ/Tools/data/leptonFakerate/"
         filepath = self.dataDir+filename[year]
 
         self.SFmaps = {
             "muon": {
-                "SF" :  getObjFromFile(filepath,"fakerate__MC__muon"),
+                "SF"            :  getObjFromFile(filepath,"fakerate__MC__muon"),
+                "SF_noLooseSel" :  getObjFromFile(filepath,"fakerate__MC__muon__noLooseSel"),
+                "SF_noLooseWP"  :  getObjFromFile(filepath,"fakerate__MC__muon__noLooseWP"),
             },
             "elec": {
-                "SF" :  getObjFromFile(filepath,"fakerate__MC__elec"),        
+                "SF"            :  getObjFromFile(filepath,"fakerate__MC__elec"),  
+                "SF_noLooseSel" :  getObjFromFile(filepath,"fakerate__MC__elec__noLooseSel"),
+                "SF_noLooseWP"  :  getObjFromFile(filepath,"fakerate__MC__elec__noLooseWP"),     
             },
         }
     
@@ -45,9 +50,9 @@ class leptonFakerate:
         else: 
           raise Exception("Lepton Fakerate for PdgId %i not known"%pdgId)
 
-        ptbin = self.SFmaps[lepton]["SF"].GetXaxis().FindBin(pt)
-        etabin  = self.SFmaps[lepton]["SF"].GetYaxis().FindBin(eta)
-        fakerate = self.SFmaps[lepton]["SF"].GetBinContent(ptbin, etabin)
+        ptbin = self.SFmaps[lepton][self.mode].GetXaxis().FindBin(pt)
+        etabin  = self.SFmaps[lepton][self.mode].GetYaxis().FindBin(eta)
+        fakerate = self.SFmaps[lepton][self.mode].GetBinContent(ptbin, etabin)
         # print lepton, "--", pt, eta, "|", ptbin, etabin, "|", fakerate
         return fakerate
         # err = self.SFmaps[lepton][uncert].GetBinContent(etabin, ptbin)

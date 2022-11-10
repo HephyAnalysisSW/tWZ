@@ -44,6 +44,7 @@ special_cuts = {
     "singlelepL":      "l1_pt>10&&l1_mvaTOPv2WP>=2",
     "singlelepM":      "l1_pt>10&&l1_mvaTOPv2WP>=3",
     "singlelepT":      "l1_pt>10&&l1_mvaTOPv2WP>=4",
+    "vetoAddLepVL":    "Sum$(lep_pt>10&&abs(lep_eta)<2.4&&lep_mvaTOPv2WP>=1)==1",
     "vetoAddLepL":     "Sum$(lep_pt>10&&abs(lep_eta)<2.4&&lep_mvaTOPv2WP>=2)==1",
     "trilepVL":        "l1_pt>40&&l2_pt>20&&l3_pt>10",
     "trilepL" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=2&&l2_mvaTOPv2WP>=2&&l3_mvaTOPv2WP>=2",

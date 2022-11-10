@@ -76,7 +76,10 @@ for year in years:
             p = Plotter(year+"__"+channel+"__"+trigger)
             p.plot_dir = plotdir
             p.drawRatio = True
-            p.xtitle = "m_{T}^{fixy}"
+            p.xtitle = "m_{T}^{fix}"
+            p.yfactor = 2.0
+            p.lumi = "60"
+            p.legshift = (-0.35, +0.02, -0.4, -0.14) 
             p.addData(h_data, "Data")
             for bkg in backgrounds:
                 h_background[bkg].Scale(1.0/prescales[trigger]) 
