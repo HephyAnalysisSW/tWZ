@@ -35,6 +35,7 @@ ZZ = Sample.fromDirectory(name="ZZ", treeName="Events", isData=False, color=colo
 
 dirs['WW']               = ["WW"]
 # dirs['VVTo2L2Nu']        = ["VVTo2L2Nu"] # NOT YET THERE IN UL
+WW = Sample.fromDirectory(name="WW", treeName="Events", isData=False, color=color.WW, texName="WW", directory=make_dirs( dirs['WW']))
 
 dirs['WZTo3LNu']               = ["WZTo3LNu"]
 WZTo3LNu = Sample.fromDirectory(name="WZTo3LNu", treeName="Events", isData=False, color=color.WZ, texName="WZ", directory=make_dirs( dirs['WZTo3LNu']))
