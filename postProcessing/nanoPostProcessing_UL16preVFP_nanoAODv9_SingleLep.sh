@@ -31,7 +31,7 @@ python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --tri
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample TTSingleLep_pow_CP5 #SPLIT200
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample WJetsToLNu  #SPLIT47
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample WW #SPLIT10
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample WZTo3LNu #SPLIT9
+python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample WZ #SPLIT8
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample ZZ #SPLIT10
 
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample SingleMuon_Run2016Bver1_preVFP #SPLIT2
