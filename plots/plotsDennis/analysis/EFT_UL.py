@@ -59,6 +59,9 @@ argParser.add_argument('--triplet',        action='store_true', default=False)
 argParser.add_argument('--doTTbarReco',    action='store_true', default=False)
 argParser.add_argument('--applyFakerate',  action='store_true', default=False)
 argParser.add_argument('--nonpromptOnly',  action='store_true', default=False)
+argParser.add_argument('--splitnonprompt', action='store_true', default=False)
+argParser.add_argument('--noLooseSel',     action='store_true')
+argParser.add_argument('--noLooseWP',      action='store_true')
 args = argParser.parse_args()
 
 ################################################################################
@@ -103,7 +106,10 @@ else:
 if args.small:                        args.plot_directory += "_small"
 if args.noData:                       args.plot_directory += "_noData"
 if args.nonpromptOnly:                args.plot_directory += "_nonpromptOnly"
+if args.splitnonprompt:               args.plot_directory += "_splitnonprompt"
 if args.applyFakerate:                args.plot_directory += "_FakeRateSF"
+if args.noLooseSel:                   args.plot_directory += "_noLooseSel"
+if args.noLooseWP:                    args.plot_directory += "_noLooseWP"
 if args.sys is not 'central':         args.plot_directory += "_%s" %(args.sys)
 
 
@@ -218,27 +224,42 @@ from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
 if args.era == "UL2016":
     mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
     if args.applyFakerate or args.nonpromptOnly:
-        mc = [UL2016.nonprompt_3l]
+        if args.splitnonprompt:
+            mc = [UL2016.WW, UL2016.Top, UL2016.DY]
+        else:
+            mc = [UL2016.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2016preVFP":
     mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
     if args.applyFakerate or args.nonpromptOnly:
-        mc = [UL2016preVFP.nonprompt_3l]
+        if args.splitnonprompt:
+            mc = [UL2016preVFP.WW, UL2016preVFP.Top, UL2016preVFP.DY]
+        else:
+            mc = [UL2016preVFP.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2017":
     mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
     if args.applyFakerate or args.nonpromptOnly:
-        mc = [UL2017.nonprompt_3l]
+        if args.splitnonprompt:
+            mc = [UL2017.WW, UL2017.Top, UL2017.DY]
+        else:
+            mc = [UL2017.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2018":
     mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
     if args.applyFakerate or args.nonpromptOnly:
-        mc = [UL2018.nonprompt_3l]
+        if args.splitnonprompt:
+            mc = [UL2018.WW, UL2018.Top, UL2018.DY]
+        else:
+            mc = [UL2018.nonprompt_3l]
     samples_eft = []
 elif args.era == "ULRunII":
     mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
     if args.applyFakerate or args.nonpromptOnly:
-        mc = [nonprompt_3l]
+        if args.splitnonprompt:
+            mc = [WW, Top, DY]
+        else:
+            mc = [nonprompt_3l]
     samples_eft = []
 
 ################################################################################
@@ -408,6 +429,11 @@ leptonSF17 = leptonSF_topMVA(2017, LeptonWP)
 leptonSF18 = leptonSF_topMVA(2018, LeptonWP)
 
 leptonFakerate18 = leptonFakerate("UL2018")
+if args.noLooseSel:
+    leptonFakerate18 = leptonFakerate("UL2018", "SF_noLooseSel")
+if args.noLooseWP:
+    leptonFakerate18 = leptonFakerate("UL2018", "SF_noLooseWP")
+    
 
 ################################################################################
 # Text on the plots
@@ -517,6 +543,54 @@ def getWlep( event ):
         Wlep = lepton + neu
         Wleps.append([Wlep, lepton, neu])
     return Wleps
+    
+    
+def looseSelection(lepindex, event):
+    if args.noLooseSel:
+        return True
+    if lepindex < 0:
+        return False
+    
+    if event.lep_sip3d[lepindex] > 8:
+        return False
+    if event.lep_pfRelIso03_all[lepindex] > 0.4:
+        return False
+    
+    # elec
+    if abs(event.lep_pdgId[lepindex]) == 11:
+        eleindex = event.lep_eleIndex[lepindex]
+        if not event.Electron_convVeto[eleindex]:
+            return False
+        # if event.Electron_tightCharge[eleindex] < 1:
+        #     return False
+        if ord(event.Electron_lostHits[eleindex]) > 1:
+            return False
+            
+        passID = False
+        # if event.Electron_mvaFall17V2Iso_WP80:
+        if event.lep_jetBTag[lepindex] < 0.1:
+            jetPtRatio = 1/(event.Electron_jetRelIso[eleindex]+1)
+            if (event.year == 2016 and jetPtRatio > 0.5) or (event.year in [2017,2018] and jetPtRatio > 0.4):
+                passID = True
+        if event.lep_mvaTOPv2WP[lepindex] >= 4:
+            passID = True   
+        if not passID:
+            return False
+    
+    # muon
+    if abs(event.lep_pdgId[lepindex]) == 13:
+        muindex = event.lep_muIndex[lepindex]
+        passID = False
+        if event.lep_jetBTag[lepindex] < 0.025:
+            jetPtRatio = 1/(event.Muon_jetRelIso[muindex]+1)
+            if jetPtRatio > 0.45:
+                passID = True
+        if event.lep_mvaTOPv2WP[lepindex] >= 4:
+            passID = True   
+        if not passID:
+            return False                
+                        
+    return True   
 ################################################################################
 # Define sequences
 sequence       = []
@@ -577,6 +651,11 @@ def getLeptonFakeRate( sample, event ):
         idx3 = event.l3_index
         for i in [idx1, idx2, idx3]:
             if event.lep_mvaTOPv2WP[i] < 4:
+                # Do not use event if loose lepton selection is not satisfied
+                if not looseSelection(i, event):
+                    event.reweightLeptonFakerate = 0
+                    return 
+                ####
                 Nfakes += 1
                 pdgId = event.lep_pdgId[i]
                 eta = event.lep_eta[i]
@@ -688,6 +767,17 @@ def getDiBosonAngles(sample, event):
         event.theta = float('nan')
         event.phi = float('nan')    
 sequence.append( getDiBosonAngles )
+
+def getbScoresLepton(sample, event):
+    fakelepton_btagscores = []
+    if event.l1_mvaTOPv2WP < 4:
+        fakelepton_btagscores.append(event.lep_jetBTag[event.l1_index])
+    if event.l2_mvaTOPv2WP < 4:
+        fakelepton_btagscores.append(event.lep_jetBTag[event.l2_index])
+    if event.l3_mvaTOPv2WP < 4:
+        fakelepton_btagscores.append(event.lep_jetBTag[event.l3_index])  
+    event.fakelepton_btagscores = fakelepton_btagscores
+sequence.append(getbScoresLepton)
 
 # def getZorigin(event, sample):
 #     pdgIds = []
@@ -812,11 +902,11 @@ read_variables = [
     "l4_pt/F", "l4_eta/F" , "l4_phi/F", "l4_mvaTOP/F", "l4_mvaTOPv2/F", "l4_mvaTOPWP/I", "l4_mvaTOPv2WP/I", "l4_index/I",
     "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I]",
     "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F]",
-    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F,mvaTOPv2WP/I]",
+    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F,mvaTOPv2WP/I,jetBTag/F,sip3d/F,pfRelIso03_all/F]",
     "Z1_l1_index/I", "Z1_l2_index/I", "nonZ1_l1_index/I", "nonZ1_l2_index/I",
     "Z1_phi/F", "Z1_pt/F", "Z1_mass/F", "Z1_cosThetaStar/F", "Z1_eta/F", "Z1_lldPhi/F", "Z1_lldR/F",
     "Muon[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,segmentComp/F,nStations/I,nTrackerLayers/I,mediumId/O,tightId/O,isPFcand/B,isTracker/B,isGlobal/B]",
-    "Electron[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,vidNestedWPBitmap/I,deltaEtaSC/F]",
+    "Electron[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,vidNestedWPBitmap/I,deltaEtaSC/F,convVeto/O,lostHits/b]",
 ]
 
 if "qualep" in args.selection:
@@ -1014,6 +1104,15 @@ for i_mode, mode in enumerate(allModes):
         attribute = TreeVariable.fromString( "l3_pt/F" ),
         binning=[40, 0, 400],
     ))
+    
+    
+    plots.append(Plot(
+        name = "fake_bscore_closest",
+        texX = 'b tag score closest jet for fake leptons', texY = 'Number of Events',
+        attribute = lambda event, sample: event.fakelepton_btagscores,
+        binning=[40, 0, 1.0],
+    ))
+    
     
     if args.doTTbarReco:
         plots.append(Plot(
@@ -1314,6 +1413,9 @@ for plot in allPlots['all']:
                 elif "ZZ" in histname: process = "ZZ"
                 elif "triBoson" in histname: process = "triBoson"
                 elif "nonprompt" in histname: process = "nonprompt"
+                elif "WW" in histname: process = "WW"
+                elif "Top" in histname: process = "tt+ST"
+                elif "DY" in histname: process = "DY"
                 elif "data" in histname: process = "data"
                 # Also add a string for the eft signal samples
                 n_noneft = len(noneftidxs)

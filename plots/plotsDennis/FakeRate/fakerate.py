@@ -49,12 +49,17 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='FakeRate_v3')
+argParser.add_argument('--plot_directory', action='store', default='FakeRate_v4')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='singlelepL-vetoMET')
 argParser.add_argument('--sys',            action='store', default='central')
 argParser.add_argument('--channel',        action='store', default='muon')
 argParser.add_argument('--noPreScale',     action='store_true')
+argParser.add_argument('--noLargeWeights', action='store_true')
+argParser.add_argument('--reduce',         action='store_true')
+argParser.add_argument('--noLooseSel',     action='store_true')
+argParser.add_argument('--noLooseWP',      action='store_true')
+
 args = argParser.parse_args()
 
 ################################################################################
@@ -97,6 +102,10 @@ else:
 if args.small:                        args.plot_directory += "_small"
 if args.noData:                       args.plot_directory += "_noData"
 if args.noPreScale:                   args.plot_directory += "_noPreScale"
+if args.noLargeWeights:               args.plot_directory += "_noLargeWeights"
+if args.reduce:                       args.plot_directory += "_reduce"
+if args.noLooseSel:                   args.plot_directory += "_noLooseSel"
+if args.noLooseWP:                    args.plot_directory += "_noLooseWP"
 if args.sys is not 'central':         args.plot_directory += "_%s" %(args.sys)
 
 
@@ -219,9 +228,9 @@ elif args.era == "UL2017":
     mc = []
 elif args.era == "UL2018":
     if args.channel == "muon":
-        mc = [UL2018.QCD_MuEnriched, UL2018.WZTo3LNu, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY, UL2018.WJetsToLNu]
+        mc = [UL2018.QCD_MuEnriched, UL2018.WZ, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY, UL2018.WJetsToLNu]
     elif args.channel == "elec":
-        mc = [UL2018.QCD_EMEnriched, UL2018.QCD_bcToE, UL2018.WZTo3LNu, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY, UL2018.WJetsToLNu]
+        mc = [UL2018.QCD_EMEnriched, UL2018.QCD_bcToE, UL2018.WZ, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY, UL2018.WJetsToLNu]
 elif args.era == "ULRunII":
     mc = []
 
@@ -281,7 +290,14 @@ if args.small:
         sample.normalization = 1.
         sample.reduceFiles( to = 1 )
         sample.scale /= sample.normalization
-        
+
+if args.reduce:
+    for sample in mc:
+        if sample.name == "TTbar":
+            sample.normalization = 1.
+            sample.reduceFiles( factor = 10 )
+            sample.scale /= sample.normalization
+            
 ################################################################################
 # Lepton SF
 # LeptonWP = "loose"
@@ -386,7 +402,56 @@ def passedOfflineCut( event, triggername ):
         return True 
     else:
         return False
+
+
+def looseSelection(lepindex, event):
+    if args.noLooseSel:
+        return True    
     
+    if lepindex < 0:
+        return False
+    
+    if event.lep_sip3d[lepindex] > 8:
+        return False
+    if event.lep_pfRelIso03_all[lepindex] > 0.4:
+        return False
+    
+    # elec
+    if abs(event.lep_pdgId[lepindex]) == 11:
+        eleindex = event.lep_eleIndex[lepindex]
+        if not event.Electron_convVeto[eleindex]:
+            return False
+        # if event.Electron_tightCharge[eleindex] < 1:
+        #     return False
+        if ord(event.Electron_lostHits[eleindex]) > 1:
+            return False
+            
+        passID = False
+        # if event.Electron_mvaFall17V2Iso_WP80:
+        if event.lep_jetBTag[lepindex] < 0.1:
+            jetPtRatio = 1/(event.Electron_jetRelIso[eleindex]+1)
+            if (event.year == 2016 and jetPtRatio > 0.5) or (event.year in [2017,2018] and jetPtRatio > 0.4):
+                passID = True
+        if event.l1_mvaTOPv2WP >= 4:
+            passID = True   
+        if not passID:
+            return False
+    
+    # muon
+    if abs(event.lep_pdgId[lepindex]) == 13:
+        muindex = event.lep_muIndex[lepindex]
+        passID = False
+        if event.lep_jetBTag[lepindex] < 0.025:
+            jetPtRatio = 1/(event.Muon_jetRelIso[muindex]+1)
+            if jetPtRatio > 0.45:
+                passID = True
+        if event.l1_mvaTOPv2WP >= 4:
+            passID = True   
+        if not passID:
+            return False                
+                        
+    return True
+
     
 ################################################################################
 # Define sequences
@@ -432,14 +497,27 @@ def applyAdditionalCuts(sample, event):
             passedTriggersAndCuts.append(trigger)
     
     event.passedCuts = True if len(passedTriggersAndCuts) > 0 else False
+    
+    # kill large weights
+    if args.noLargeWeights and event.weight > 100:
+        event.passedCuts = False
+    ####
     id = event.lep_pdgId[event.l1_index]
     passedMediumId = True if ( abs(id)==11 or (abs(id)==13 and event.lep_mediumId[event.l1_index]) ) else False
-    event.passedLoose = event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=2
-    event.passedMedium = event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=3
-    event.passedTight = event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=4
-    event.tightLepton = passedMediumId and event.l1_mvaTOPv2WP>=4 # also store information about lepton independent from trigger
+    passedLooseDef = looseSelection(event.l1_index, event)
+    event.passedLoose = passedLooseDef and event.passedCuts and passedMediumId and (event.l1_mvaTOPv2WP>=2 or args.noLooseWP)
+    event.passedMedium = passedLooseDef and event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=3
+    event.passedTight = passedLooseDef and event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=4
+    event.tightLepton = passedLooseDef and passedMediumId and event.l1_mvaTOPv2WP>=4 # also store information about lepton independent from trigger
     event.passedTriggers = passedTriggersAndCuts
     # print event.passedTriggers
+    
+    event.sip3d = event.lep_sip3d[event.l1_index]
+    event.Irel = event.lep_pfRelIso03_all[event.l1_index]
+    event.convVeto = event.Electron_convVeto[event.lep_eleIndex[event.l1_index]] if abs(id)==11 else float('nan')
+    event.lostHits = ord(event.Electron_lostHits[event.lep_eleIndex[event.l1_index]]) if abs(id)==11 else float('nan')
+    event.eleMVA = event.Electron_mvaFall17V2Iso_WP80[event.lep_eleIndex[event.l1_index]] if abs(id)==11 else float('nan')
+    event.jetRatio = 1./(event.Electron_jetRelIso[event.lep_eleIndex[event.l1_index]]+1)  if abs(id)==11 else 1./(event.Muon_jetRelIso[event.lep_muIndex[event.l1_index]]+1) 
 sequence.append( applyAdditionalCuts )
     
 def getMTfix(sample, event):
@@ -493,9 +571,11 @@ def getClosestJetFlavor(sample, event):
             bscore_closest = event.JetGood_btagDeepFlavB[i]
             foundjet = True
     event.dR_closest = mindR 
-    event.bscore_closest = bscore_closest
-    # compare with event.lep_jetBTag[event.l1_index]
-    # don't forget to include in "read_variables"!
+    event.bscore_closest_custom = bscore_closest
+    if event.l1_index >= 0:
+        event.bscore_closest = event.lep_jetBTag[event.l1_index]
+    else:
+        event.bscore_closest = float('nan')
 sequence.append(getClosestJetFlavor)
 ################################################################################
 # Read variables
@@ -509,11 +589,11 @@ read_variables = [
     "MET_pt/F", "MET_phi/F",
     "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I]",
     "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F]",
-    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F]",
+    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F,jetBTag/F,sip3d/F,pfRelIso03_all/F]",
     # "Z1_l1_index/I", "Z1_l2_index/I", "nonZ1_l1_index/I", "nonZ1_l2_index/I",
     # "Z1_phi/F", "Z1_pt/F", "Z1_mass/F", "Z1_cosThetaStar/F", "Z1_eta/F", "Z1_lldPhi/F", "Z1_lldR/F",
     "Muon[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,segmentComp/F,nStations/I,nTrackerLayers/I,mediumId/O,tightId/O,isPFcand/B,isTracker/B,isGlobal/B]",
-    "Electron[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,vidNestedWPBitmap/I,deltaEtaSC/F]",
+    "Electron[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,vidNestedWPBitmap/I,deltaEtaSC/F,convVeto/O,tightCharge/I,lostHits/b,mvaFall17V2Iso_WP80/O]",
     "HLT_Ele8_CaloIdM_TrackIdM_PFJet30/O","HLT_Ele17_CaloIdM_TrackIdM_PFJet30/O","HLT_Mu3_PFJet40/O","HLT_Mu8/O","HLT_Mu17/O","HLT_Mu20/O","HLT_Mu27/O",
 ]
 
@@ -616,6 +696,59 @@ plots = []
 plots2D = []
 
 plots.append(Plot(
+    name = "sip3d",
+    texX = 'sip3d', texY = 'Number of Events',
+    attribute = lambda event, sample: event.sip3d,
+    addOverFlowBin='upper',
+    binning=[17, -0.5, 16.5],
+))
+
+plots.append(Plot(
+    name = "Irel",
+    texX = 'Irel', texY = 'Number of Events',
+    attribute = lambda event, sample: event.Irel,
+    addOverFlowBin='upper',
+    binning=[20, 0.0, 1.0],
+))
+
+plots.append(Plot(
+    name = "convVeto",
+    texX = 'convVeto', texY = 'Number of Events',
+    attribute = lambda event, sample: event.convVeto,
+    addOverFlowBin='upper',
+    binning=[3, -1.5, 1.5],
+))
+
+plots.append(Plot(
+    name = "lostHits",
+    texX = 'lostHits', texY = 'Number of Events',
+    attribute = lambda event, sample: event.lostHits,
+    addOverFlowBin='upper',
+    binning=[5, -1.5, 3.5],
+))
+
+
+plots.append(Plot(
+    name = "eleMVA",
+    texX = 'Passed electron MVA', texY = 'Number of Events',
+    attribute = lambda event, sample: event.eleMVA,
+    addOverFlowBin='upper',
+    binning=[3, -1.5, 1.5],
+))
+
+
+plots.append(Plot(
+    name = "jetRatio",
+    texX = 'jetRatio', texY = 'Number of Events',
+    attribute = lambda event, sample: event.jetRatio,
+    addOverFlowBin='upper',
+    binning=[30, 0.0, 1.5],
+))
+
+
+
+
+plots.append(Plot(
     name = "dR_closest",
     texX = '#Delta R(lepton, next jet)', texY = 'Number of Events',
     attribute = lambda event, sample: event.dR_closest if event.passedLoose else float('nan'),
@@ -628,7 +761,15 @@ plots.append(Plot(
     texX = 'b tag score closest jet', texY = 'Number of Events',
     attribute = lambda event, sample: event.bscore_closest if event.passedLoose else float('nan'),
     addOverFlowBin='upper',
-    binning=[10, 0, 1.0],
+    binning=[40, 0, 1.0],
+))
+
+plots.append(Plot(
+    name = "bscore_closest_custom",
+    texX = 'b tag score closest jet', texY = 'Number of Events',
+    attribute = lambda event, sample: event.bscore_closest_custom if event.passedLoose else float('nan'),
+    addOverFlowBin='upper',
+    binning=[40, 0, 1.0],
 ))
 
 plots.append(Plot(

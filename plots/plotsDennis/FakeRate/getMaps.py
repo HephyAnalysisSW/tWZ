@@ -39,10 +39,17 @@ def drawMap(map, plotname):
     c.Print(plot_directory+"/FakeRate/"+plotname+".pdf")
     
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
-path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v3/"
+paths = [
+    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v4/",
+    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v4_noLooseSel/",
+    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v4_noLooseWP/",
+]
+
+    
 years = ["UL2018"]
 channels = ["elec", "muon"]
-selection = "singlelepL-vetoMET"
+selection = "singlelepL-vetoAddLepL-vetoMET"
+selection_noLooseWP = "singlelepVL-vetoAddLepVL-vetoMET"
 
 QCDsamples = {
     "elec": ["QCD_EMEnriched", "QCD_bcToE"],
@@ -58,34 +65,42 @@ logger.info("Script to create lepton fake rate maps")
 for year in years:
     logger.info("Running year %s", year)
     outputfile = ROOT.TFile("LeptonFakerate_"+year+".root", "RECREATE")
-    for channel in channels:
-        filepath =  os.path.join(path, year, channel, selection, "Results.root")
-        logger.info("Reading histograms from %s", filepath)
-        file = ROOT.TFile(filepath)
-        backgroundsL =  getSumOfHistograms(file, histnameL, backgrounds)
-        backgroundsT =  getSumOfHistograms(file, histnameT, backgrounds)
-        dataL = getSumOfHistograms(file, histnameL, ["data"])
-        dataT = getSumOfHistograms(file, histnameT, ["data"])
-        dataL.Add(backgroundsL, -1.0)
-        dataT.Add(backgroundsT, -1.0)
-        QCDL =  getSumOfHistograms(file, histnameL, QCDsamples[channel])
-        QCDT =  getSumOfHistograms(file, histnameT, QCDsamples[channel])
-        
-        mapData = dataT
-        mapData.Divide(dataL)
-        mapMC = QCDT.Clone()
-        mapMC.Divide(QCDL)
-        
-        outputfile.cd()
-        mapMC.Write("fakerate__MC__"+channel)
-        mapData.Write("fakerate__DATA__"+channel)
-        
-        drawMap(QCDL, year+"__"+channel+"__QCD_loose")
-        drawMap(QCDT, year+"__"+channel+"__QCD_tight")
-        drawMap(backgroundsL, year+"__"+channel+"__Backgrounds_loose")
-        drawMap(backgroundsT, year+"__"+channel+"__Backgrounds_tight")        
-        drawMap(dataL, year+"__"+channel+"__Data_loose")
-        drawMap(mapData, year+"__"+channel+"__Map_Data")
-        drawMap(mapMC, year+"__"+channel+"__Map_MC")
+    for path in paths:
+        sel = selection
+        suffix = ""
+        if "_noLooseSel" in path:
+            suffix = "__noLooseSel"
+        if "_noLooseWP" in path:
+            suffix = "__noLooseWP"
+            sel = selection_noLooseWP
+        for channel in channels:
+            filepath =  os.path.join(path, year, channel, sel, "Results.root")
+            logger.info("Reading histograms from %s", filepath)
+            file = ROOT.TFile(filepath)
+            backgroundsL =  getSumOfHistograms(file, histnameL, backgrounds)
+            backgroundsT =  getSumOfHistograms(file, histnameT, backgrounds)
+            dataL = getSumOfHistograms(file, histnameL, ["data"])
+            dataT = getSumOfHistograms(file, histnameT, ["data"])
+            dataL.Add(backgroundsL, -1.0)
+            dataT.Add(backgroundsT, -1.0)
+            QCDL =  getSumOfHistograms(file, histnameL, QCDsamples[channel])
+            QCDT =  getSumOfHistograms(file, histnameT, QCDsamples[channel])
+            
+            mapData = dataT
+            mapData.Divide(dataL)
+            mapMC = QCDT.Clone()
+            mapMC.Divide(QCDL)
+            
+            outputfile.cd()
+            mapMC.Write("fakerate__MC__"+channel+suffix)
+            mapData.Write("fakerate__DATA__"+channel+suffix)
+            
+            drawMap(QCDL, year+"__"+channel+"__QCD_loose"+suffix)
+            drawMap(QCDT, year+"__"+channel+"__QCD_tight"+suffix)
+            drawMap(backgroundsL, year+"__"+channel+"__Backgrounds_loose"+suffix)
+            drawMap(backgroundsT, year+"__"+channel+"__Backgrounds_tight"+suffix)        
+            drawMap(dataL, year+"__"+channel+"__Data_loose"+suffix)
+            drawMap(mapData, year+"__"+channel+"__Map_Data"+suffix)
+            drawMap(mapMC, year+"__"+channel+"__Map_MC"+suffix)
         
     outputfile.Close()
