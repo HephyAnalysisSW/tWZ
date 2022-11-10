@@ -23,7 +23,6 @@ import tWZ.Tools.user as user
 from tWZ.Tools.helpers             import closestOSDLMassToMZ, deltaR, deltaPhi, bestDRMatchInCollection, nonEmptyFile, getSortedZCandidates, cosThetaStar, m3, getMinDLMass
 from tWZ.Tools.objectSelection_UL     import getMuons, getElectrons, muonSelector, eleSelector, getGoodMuons, getGoodElectrons, isBJet, getGenPartsAll, getJets, genLepFromZ, mvaTopWP
 from tWZ.Tools.objectSelection_UL     import getGenZs
-from tWZ.Tools.mvaTOPreader  import mvaTOPreader
 
 from tWZ.Tools.overlapRemovalTTG   import hasMesonMother, getParentIds
 from tWZ.Tools.triggerEfficiency   import triggerEfficiency
@@ -31,7 +30,8 @@ from tWZ.Tools.leptonSF            import leptonSF as leptonSF_
 from tWZ.Tools.mcTools import pdgToName, GenSearch, B_mesons, D_mesons, B_mesons_abs, D_mesons_abs
 genSearch = GenSearch()
 
-from tWZ.Tools.metFiltersUL               import getFilterCut
+from Analysis.Tools.mvaTOPreader             import mvaTOPreader
+from Analysis.Tools.metFiltersUL             import getFilterCut
 from Analysis.Tools.puProfileDirDB           import puProfile
 from Analysis.Tools.LeptonTrackingEfficiency import LeptonTrackingEfficiency
 from Analysis.Tools.helpers                  import checkRootFile, deepCheckRootFile, deepCheckWeight, dRCleaning
@@ -480,7 +480,7 @@ if isMC:
 
 read_variables += [\
     TreeVariable.fromString('nElectron/I'),
-    VectorTreeVariable.fromString('Electron[pt/F,eta/F,phi/F,pdgId/I,cutBased/I,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,sip3d/F,lostHits/b,mvaFall17V2noIso/F,mvaFall17V2Iso_WP80/O,mvaFall17V2Iso_WP90/O,convVeto/O,dxy/F,dz/F,charge/I,deltaEtaSC/F,vidNestedWPBitmap/I,mvaTTH/F,jetNDauCharged/b,jetPtRelv2/F,jetRelIso/F]'),
+    VectorTreeVariable.fromString('Electron[pt/F,eta/F,phi/F,pdgId/I,cutBased/I,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,sip3d/F,lostHits/b,mvaFall17V2noIso/F,mvaFall17V2Iso_WP80/O,mvaFall17V2Iso_WP90/O,convVeto/O,dxy/F,dz/F,charge/I,deltaEtaSC/F,vidNestedWPBitmap/I,mvaTTH/F,jetNDauCharged/b,jetPtRelv2/F,jetRelIso/F,tightCharge/I]'),
     TreeVariable.fromString('nMuon/I'),
     VectorTreeVariable.fromString('Muon[pt/F,eta/F,phi/F,pdgId/I,mediumId/O,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,sip3d/F,dxy/F,dz/F,charge/I,mvaTTH/F,jetNDauCharged/b,jetPtRelv2/F,jetRelIso/F,segmentComp/F,isGlobal/O,isTracker/O]'),
     TreeVariable.fromString('nJet/I'),
