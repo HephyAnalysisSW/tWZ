@@ -27,11 +27,11 @@ from tWZ.Tools.objectSelection_UL     import getGenZs
 from tWZ.Tools.overlapRemovalTTG   import hasMesonMother, getParentIds
 from tWZ.Tools.triggerEfficiency   import triggerEfficiency
 from tWZ.Tools.leptonSF            import leptonSF as leptonSF_
-from tWZ.Tools.mcTools import pdgToName, GenSearch, B_mesons, D_mesons, B_mesons_abs, D_mesons_abs
-genSearch = GenSearch()
 
 from Analysis.Tools.mvaTOPreader             import mvaTOPreader
-from Analysis.Tools.metFiltersUL             import getFilterCut
+from Analysis.Tools.metFiltersUL              import getFilterCut
+from Analysis.Tools.mcTools import pdgToName, GenSearch, B_mesons, D_mesons, B_mesons_abs, D_mesons_abs
+genSearch = GenSearch()
 from Analysis.Tools.puProfileDirDB           import puProfile
 from Analysis.Tools.LeptonTrackingEfficiency import LeptonTrackingEfficiency
 from Analysis.Tools.helpers                  import checkRootFile, deepCheckRootFile, deepCheckWeight, dRCleaning
@@ -351,7 +351,7 @@ selectionString = '&&'.join(skimConds)
 
 ################################################################################
 # top pt reweighting
-from tWZ.Tools.topPtReweighting import getUnscaledTopPairPtReweightungFunction, getTopPtDrawString, getTopPtsForReweighting
+from Analysis.Tools.topPtReweighting import getUnscaledTopPairPtReweightungFunction, getTopPtDrawString, getTopPtsForReweighting
 # Decision based on sample name -> whether TTJets or TTLep is in the sample name
 isTT = sample.name.startswith("TTJets") or sample.name.startswith("TTLep") or sample.name.startswith("TT_pow")
 doTopPtReweighting = isTT and not options.noTopPtReweighting
@@ -380,7 +380,7 @@ else:
 ################################################################################
 # CR reweighting 
 if options.doCRReweighting:
-    from tWZ.Tools.colorReconnectionReweighting import getCRWeight, getCRDrawString
+    from Analysis.Tools.colorReconnectionReweighting import getCRWeight, getCRDrawString
     logger.info( "Sample will have CR reweighting." )
     #norm = sample.getYieldFromDraw( selectionString = selectionString, weightString = "genWeight" )
     norm = float(sample.chain.GetEntries(selectionString))
