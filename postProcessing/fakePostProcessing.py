@@ -24,9 +24,9 @@ from tWZ.Tools.helpers             import deltaR, deltaPhi, bestDRMatchInCollect
 from tWZ.Tools.objectSelection     import getMuons, getElectrons, muonSelector, eleSelector, getGoodMuons, getGoodElectrons, isBJet, getGenPartsAll, getJets, mvaTopWP, getPhotons
 
 from tWZ.Tools.leptonSF            import leptonSF as leptonSF_
-from tWZ.Tools.mcTools import pdgToName, GenSearch, B_mesons, D_mesons, B_mesons_abs, D_mesons_abs
-genSearch = GenSearch()
 
+from Analysis.Tools.mcTools import pdgToName, GenSearch, B_mesons, D_mesons, B_mesons_abs, D_mesons_abs
+genSearch = GenSearch()
 from Analysis.Tools.metFilters               import getFilterCut
 # from Analysis.Tools.overlapRemovalTTG        import hasMesonMother, getParentIds
 from Analysis.Tools.puProfileDirDB           import puProfile
