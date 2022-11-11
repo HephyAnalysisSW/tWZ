@@ -2,37 +2,49 @@ import ROOT
 import os
 from tWZ.Tools.helpers import getObjFromFile
 
-
-filename = {
-    "UL2018": "LeptonFakerate_UL2018.root",
-}
-
-
 class leptonFakerate:
-    def __init__(self, year, mode = "SF"):
-        # Define maps here 
+    def __init__(self, year, mode = "SF", dataMC = "MC"):
+        
+        # Check inputs
+        if not year in ["UL2016", "UL2016preVFP", "UL2017", "UL2018"]:
+            raise Exception("Lepton fakerate not known for era %s "%year)
+        if not mode in ["SF", "SF_noLooseSel", "SF_noLooseWP"]:
+            raise Exception("Lepton fakerate not know for mode %s "%mode)
+        if not dataMC in ["MC", "DATA"]:
+            raise Exception("dataMC switch in lepton fakerate must be 'MC or 'DATA' ")
+            
+            
+        # Define map locations 
+        self.dataMC = dataMC
         self.year = year
         self.mode = mode
         self.dataDir = "$CMSSW_BASE/src/tWZ/Tools/data/leptonFakerate/"
-        filepath = self.dataDir+filename[year]
+        suffix = ""
+        if "noLooseSel" in mode:
+            suffix = "noLooseSel"
+        elif "noLooseWP" in mode:
+            suffix = "noLooseWP"
+        filepath_elec_DATA = self.dataDir+"LeptonFakerate__"+self.year+"__elec__"+suffix+".root"
+        filepath_muon_DATA = self.dataDir+"LeptonFakerate__"+self.year+"__muon__"+suffix+".root"
+        filepath_elec_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__elec__"+suffix+".root"
+        filepath_muon_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__muon__"+suffix+".root"
 
+        # Store needed maps in dictionary
         self.SFmaps = {
             "muon": {
-                "SF"            :  getObjFromFile(filepath,"fakerate__MC__muon"),
-                "SF_noLooseSel" :  getObjFromFile(filepath,"fakerate__MC__muon__noLooseSel"),
-                "SF_noLooseWP"  :  getObjFromFile(filepath,"fakerate__MC__muon__noLooseWP"),
+                "MC"   :   getObjFromFile(filepath_muon_MC,"Fakerate_MC"),
+                "DATA" :   getObjFromFile(filepath_muon_DATA,"Fakerate_v1"),
             },
             "elec": {
-                "SF"            :  getObjFromFile(filepath,"fakerate__MC__elec"),  
-                "SF_noLooseSel" :  getObjFromFile(filepath,"fakerate__MC__elec__noLooseSel"),
-                "SF_noLooseWP"  :  getObjFromFile(filepath,"fakerate__MC__elec__noLooseWP"),     
+                "MC"   :   getObjFromFile(filepath_elec_MC,"Fakerate_MC"),
+                "DATA" :   getObjFromFile(filepath_elec_DATA,"Fakerate_v1"),
             },
         }
     
     def getFactor(self, pdgId, pt, eta_, unc='sys', sigma=0):
         # Set boundaries
         eta = abs(eta_)
-        if eta > 2.4:
+        if eta > 2.399:
             eta = 2.39 
         if pt > 100:
             pt = 99
@@ -50,10 +62,9 @@ class leptonFakerate:
         else: 
           raise Exception("Lepton Fakerate for PdgId %i not known"%pdgId)
 
-        ptbin = self.SFmaps[lepton][self.mode].GetXaxis().FindBin(pt)
-        etabin  = self.SFmaps[lepton][self.mode].GetYaxis().FindBin(eta)
-        fakerate = self.SFmaps[lepton][self.mode].GetBinContent(ptbin, etabin)
-        # print lepton, "--", pt, eta, "|", ptbin, etabin, "|", fakerate
+        ptbin = self.SFmaps[lepton][self.dataMC].GetXaxis().FindBin(pt)
+        etabin  = self.SFmaps[lepton][self.dataMC].GetYaxis().FindBin(eta)
+        fakerate = self.SFmaps[lepton][self.dataMC].GetBinContent(ptbin, etabin)
         return fakerate
         # err = self.SFmaps[lepton][uncert].GetBinContent(etabin, ptbin)
         # return SF+sigma*err

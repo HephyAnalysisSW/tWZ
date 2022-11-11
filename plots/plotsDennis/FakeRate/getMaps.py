@@ -64,7 +64,6 @@ histnameT = "lep_pt_eta_tight"
 logger.info("Script to create lepton fake rate maps")
 for year in years:
     logger.info("Running year %s", year)
-    outputfile = ROOT.TFile("LeptonFakerate_"+year+".root", "RECREATE")
     for path in paths:
         sel = selection
         suffix = ""
@@ -74,6 +73,7 @@ for year in years:
             suffix = "__noLooseWP"
             sel = selection_noLooseWP
         for channel in channels:
+            outputfile = ROOT.TFile("LeptonFakerate__MC__"+year+"__"+channel+suffix+".root", "RECREATE")
             filepath =  os.path.join(path, year, channel, sel, "Results.root")
             logger.info("Reading histograms from %s", filepath)
             file = ROOT.TFile(filepath)
@@ -92,8 +92,8 @@ for year in years:
             mapMC.Divide(QCDL)
             
             outputfile.cd()
-            mapMC.Write("fakerate__MC__"+channel+suffix)
-            mapData.Write("fakerate__DATA__"+channel+suffix)
+            mapMC.Write("Fakerate_MC")
+            mapData.Write("Fakerate_DATA")
             
             drawMap(QCDL, year+"__"+channel+"__QCD_loose"+suffix)
             drawMap(QCDT, year+"__"+channel+"__QCD_tight"+suffix)
@@ -102,5 +102,4 @@ for year in years:
             drawMap(dataL, year+"__"+channel+"__Data_loose"+suffix)
             drawMap(mapData, year+"__"+channel+"__Map_Data"+suffix)
             drawMap(mapMC, year+"__"+channel+"__Map_MC"+suffix)
-        
-    outputfile.Close()
+            outputfile.Close()
