@@ -32,7 +32,7 @@ boundaries_eta = [0, 1.2, 2.1, 2.4]
 WPs = ["LOOSE", "TIGHT"]
 
 text2workspace_cmd = 'text2workspace.py <TXTFILE> -m 0 -o <ROOTFILE>'
-combine_cmd = "combine <NAME> -M FitDiagnostics --saveShapes --saveWithUnc --numToysForShape 2000  --preFitValue 1 --setParameterRanges r=0,10 -n <OUTNAME>"
+combine_cmd = "combine <NAME> -M FitDiagnostics --saveShapes --saveWithUnc --numToysForShape 2000  --preFitValue 1 --setParameterRanges r=0.1,10 -n <OUTNAME>"
 
 logger.info("Comands to run:")
 logger.info("  - %s", text2workspace_cmd)

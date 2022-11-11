@@ -178,18 +178,24 @@ for i in range(len(boundaries_pt)):
         N_nonprompt_data_L = h_pre_data_L.Integral() - h_post_prompt_L.Integral()
         N_nonprompt_data_T = h_pre_data_T.Integral() - h_post_prompt_T.Integral()
         fakerate_v1 = N_nonprompt_data_T/N_nonprompt_data_L if N_nonprompt_data_L>0 else 0
+        if fakerate_v1 > 1.0:
+            fakerate_v1 = 1.0
         FakerateMap_v1.SetBinContent(ptbin, etabin, fakerate_v1)
 
         # Version 2: nonprompt = data - prompt_prefit
         N_nonprompt_data_pre_L = h_pre_data_L.Integral() - h_pre_prompt_L.Integral()
         N_nonprompt_data_pre_T = h_pre_data_T.Integral() - h_pre_prompt_T.Integral()
         fakerate_v2 = N_nonprompt_data_pre_T/N_nonprompt_data_pre_L if N_nonprompt_data_pre_L>0 else 0
+        if fakerate_v2 > 1.0:
+            fakerate_v2 = 1.0
         FakerateMap_v2.SetBinContent(ptbin, etabin, fakerate_v2)
         
         # Version 3: nonprompt = nonprompt_postfit
         N_nonprompt_fit_L = h_post_nonprompt_L.Integral()
         N_nonprompt_fit_T = h_post_nonprompt_T.Integral()
         fakerate_v3 = N_nonprompt_fit_T/N_nonprompt_fit_L if N_nonprompt_fit_L>0 else 0
+        if fakerate_v3 > 1.0:
+            fakerate_v3 = 1.0
         FakerateMap_v3.SetBinContent(ptbin, etabin, fakerate_v3)
         
         # Check compatibility of various methods
@@ -199,17 +205,30 @@ for i in range(len(boundaries_pt)):
         if d12 > 0.4 or d13 > 0.4 or d23 > 0.4:
             logger.info("PT%s ETA%s, v1 and v2 not compatible: v1=%s, v2=%s, v3=%s", ptbin, etabin, fakerate_v1, fakerate_v2, fakerate_v3)
                                         
+
 suffix = ""
 if args.noLooseSel:
     suffix = "__noLooseSel"
 if args.noLooseWP:
     suffix = "__noLooseWP"
     
-drawMap(FakerateMap_v1, year+"__"+channel+"__Map_DATA_v1"+suffix)
-drawMap(FakerateMap_v2, year+"__"+channel+"__Map_DATA_v2"+suffix)
-drawMap(FakerateMap_v3, year+"__"+channel+"__Map_DATA_v3"+suffix)
+if not args.plotPrefit:
+    drawMap(FakerateMap_v1, year+"__"+channel+"__Map_DATA_v1"+suffix)
+    drawMap(FakerateMap_v2, year+"__"+channel+"__Map_DATA_v2"+suffix)
+    drawMap(FakerateMap_v3, year+"__"+channel+"__Map_DATA_v3"+suffix)
+
 
 for name in plotters:
     plotters[name].draw()
 
-del plotters
+# del plotters
+
+# Store maps in file
+if not args.plotPrefit:
+    outfile = ROOT.TFile("LeptonFakerate__"+year+"__"+channel+suffix+".root", "RECREATE")
+    outfile.cd()
+    FakerateMap_v1.Write("Fakerate_v1")
+    FakerateMap_v2.Write("Fakerate_v2")
+    FakerateMap_v3.Write("Fakerate_v3")
+    outfile.Close()
+####

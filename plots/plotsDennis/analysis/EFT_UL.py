@@ -62,6 +62,7 @@ argParser.add_argument('--nonpromptOnly',  action='store_true', default=False)
 argParser.add_argument('--splitnonprompt', action='store_true', default=False)
 argParser.add_argument('--noLooseSel',     action='store_true')
 argParser.add_argument('--noLooseWP',      action='store_true')
+argParser.add_argument('--useDataSF',      action='store_true')
 args = argParser.parse_args()
 
 ################################################################################
@@ -110,6 +111,7 @@ if args.splitnonprompt:               args.plot_directory += "_splitnonprompt"
 if args.applyFakerate:                args.plot_directory += "_FakeRateSF"
 if args.noLooseSel:                   args.plot_directory += "_noLooseSel"
 if args.noLooseWP:                    args.plot_directory += "_noLooseWP"
+if args.useDataSF:                    args.plot_directory += "_useDataSF"
 if args.sys is not 'central':         args.plot_directory += "_%s" %(args.sys)
 
 
@@ -428,12 +430,20 @@ leptonSF16 = leptonSF_topMVA(2016, LeptonWP)
 leptonSF17 = leptonSF_topMVA(2017, LeptonWP)
 leptonSF18 = leptonSF_topMVA(2018, LeptonWP)
 
-leptonFakerate18 = leptonFakerate("UL2018")
+
+# FakerateSF 
+mode = "SF"
+dataMC = "MC"
+
 if args.noLooseSel:
-    leptonFakerate18 = leptonFakerate("UL2018", "SF_noLooseSel")
+    mode = "SF_noLooseSel"
 if args.noLooseWP:
-    leptonFakerate18 = leptonFakerate("UL2018", "SF_noLooseWP")
-    
+    mode = "SF_noLooseWP"
+
+if args.useDataSF:
+    dataMC = "DATA"
+
+leptonFakerate18 = leptonFakerate("UL2018", mode, dataMC)
 
 ################################################################################
 # Text on the plots
