@@ -21,13 +21,13 @@ class leptonFakerate:
         self.dataDir = "$CMSSW_BASE/src/tWZ/Tools/data/leptonFakerate/"
         suffix = ""
         if "noLooseSel" in mode:
-            suffix = "noLooseSel"
+            suffix = "__noLooseSel"
         elif "noLooseWP" in mode:
-            suffix = "noLooseWP"
-        filepath_elec_DATA = self.dataDir+"LeptonFakerate__"+self.year+"__elec__"+suffix+".root"
-        filepath_muon_DATA = self.dataDir+"LeptonFakerate__"+self.year+"__muon__"+suffix+".root"
-        filepath_elec_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__elec__"+suffix+".root"
-        filepath_muon_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__muon__"+suffix+".root"
+            suffix = "__noLooseWP"
+        filepath_elec_DATA = self.dataDir+"LeptonFakerate__"+self.year+"__elec"+suffix+".root"
+        filepath_muon_DATA = self.dataDir+"LeptonFakerate__"+self.year+"__muon"+suffix+".root"
+        filepath_elec_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__elec"+suffix+".root"
+        filepath_muon_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__muon"+suffix+".root"
 
         # Store needed maps in dictionary
         self.SFmaps = {
@@ -46,8 +46,8 @@ class leptonFakerate:
         eta = abs(eta_)
         if eta > 2.399:
             eta = 2.39 
-        if pt > 100:
-            pt = 99
+        if pt > 64:
+            pt = 64
                         
         # Get uncertainty mode
         uncert = "sys"

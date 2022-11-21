@@ -59,6 +59,7 @@ argParser.add_argument('--noLargeWeights', action='store_true')
 argParser.add_argument('--reduce',         action='store_true')
 argParser.add_argument('--noLooseSel',     action='store_true')
 argParser.add_argument('--noLooseWP',      action='store_true')
+argParser.add_argument('--mvaTOPv1',       action='store_true')
 
 args = argParser.parse_args()
 
@@ -100,6 +101,7 @@ else:
 ################################################################################
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
+if args.mvaTOPv1:                     args.plot_directory += "_mvaTOPv1"
 if args.noData:                       args.plot_directory += "_noData"
 if args.noPreScale:                   args.plot_directory += "_noPreScale"
 if args.noLargeWeights:               args.plot_directory += "_noLargeWeights"
@@ -225,7 +227,10 @@ if args.era == "UL2016":
 elif args.era == "UL2016preVFP":
     mc = []
 elif args.era == "UL2017":
-    mc = []
+    if args.channel == "muon":
+        mc = [UL2017.QCD_MuEnriched, UL2017.WZ, UL2017.ZZ, UL2017.WW, UL2017.TTbar, UL2017.DY, UL2017.WJetsToLNu]
+    elif args.channel == "elec":
+        mc = [UL2017.QCD_EMEnriched, UL2017.QCD_bcToE, UL2017.WZ, UL2017.ZZ, UL2017.WW, UL2017.TTbar, UL2017.DY, UL2017.WJetsToLNu]
 elif args.era == "UL2018":
     if args.channel == "muon":
         mc = [UL2018.QCD_MuEnriched, UL2018.WZ, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY, UL2018.WJetsToLNu]
@@ -238,6 +243,9 @@ elif args.era == "ULRunII":
 # Binning for Maps
 boundaries_pt = [0, 20, 30, 45, 65, 120]
 boundaries_eta = [0, 1.2, 2.1, 2.4]
+if args.channel == "elec":
+    boundaries_eta = [0, 0.8, 1.44, 2.4]
+    
 
 ################################################################################
 # Creating a list of weights
@@ -256,21 +264,31 @@ if not args.noData:
 
 ################################################################################
 # Define the data sample
+
+if args.channel == "muon":
+    datastring = "SingleMuon_"
+elif args.channel == "elec":
+    datastring = "SingleElectron_"
+    if args.era == "UL2018":
+        datastring = "EGamma_"
+    
+
 if   args.era == "UL2016": 
-    datastring = "Run2016"
+    datastring += "Run2016"
     lumistring = "2016"
 elif args.era == "UL2016preVFP": 
-    datastring = "Run2016_preVFP"
+    datastring += "Run2016_preVFP"
     lumistring = "2016_preVFP"
 elif args.era == "UL2017": 
-    datastring = "Run2017"
+    datastring += "Run2017"
     lumistring = "2017"
 elif args.era == "UL2018": 
-    datastring = "Run2018"
+    datastring += "Run2018"
     lumistring = "2018"
 elif args.era == "ULRunII":
-    datastring = "RunII"
+    datastring += "RunII"
     lumistring = "RunII"
+
 
 try:
   data_sample = eval(datastring)
@@ -681,6 +699,9 @@ else:
 
 # Use some defaults
 selection_string = cutInterpreter.cutString(args.selection)
+if args.mvaTOPv1:
+    selection_string = selection_string.replace("mvaTOPv2", "mvaTOP")
+    
 if args.channel == "muon":
     selection_string += "&&(abs(lep_pdgId[l1_index])==13)&&lep_mediumId[l1_index]"
 elif args.channel == "elec":
@@ -1115,4 +1136,4 @@ outfile.Close()
 
 
 
-logger.info( "Done with prefix %s and selectionString %s", args.selection, cutInterpreter.cutString(args.selection) )
+logger.info( "Done with prefix %s and selectionString %s", args.selection, selection_string )
