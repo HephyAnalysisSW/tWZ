@@ -17,6 +17,10 @@ logger.info("Loading data samples from directory %s", directory_)
 
 def getSample(pd, runName, lumi):
     runs = ["Run2017B","Run2017C","Run2017D","Run2017E","Run2017F"]
+    # No electron triggers in Run2017B, so exclude this from stream
+    if 'SingleElectron' in pd:
+        runs = ["Run2017C","Run2017D","Run2017E","Run2017F"]
+    ####
     dirlist = [directory_+"/"+pd+"_"+run for run in runs]
     sample      = Sample.fromDirectory(name=(pd + '_' + runName), treeName="Events", texName=(pd + ' (' + runName + ')'), directory=dirlist)
     sample.lumi = lumi
@@ -28,7 +32,7 @@ SingleElectron_Run2017          = getSample('SingleElectron',   'Run2017',      
 SingleMuon_Run2017              = getSample('SingleMuon',       'Run2017',       (41.5)*1000)
 allSamples += [SingleMuon_Run2017, SingleElectron_Run2017]
 
-Run2017 = Sample.combine("Run2017", [SingleMuon_Run2017, SingleMuon_Run2017], texName = "Run2017")
+Run2017 = Sample.combine("Run2017", [SingleElectron_Run2017, SingleMuon_Run2017], texName = "Run2017")
 Run2017.lumi  = (41.5)*1000
 
 allSamples += [Run2017]
