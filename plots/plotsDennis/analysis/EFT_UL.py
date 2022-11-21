@@ -63,6 +63,7 @@ argParser.add_argument('--splitnonprompt', action='store_true', default=False)
 argParser.add_argument('--noLooseSel',     action='store_true')
 argParser.add_argument('--noLooseWP',      action='store_true')
 argParser.add_argument('--useDataSF',      action='store_true')
+argParser.add_argument('--mvaTOPv1',       action='store_true')
 args = argParser.parse_args()
 
 ################################################################################
@@ -105,6 +106,7 @@ else:
 ################################################################################
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
+if args.mvaTOPv1:                     args.plot_directory += "_mvaTOPv1"
 if args.noData:                       args.plot_directory += "_noData"
 if args.nonpromptOnly:                args.plot_directory += "_nonpromptOnly"
 if args.splitnonprompt:               args.plot_directory += "_splitnonprompt"
@@ -672,6 +674,8 @@ def getLeptonFakeRate( sample, event ):
                 pt = event.lep_ptCone[i]
                 sigma = 0
                 fakerate = leptonFakerate18.getFactor(pdgId, pt, eta, "sys", sigma )
+                if fakerate > 0.9:
+                    fakerate = 0.9
                 SF *= fakerate/(1-fakerate)
     sign = -1 if (Nfakes > 0 and (Nfakes % 2) == 0) else 1 # for two failing leptons there is a negative sign
     event.reweightLeptonFakerate = sign*SF
@@ -901,6 +905,13 @@ def Nlep( event, sample ):
     event.Nlep_tight = Nlep_tight
 sequence.append( Nlep )
 
+def getJetId( event, sample ):
+    jetIds = []
+    for i in range(event.nJetGood):
+        jetIds.append(event.JetGood_jetId[i])
+    event.jetIds = jetIds
+sequence.append(getJetId)
+
 ################################################################################
 # Read variables
 
@@ -910,8 +921,8 @@ read_variables = [
     "l2_pt/F", "l2_eta/F" , "l2_phi/F", "l2_mvaTOP/F", "l2_mvaTOPv2/F", "l2_mvaTOPWP/I", "l2_mvaTOPv2WP/I", "l2_index/I",
     "l3_pt/F", "l3_eta/F" , "l3_phi/F", "l3_mvaTOP/F", "l3_mvaTOPv2/F", "l3_mvaTOPWP/I", "l3_mvaTOPv2WP/I", "l3_index/I",
     "l4_pt/F", "l4_eta/F" , "l4_phi/F", "l4_mvaTOP/F", "l4_mvaTOPv2/F", "l4_mvaTOPWP/I", "l4_mvaTOPv2WP/I", "l4_index/I",
-    "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I]",
-    "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F]",
+    "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I,jetId/I]",
+    "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F,jetId/I]",
     "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F,mvaTOPv2WP/I,jetBTag/F,sip3d/F,pfRelIso03_all/F]",
     "Z1_l1_index/I", "Z1_l2_index/I", "nonZ1_l1_index/I", "nonZ1_l2_index/I",
     "Z1_phi/F", "Z1_pt/F", "Z1_mass/F", "Z1_cosThetaStar/F", "Z1_eta/F", "Z1_lldPhi/F", "Z1_lldR/F",
@@ -1057,6 +1068,8 @@ for i_mode, mode in enumerate(allModes):
 
     # Use some defaults
     selection_string = selectionModifier(cutInterpreter.cutString(args.selection)) if selectionModifier is not None else cutInterpreter.cutString(args.selection)
+    if args.mvaTOPv1:
+        selection_string = selection_string.replace("mvaTOPv2", "mvaTOP")
     Plot.setDefaults(stack = stack, weight = plotweights, selectionString = selection_string)
 
     ################################################################################
@@ -1161,6 +1174,13 @@ for i_mode, mode in enumerate(allModes):
             texX = 'Number of jets', texY = 'Number of Events',
             attribute = lambda event, sample: event.nJetGood,
             binning=[16, -0.5, 15.5],
+        ))
+        
+        plots.append(Plot(
+            name = "JetIds",
+            texX = 'Jet ID', texY = 'Number of Events',
+            attribute = lambda event, sample: event.jetIds,
+            binning=[10, -1.5, 8.5],
         ))
         
         plots.append(Plot(
@@ -1388,7 +1408,7 @@ for plot in allPlots['all']:
 if args.nicePlots:
     drawPlots(allPlots['all'], "all", dataMCScale)
 
-plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt"]
+plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "N_jets"]
 
 # Write Result Hist in root file
 print "Now write results in root file."
@@ -1446,4 +1466,4 @@ outfile.Close()
 
 
 
-logger.info( "Done with prefix %s and selectionString %s", args.selection, cutInterpreter.cutString(args.selection) )
+logger.info( "Done with prefix %s and selectionString %s", args.selection, selection_string )

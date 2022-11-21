@@ -36,6 +36,8 @@ for (l1cut, l2cut, l3cut) in failcases:
     leptonTCRstring += "l1_mvaTOPv2WP"+l1cut+WPtight+"&&l2_mvaTOPv2WP"+l2cut+WPtight+"&&l3_mvaTOPv2WP"+l3cut+WPtight
     leptonTCRstring += ")"
 leptonTCRstring += ")"
+
+
 ################################################################################
 
 from tWZ.Tools.objectSelection import lepString
@@ -52,7 +54,6 @@ special_cuts = {
     "trilepT" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4",
     "qualepM" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP>=3",
     "qualepT" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP>=4",
-    "trilepMCR":       "l1_pt>40&&l2_pt>20&&l3_pt>10&&( (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP<3) || (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP<3&&l3_mvaTOPv2WP>=3) || (l1_mvaTOPv2WP<3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3) )",
     "trilepTCR":       "l1_pt>40&&l2_pt>20&&l3_pt>10&&"+leptonTCRstring,
     "qualepMCR" :      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&((l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP<3) || (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP<3&&l4_mvaTOPv2WP>=3) || (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP<3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP>=3) || (l1_mvaTOPv2WP<3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP>=3) )",
     "qualepTCR" :      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&((l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP<4) || (l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP<4&&l4_mvaTOPv2WP>=4) || (l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP<4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP>=4) || (l1_mvaTOPv2WP<4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP>=4) )",

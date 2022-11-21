@@ -4,6 +4,7 @@ import os
 import ROOT
 import Analysis.Tools.syncer
 import array as arr
+from math                                        import sqrt
 from tWZ.Tools.user                              import plot_directory
 from tWZ.Tools.helpers                           import getObjFromFile
 from tWZ.samples.color                           import color
@@ -63,6 +64,7 @@ def ConvertBinning(h_post, dummy):
     for i in range(Nbins):
         bin = i+1
         h_new.SetBinContent(bin, h_post.GetBinContent(bin))
+        h_new.SetBinError(bin, h_post.GetBinError(bin))
     return h_new
     
 def createMap(boundaries_pt, boundaries_eta):
@@ -87,6 +89,26 @@ def drawMap(map, plotname):
     map.GetXaxis().SetRangeUser(0, 100)
     c.Print(plot_directory+"/FakeRate/"+plotname+".pdf")
         
+def getRateAndError(h1, h2):
+    N1 = 0
+    N2 = 0
+    e1sq = 0
+    e2sq = 0
+    Nbins = h1.GetSize()-2
+    for i in range(Nbins):
+        bin = i+1
+        N1 += h1.GetBinContent(bin)
+        e1sq += pow(h1.GetBinError(bin),2)
+        N2 += h2.GetBinContent(bin)
+        e2sq += pow(h2.GetBinError(bin),2)
+    e1 = sqrt(e1sq)
+    e2 = sqrt(e2sq)
+    if N1 == 0 or N2 == 0:
+        return (0., 0.)
+    ratio = N1/N2 if N2 !=0 else 0
+    error = sqrt( pow((e1/N2),2) + pow((-N1*e2/(N2*N2)),2) )
+    return (ratio, error)
+    
 # various methods to get fake rate:
 # - from postfit nonprompt only 
 # - from prefit (data-prompt)
@@ -98,11 +120,17 @@ year = args.year
 channel = args.channel
 boundaries_pt = [0, 20, 30, 45, 65, 120]
 boundaries_eta = [0, 1.2, 2.1, 2.4]
+if args.channel == "elec":
+    boundaries_eta = [0, 0.8, 1.44, 2.4]
+    
 plotters = {}
 
 FakerateMap_v1 = createMap(boundaries_pt, boundaries_eta)
+FakerateMap_v1_stat = createMap(boundaries_pt, boundaries_eta)
 FakerateMap_v2 = createMap(boundaries_pt, boundaries_eta)
+FakerateMap_v2_stat = createMap(boundaries_pt, boundaries_eta)
 FakerateMap_v3 = createMap(boundaries_pt, boundaries_eta)
+FakerateMap_v3_stat = createMap(boundaries_pt, boundaries_eta)
 
 for i in range(len(boundaries_pt)):
     for j in range(len(boundaries_eta)):
@@ -175,28 +203,29 @@ for i in range(len(boundaries_pt)):
         
         # Fakerate maps 
         # Version 1: nonprompt = data - prompt_postfit
-        N_nonprompt_data_L = h_pre_data_L.Integral() - h_post_prompt_L.Integral()
-        N_nonprompt_data_T = h_pre_data_T.Integral() - h_post_prompt_T.Integral()
-        fakerate_v1 = N_nonprompt_data_T/N_nonprompt_data_L if N_nonprompt_data_L>0 else 0
-        if fakerate_v1 > 1.0:
-            fakerate_v1 = 1.0
+        h_nonprompt_data_L = h_pre_data_L.Clone()
+        h_nonprompt_data_L.Add(h_post_prompt_L, -1)
+        h_nonprompt_data_T = h_pre_data_T.Clone()
+        h_nonprompt_data_T.Add(h_post_prompt_T, -1)
+        fakerate_v1, fakerate_v1_stat = getRateAndError(h_nonprompt_data_T, h_nonprompt_data_L)
         FakerateMap_v1.SetBinContent(ptbin, etabin, fakerate_v1)
+        FakerateMap_v1_stat.SetBinContent(ptbin, etabin, fakerate_v1_stat)
 
         # Version 2: nonprompt = data - prompt_prefit
-        N_nonprompt_data_pre_L = h_pre_data_L.Integral() - h_pre_prompt_L.Integral()
-        N_nonprompt_data_pre_T = h_pre_data_T.Integral() - h_pre_prompt_T.Integral()
-        fakerate_v2 = N_nonprompt_data_pre_T/N_nonprompt_data_pre_L if N_nonprompt_data_pre_L>0 else 0
-        if fakerate_v2 > 1.0:
-            fakerate_v2 = 1.0
+        h_nonprompt_data_pre_L = h_pre_data_L.Clone()
+        h_nonprompt_data_pre_L.Add(h_pre_prompt_L, -1)
+        h_nonprompt_data_pre_T = h_pre_data_T.Clone()
+        h_nonprompt_data_pre_T.Add(h_pre_prompt_T, -1)
+        fakerate_v2, fakerate_v2_stat = getRateAndError(h_nonprompt_data_pre_T, h_nonprompt_data_pre_L)
         FakerateMap_v2.SetBinContent(ptbin, etabin, fakerate_v2)
+        FakerateMap_v2_stat.SetBinContent(ptbin, etabin, fakerate_v2_stat)        
         
         # Version 3: nonprompt = nonprompt_postfit
-        N_nonprompt_fit_L = h_post_nonprompt_L.Integral()
-        N_nonprompt_fit_T = h_post_nonprompt_T.Integral()
-        fakerate_v3 = N_nonprompt_fit_T/N_nonprompt_fit_L if N_nonprompt_fit_L>0 else 0
-        if fakerate_v3 > 1.0:
-            fakerate_v3 = 1.0
+        h_nonprompt_fit_L = h_post_nonprompt_L.Clone()
+        h_nonprompt_fit_T = h_post_nonprompt_T.Clone()
+        fakerate_v3, fakerate_v3_stat = getRateAndError(h_nonprompt_fit_T, h_nonprompt_fit_L)
         FakerateMap_v3.SetBinContent(ptbin, etabin, fakerate_v3)
+        FakerateMap_v3_stat.SetBinContent(ptbin, etabin, fakerate_v3_stat)     
         
         # Check compatibility of various methods
         d12 = fakerate_v1 - fakerate_v2
@@ -216,6 +245,9 @@ if not args.plotPrefit:
     drawMap(FakerateMap_v1, year+"__"+channel+"__Map_DATA_v1"+suffix)
     drawMap(FakerateMap_v2, year+"__"+channel+"__Map_DATA_v2"+suffix)
     drawMap(FakerateMap_v3, year+"__"+channel+"__Map_DATA_v3"+suffix)
+    drawMap(FakerateMap_v1_stat, year+"__"+channel+"__Map_DATA_v1_stat"+suffix)
+    drawMap(FakerateMap_v2_stat, year+"__"+channel+"__Map_DATA_v2_stat"+suffix)
+    drawMap(FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3_stat"+suffix)
 
 
 for name in plotters:
@@ -230,5 +262,8 @@ if not args.plotPrefit:
     FakerateMap_v1.Write("Fakerate_v1")
     FakerateMap_v2.Write("Fakerate_v2")
     FakerateMap_v3.Write("Fakerate_v3")
+    FakerateMap_v1_stat.Write("Fakerate_v1_stat")
+    FakerateMap_v2_stat.Write("Fakerate_v2_stat")
+    FakerateMap_v3_stat.Write("Fakerate_v3_stat")
     outfile.Close()
 ####

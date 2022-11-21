@@ -56,7 +56,9 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 boundaries_pt = [0, 20, 30, 45, 65, 120]
 boundaries_eta = [0, 1.2, 2.1, 2.4]
-
+if args.channel == "elec":
+    boundaries_eta = [0, 0.8, 1.44, 2.4]
+    
 channel = args.channel
 year = args.year
 

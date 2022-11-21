@@ -73,8 +73,9 @@ selections = [
 years = ["UL2018"]
 channels = ["all"]
 
-histnames = ["Z1_pt", "l1_pt", "l2_pt", "l3_pt"]
+histnames = ["N_jets", "Z1_pt", "l1_pt", "l2_pt", "l3_pt"]
 object = {
+    "N_jets": "Number of jets",
     "Z1_pt": "Z", 
     "l1_pt": "Leading lepton", 
     "l2_pt": "Sub-leading lepton", 
@@ -82,6 +83,7 @@ object = {
 }
 
 rebin = {
+    "N_jets": 1,
     "Z1_pt": 4, 
     "l1_pt": 1, 
     "l2_pt": 1, 
@@ -89,6 +91,7 @@ rebin = {
 }
 
 xmax = {
+    "N_jets": 10.5, 
     "Z1_pt": 300, 
     "l1_pt": 200, 
     "l2_pt": 150, 
@@ -125,6 +128,7 @@ for year in years:
                     p.drawRatio = True
                     p.ratiorange = (0.2, 1.8)
                     p.xtitle = object[histname]+" p_{T} [GeV]"
+                    if "N_jets" in histname: p.xtitle = object[histname]
                     p.addData(hist_SR, process+" [SR]")
                     p.addBackground(hist_CR, process+" [CR*fakerate]", 15)
                     plotters[year+selection+channel+process+histname] = p
