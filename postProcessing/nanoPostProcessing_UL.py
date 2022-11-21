@@ -795,7 +795,6 @@ def filler( event ):
         lep['ptConeGhent'] = ptConeGhent        
         lep['jetPtRatio'] = 1/(lep['jetRelIso']+1)
         mvaScore, WPv1, mvaScorev2, WPv2 = mvaTOPreader_.getmvaTOPScore(lep)
-        print mvaScore, mvaScorev2
         lep['mvaTOP'] = mvaScore
         lep['mvaTOPWP'] = WPv1
         lep['mvaTOPv2'] = mvaScorev2
