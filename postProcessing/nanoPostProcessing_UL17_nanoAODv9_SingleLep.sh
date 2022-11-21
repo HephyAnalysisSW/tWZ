@@ -12,7 +12,7 @@ python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --tri
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_MuEnriched_1000toInf #SPLIT17
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_EMEnriched_15to20 #SPLIT18
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_EMEnriched_20to30 #SPLIT6
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_EMEnriched_30to50 #SPLIT13
+python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_EMEnriched_30to50 #SPLIT4
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_EMEnriched_50to80 #SPLIT4
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_EMEnriched_80to120 #SPLIT5
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_EMEnriched_120to170 #SPLIT8
@@ -21,19 +21,19 @@ python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --tri
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_bcToE_15to20 #SPLIT23
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_bcToE_20to30 #SPLIT27
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_bcToE_30to80 #SPLIT5
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_bcToE_80to170 #SPLIT17
+python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_bcToE_80to170 #SPLIT7
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_bcToE_170to250 #SPLIT14
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample QCD_bcToE_250toInf #SPLIT22
-
+# 
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M10to50_LO  #SPLIT42
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 #SPLIT35
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample TTLep_pow_CP5 #SPLIT155
+python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample TTLep_pow_CP5 #SPLIT99
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample TTSingleLep_pow_CP5 #SPLIT200
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample WJetsToLNu  #SPLIT47
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample WW #SPLIT10
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample WZ #SPLIT10
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample ZZ #SPLIT10
-
+python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample ZZ #SPLIT2
+# 
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample SingleMuon_Run2017B #SPLIT30
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample SingleMuon_Run2017C #SPLIT30
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2017 --processingEra tWZ_UL_nAODv9_v1 --sample SingleMuon_Run2017D #SPLIT20

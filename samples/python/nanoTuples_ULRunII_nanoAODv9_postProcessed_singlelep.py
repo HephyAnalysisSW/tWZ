@@ -2,8 +2,16 @@ from RootTools.core.standard import *
 
 # from tWZ.samples.nanoTuples_DATA_UL2016_nanoAODv9_postProcessed_singlelep import Run2016
 # from tWZ.samples.nanoTuples_DATA_UL2016preVFP_nanoAODv9_postProcessed_singlelep import Run2016_preVFP
-# from tWZ.samples.nanoTuples_DATA_UL2017_nanoAODv9_postProcessed_singlelep import Run2017
+
+# Data 2017
+from tWZ.samples.nanoTuples_DATA_UL2017_nanoAODv9_postProcessed_singlelep import Run2017
+from tWZ.samples.nanoTuples_DATA_UL2017_nanoAODv9_postProcessed_singlelep import SingleElectron_Run2017
+from tWZ.samples.nanoTuples_DATA_UL2017_nanoAODv9_postProcessed_singlelep import SingleMuon_Run2017
+
+# Data 2018
 from tWZ.samples.nanoTuples_DATA_UL2018_nanoAODv9_postProcessed_singlelep import Run2018
+from tWZ.samples.nanoTuples_DATA_UL2018_nanoAODv9_postProcessed_singlelep import EGamma_Run2018
+from tWZ.samples.nanoTuples_DATA_UL2018_nanoAODv9_postProcessed_singlelep import SingleMuon_Run2018
 
 
 # RunII      = Sample.combine( "RunII", [Run2016, Run2016_preVFP, Run2017, Run2018], texName = "RunII" ) 
@@ -12,14 +20,14 @@ from tWZ.samples.nanoTuples_DATA_UL2018_nanoAODv9_postProcessed_singlelep import
 lumi_year  = {
     # "2016":        Run2016.lumi, 
     # "2016_preVFP": Run2016_preVFP.lumi, 
-    # "2017":        Run2017.lumi, 
+    "2017":        Run2017.lumi, 
     "2018":        Run2018.lumi,
     # "RunII":       RunII.lumi,
 }
 
 # import tWZ.samples.nanoTuples_UL2016_nanoAODv9_postProcessed_singlelep as UL2016
 # import tWZ.samples.nanoTuples_UL2016preVFP_nanoAODv9_postProcessed_singlelep as UL2016preVFP
-# import tWZ.samples.nanoTuples_UL2017_nanoAODv9_postProcessed_singlelep as UL2017
+import tWZ.samples.nanoTuples_UL2017_nanoAODv9_postProcessed_singlelep as UL2017
 import tWZ.samples.nanoTuples_UL2018_nanoAODv9_postProcessed_singlelep as UL2018
 # 
 # 
