@@ -127,6 +127,7 @@ def lepStringNoMVA( eleMu = None, idx = None):
     else:
         return '('+lepString( 'ele', WP, idx=idx) + ')||(' + lepString( 'mu', WP, idx=idx) + ')'
 
+
 def mvaTopWP(mvaTopThr, pdgId):
     mvaTOPs = mvaTOP['mu'] if abs(pdgId)==13 else mvaTOP['ele']
     return sum( [ int( mvaTopThr > th ) for th in mvaTOPs.values() ] )

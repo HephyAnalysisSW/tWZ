@@ -14,8 +14,6 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 argParser.add_argument('--splitnonprompt', action='store_true', default=False)
-argParser.add_argument('--noLooseSel',     action='store_true')
-argParser.add_argument('--noLooseWP',      action='store_true')
 args = argParser.parse_args()
 
 logger.info("Apply fake rate to control region and compare with signal region")
@@ -39,25 +37,13 @@ def makeDummySys(hist, variation):
 ################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
-path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v3_noData_nonpromptOnly/"
-path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v3_noData_nonpromptOnly_FakeRateSF/"
+path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v4_noData_nonpromptOnly/"
+path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v4_noData_nonpromptOnly_FakeRateSF/"
 if args.splitnonprompt:
-    path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v3_noData_nonpromptOnly_splitnonprompt_FakeRateSF/"
-    path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v3_noData_nonpromptOnly_splitnonprompt/"
+    path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v4_noData_nonpromptOnly_splitnonprompt/"
+    path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v4_noData_nonpromptOnly_splitnonprompt_FakeRateSF/"
 
-suffix = ""
-if args.noLooseSel:
-    path_CR = path_CR.replace("_FakeRateSF", "_FakeRateSF_noLooseSel")
-    suffix = "__noLooseSel"
-if args.noLooseWP:
-    path_CR = path_CR.replace("_FakeRateSF", "_FakeRateSF_noLooseWP")
-    suffix = "__noLooseWP"
-    
-
-prefix_CR = "trilepL-trilepTCR-"
-if args.noLooseWP:
-    prefix_CR = prefix_CR.replace("trilepL", "trilepVL")
-
+prefix_CR = "trilepFOnoT-"
 prefix_SR = "trilepT-"
 
 
@@ -67,8 +53,10 @@ selections = [
     # "minDLmass12-njet3p-btag1p/",
     # "minDLmass12-onZ1/",
     "minDLmass12-onZ1-btag0-met60/",
-    "minDLmass12-onZ1-njet3p-btag1p/",
+    # "minDLmass12-onZ1-njet3p-btag1p/",
 ]
+
+systematics = ["Fakerate"]
 
 years = ["UL2018"]
 channels = ["all"]
@@ -84,10 +72,10 @@ object = {
 
 rebin = {
     "N_jets": 1,
-    "Z1_pt": 4, 
-    "l1_pt": 1, 
-    "l2_pt": 1, 
-    "l3_pt": 1,
+    "Z1_pt": 2, 
+    "l1_pt": 4, 
+    "l2_pt": 4, 
+    "l3_pt": 4,
 }
 
 xmax = {
@@ -121,16 +109,30 @@ for year in years:
                     hist_CR = getObjFromFile(filename_CR, histname+"__"+process)
                     hist_SR = adjustHistogram(hist_SR, rebin[histname], xmax[histname])
                     hist_CR = adjustHistogram(hist_CR, rebin[histname], xmax[histname])  
+                    hists_CR_sys = {}
+                    for sys in systematics:
+                        up = getObjFromFile(filename_CR.replace("FakeRateSF", "FakeRateSF_"+sys+"_UP"), histname+"__"+process) 
+                        down = getObjFromFile(filename_CR.replace("FakeRateSF", "FakeRateSF_"+sys+"_DOWN"), histname+"__"+process) 
+                        up = adjustHistogram(up, rebin[histname], xmax[histname])
+                        down = adjustHistogram(down, rebin[histname], xmax[histname])
+                        # up = hist_CR.Clone()
+                        # up.Add(hist_CR, 0.1)
+                        # down = hist_CR.Clone()
+                        # down.Add(hist_CR, -0.1)
+                        hists_CR_sys[sys] = [up, down]
                     plotdir = plot_directory+"/FakeRate/ClosureTest/"+selection
                     if not os.path.exists( plotdir ): os.makedirs( plotdir )
-                    p = Plotter(year+"__"+channel+"__"+process+"__"+histname+suffix)
+                    p = Plotter(year+"__"+channel+"__"+process+"__"+histname)
                     p.plot_dir = plotdir
                     p.drawRatio = True
                     p.ratiorange = (0.2, 1.8)
                     p.xtitle = object[histname]+" p_{T} [GeV]"
                     if "N_jets" in histname: p.xtitle = object[histname]
                     p.addData(hist_SR, process+" [SR]")
-                    p.addBackground(hist_CR, process+" [CR*fakerate]", 15)
+                    CRname = process+" [CR*fakerate]"
+                    p.addBackground(hist_CR, CRname, 15)
+                    for sys in systematics:
+                        p.addSystematic(hists_CR_sys[sys][0], hists_CR_sys[sys][1], sys, CRname)
                     plotters[year+selection+channel+process+histname] = p
 
 for name in plotters:

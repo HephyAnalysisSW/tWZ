@@ -13,11 +13,12 @@ logger    = logger.get_logger(   "INFO", logFile = None)
 
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
-
-path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v3_noPreScale/"
-years = ["UL2018"]
+# path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v5_noPreScale/"
+path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v5_noPreScale_reduce/"
+years = ["UL2017", "UL2018"]
 channels = ["elec", "muon"]
-selection = "singlelepT-vetoAddLepL-met40"
+# channels = ["elec"]
+selection = "singlelepT-vetoAddLepFO-met40"
 triggerlist = {
     "elec" : ["HLT_Ele8_CaloIdM_TrackIdM_PFJet30","HLT_Ele17_CaloIdM_TrackIdM_PFJet30"],
     "muon" : ["HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17","HLT_Mu20","HLT_Mu27"],
