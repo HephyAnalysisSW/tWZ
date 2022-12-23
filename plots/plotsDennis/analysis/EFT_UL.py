@@ -27,7 +27,7 @@ from tWZ.Tools.user                      import plot_directory
 from tWZ.Tools.cutInterpreter            import cutInterpreter
 from tWZ.Tools.objectSelection_UL        import lepString, lepStringNoMVA
 from tWZ.Tools.helpers                   import getCollection, cosThetaStarNew, getTheta, gettheta, getphi
-from tWZ.Tools.leptonSF_topMVA           import leptonSF_topMVA
+# from tWZ.Tools.leptonSF_topMVA           import leptonSF_topMVA
 from tWZ.Tools.leptonFakerate            import leptonFakerate
 
 # Analysis
@@ -36,6 +36,7 @@ from Analysis.Tools.puProfileCache       import *
 from Analysis.Tools.puReweighting        import getReweightingFunction
 from Analysis.Tools.leptonJetArbitration     import cleanJetsAndLeptons
 from Analysis.Tools.WeightInfo           import WeightInfo
+from Analysis.Tools.LeptonSF_UL          import LeptonSF
 
 import Analysis.Tools.syncer
 import numpy as np
@@ -49,7 +50,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v3')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v4')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -60,10 +61,7 @@ argParser.add_argument('--doTTbarReco',    action='store_true', default=False)
 argParser.add_argument('--applyFakerate',  action='store_true', default=False)
 argParser.add_argument('--nonpromptOnly',  action='store_true', default=False)
 argParser.add_argument('--splitnonprompt', action='store_true', default=False)
-argParser.add_argument('--noLooseSel',     action='store_true')
-argParser.add_argument('--noLooseWP',      action='store_true')
 argParser.add_argument('--useDataSF',      action='store_true')
-argParser.add_argument('--mvaTOPv1',       action='store_true')
 args = argParser.parse_args()
 
 ################################################################################
@@ -76,8 +74,10 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 ################################################################################
 # Possible SYS variations
 variations = [
+    "Fakerate_UP", "Fakerate_DOWN",
     "Trigger_UP", "Trigger_DOWN",
-    "LepID_UP", "LepID_DOWN",
+    "LepIDstat_UP", "LepIDstat_DOWN",
+    "LepIDsys_UP", "LepIDsys_DOWN",
     "BTag_b_UP", "BTag_b_DOWN",
     "BTag_l_UP", "BTag_l_DOWN",
     "PU_UP", "PU_DOWN",
@@ -106,13 +106,10 @@ else:
 ################################################################################
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
-if args.mvaTOPv1:                     args.plot_directory += "_mvaTOPv1"
 if args.noData:                       args.plot_directory += "_noData"
 if args.nonpromptOnly:                args.plot_directory += "_nonpromptOnly"
 if args.splitnonprompt:               args.plot_directory += "_splitnonprompt"
 if args.applyFakerate:                args.plot_directory += "_FakeRateSF"
-if args.noLooseSel:                   args.plot_directory += "_noLooseSel"
-if args.noLooseWP:                    args.plot_directory += "_noLooseWP"
 if args.useDataSF:                    args.plot_directory += "_useDataSF"
 if args.sys is not 'central':         args.plot_directory += "_%s" %(args.sys)
 
@@ -227,7 +224,7 @@ from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
 
 if args.era == "UL2016":
     mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
-    if args.applyFakerate or args.nonpromptOnly:
+    if args.nonpromptOnly:
         if args.splitnonprompt:
             mc = [UL2016.WW, UL2016.Top, UL2016.DY]
         else:
@@ -235,7 +232,7 @@ if args.era == "UL2016":
     samples_eft = []
 elif args.era == "UL2016preVFP":
     mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
-    if args.applyFakerate or args.nonpromptOnly:
+    if args.nonpromptOnly:
         if args.splitnonprompt:
             mc = [UL2016preVFP.WW, UL2016preVFP.Top, UL2016preVFP.DY]
         else:
@@ -243,7 +240,7 @@ elif args.era == "UL2016preVFP":
     samples_eft = []
 elif args.era == "UL2017":
     mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
-    if args.applyFakerate or args.nonpromptOnly:
+    if args.nonpromptOnly:
         if args.splitnonprompt:
             mc = [UL2017.WW, UL2017.Top, UL2017.DY]
         else:
@@ -251,7 +248,7 @@ elif args.era == "UL2017":
     samples_eft = []
 elif args.era == "UL2018":
     mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
-    if args.applyFakerate or args.nonpromptOnly:
+    if args.nonpromptOnly:
         if args.splitnonprompt:
             mc = [UL2018.WW, UL2018.Top, UL2018.DY]
         else:
@@ -259,7 +256,7 @@ elif args.era == "UL2018":
     samples_eft = []
 elif args.era == "ULRunII":
     mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
-    if args.applyFakerate or args.nonpromptOnly:
+    if args.nonpromptOnly:
         if args.splitnonprompt:
             mc = [WW, Top, DY]
         else:
@@ -422,30 +419,25 @@ if args.small:
         
 ################################################################################
 # Lepton SF
-LeptonWP = "tight"
-if "trilepVL" in args.selection:
-    LeptonWP = "VL"
-    
-### TODO: SETUP SF FOR MEDIUM WP
-    
-leptonSF16 = leptonSF_topMVA(2016, LeptonWP)
-leptonSF17 = leptonSF_topMVA(2017, LeptonWP)
-leptonSF18 = leptonSF_topMVA(2018, LeptonWP)
+muonWP = "medium"
+elecWP = "tight"
+
+leptonSF = {
+    "UL2016preVFP":  LeptonSF("UL2016_preVFP", muonWP, elecWP),
+    "UL2016":  LeptonSF("UL2016", muonWP, elecWP),
+    "UL2017":  LeptonSF("UL2017", muonWP, elecWP),
+    "UL2018":  LeptonSF("UL2018", muonWP, elecWP),
+}
+
 
 
 # FakerateSF 
-mode = "SF"
 dataMC = "MC"
-
-if args.noLooseSel:
-    mode = "SF_noLooseSel"
-if args.noLooseWP:
-    mode = "SF_noLooseWP"
 
 if args.useDataSF:
     dataMC = "DATA"
 
-leptonFakerate18 = leptonFakerate("UL2018", mode, dataMC)
+leptonFakerate18 = leptonFakerate("UL2018", dataMC)
 
 ################################################################################
 # Text on the plots
@@ -557,52 +549,6 @@ def getWlep( event ):
     return Wleps
     
     
-def looseSelection(lepindex, event):
-    if args.noLooseSel:
-        return True
-    if lepindex < 0:
-        return False
-    
-    if event.lep_sip3d[lepindex] > 8:
-        return False
-    if event.lep_pfRelIso03_all[lepindex] > 0.4:
-        return False
-    
-    # elec
-    if abs(event.lep_pdgId[lepindex]) == 11:
-        eleindex = event.lep_eleIndex[lepindex]
-        if not event.Electron_convVeto[eleindex]:
-            return False
-        # if event.Electron_tightCharge[eleindex] < 1:
-        #     return False
-        if ord(event.Electron_lostHits[eleindex]) > 1:
-            return False
-            
-        passID = False
-        # if event.Electron_mvaFall17V2Iso_WP80:
-        if event.lep_jetBTag[lepindex] < 0.1:
-            jetPtRatio = 1/(event.Electron_jetRelIso[eleindex]+1)
-            if (event.year == 2016 and jetPtRatio > 0.5) or (event.year in [2017,2018] and jetPtRatio > 0.4):
-                passID = True
-        if event.lep_mvaTOPv2WP[lepindex] >= 4:
-            passID = True   
-        if not passID:
-            return False
-    
-    # muon
-    if abs(event.lep_pdgId[lepindex]) == 13:
-        muindex = event.lep_muIndex[lepindex]
-        passID = False
-        if event.lep_jetBTag[lepindex] < 0.025:
-            jetPtRatio = 1/(event.Muon_jetRelIso[muindex]+1)
-            if jetPtRatio > 0.45:
-                passID = True
-        if event.lep_mvaTOPv2WP[lepindex] >= 4:
-            passID = True   
-        if not passID:
-            return False                
-                        
-    return True   
 ################################################################################
 # Define sequences
 sequence       = []
@@ -628,33 +574,46 @@ sequence       = []
 def getLeptonSF(sample, event):
     if sample.isData:
         return 
-    SF = 1    
-    # Search for variation
-    sigma = 0
-    if args.sys == "LepID_UP":
-        sigma = 1
-    elif args.sys == "LepID_DOWN":
-        sigma = -1
-    # Go through the 3 leptons and multiply SF
-    idx1 = event.l1_index
-    idx2 = event.l2_index
-    idx3 = event.l3_index
-    for i in [idx1, idx2, idx3]:
-        pdgId = event.lep_pdgId[i]
-        eta = event.lep_eta[i]
-        if abs(pdgId)==11:
-            eta+=event.Electron_deltaEtaSC[event.lep_eleIndex[i]]
-        pt = event.lep_pt[i]
-        if event.year == 2016:
-            SF *= leptonSF16.getSF(pdgId, pt, eta, "sys", sigma )
-        elif event.year == 2017:
-            SF *= leptonSF17.getSF(pdgId, pt, eta, "sys", sigma )
-        elif event.year == 2018:
-            SF *= leptonSF18.getSF(pdgId, pt, eta, "sys", sigma )
+    SF = 1
+    # Only apply SF when also cutting on WP
+    if "trilepT" in args.selection or "qualepT" in args.selection:
+        # Search for variation type and direction
+        uncert = "syst"
+        if args.sys == "LepIDstat_UP" or args.sys == "LepIDstat_DOWN":
+            uncert = "stat"
+        sigma = 0
+        if args.sys == "LepIDstat_UP" or args.sys == "LepIDsys_UP":
+            sigma = 1
+        elif args.sys == "LepIDstat_DOWN" or args.sys == "LepIDsys_DOWN":
+            sigma = -1
+        # Go through the 3 leptons and multiply SF
+        idx1 = event.l1_index
+        idx2 = event.l2_index
+        idx3 = event.l3_index
+        for i in [idx1, idx2, idx3]:
+            pdgId = event.lep_pdgId[i]
+            eta = event.lep_eta[i]
+            if abs(pdgId)==11:
+                eta+=event.Electron_deltaEtaSC[event.lep_eleIndex[i]]
+            pt = event.lep_pt[i]
+            if event.year == 2016:
+                if event.preVFP:
+                    SF *= leptonSF["UL2016preVFP"].getSF(pdgId, pt, eta, uncert, sigma)
+                else:
+                    SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
+            elif event.year == 2017:
+                    SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
+            elif event.year == 2018:
+                    SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
     event.reweightLeptonMVA = SF
 sequence.append( getLeptonSF )
 
 def getLeptonFakeRate( sample, event ):
+    sigma = 0
+    if args.sys == "Fakerate_UP":
+        sigma = 1.0
+    if args.sys == "Fakerate_DOWN":
+        sigma = -1.0    
     SF = 1.0
     Nfakes = 0
     if args.applyFakerate:
@@ -662,18 +621,12 @@ def getLeptonFakeRate( sample, event ):
         idx2 = event.l2_index
         idx3 = event.l3_index
         for i in [idx1, idx2, idx3]:
-            if event.lep_mvaTOPv2WP[i] < 4:
-                # Do not use event if loose lepton selection is not satisfied
-                if not looseSelection(i, event):
-                    event.reweightLeptonFakerate = 0
-                    return 
-                ####
+            if event.lep_passFO[i] and not event.lep_passTight[i]:
                 Nfakes += 1
                 pdgId = event.lep_pdgId[i]
                 eta = event.lep_eta[i]
-                pt = event.lep_ptCone[i]
-                sigma = 0
-                fakerate = leptonFakerate18.getFactor(pdgId, pt, eta, "sys", sigma )
+                pt = event.lep_ptConeGhent[i]
+                fakerate = leptonFakerate18.getFactor(pdgId, pt, eta, "stat", sigma )
                 if fakerate > 0.9:
                     fakerate = 0.9
                 SF *= fakerate/(1-fakerate)
@@ -784,11 +737,11 @@ sequence.append( getDiBosonAngles )
 
 def getbScoresLepton(sample, event):
     fakelepton_btagscores = []
-    if event.l1_mvaTOPv2WP < 4:
+    if event.l1_passFO and not event.l1_passTight:
         fakelepton_btagscores.append(event.lep_jetBTag[event.l1_index])
-    if event.l2_mvaTOPv2WP < 4:
+    if event.l2_passFO and not event.l2_passTight:
         fakelepton_btagscores.append(event.lep_jetBTag[event.l2_index])
-    if event.l3_mvaTOPv2WP < 4:
+    if event.l3_passFO and not event.l3_passTight:
         fakelepton_btagscores.append(event.lep_jetBTag[event.l3_index])  
     event.fakelepton_btagscores = fakelepton_btagscores
 sequence.append(getbScoresLepton)
@@ -898,11 +851,26 @@ sequence.append( getTTbarReco )
 
 def Nlep( event, sample ):
     Nlep_tight = 0
-    if event.l1_mvaTOPv2WP >= 4: Nlep_tight+=1
-    if event.l2_mvaTOPv2WP >= 4: Nlep_tight+=1
-    if event.l3_mvaTOPv2WP >= 4: Nlep_tight+=1
-    if event.l4_mvaTOPv2WP >= 4: Nlep_tight+=1
+    if event.l1_passTight: Nlep_tight+=1
+    if event.l2_passTight: Nlep_tight+=1
+    if event.l3_passTight: Nlep_tight+=1
+    if event.l4_passTight: Nlep_tight+=1
     event.Nlep_tight = Nlep_tight
+    
+    Nlep = 0
+    Nlep_passFO = 0
+    Nlep_passTight = 0
+    
+    for i in range(len(event.lep_pt)):
+        Nlep += 1
+        if event.lep_passFO[i]:
+            Nlep_passFO += 1
+        if event.lep_passTight[i]:
+            Nlep_passTight += 1
+    event.Nlep = Nlep
+    event.Nlep_passFO = Nlep_passFO
+    event.Nlep_passTight = Nlep_passTight
+    
 sequence.append( Nlep )
 
 def getJetId( event, sample ):
@@ -917,13 +885,13 @@ sequence.append(getJetId)
 
 read_variables = [
     "weight/F", "year/I", "preVFP/O", "met_pt/F", "met_phi/F", "nJetGood/I", "PV_npvsGood/I",  "nJet/I", "nBTag/I", 
-    "l1_pt/F", "l1_eta/F" , "l1_phi/F", "l1_mvaTOP/F", "l1_mvaTOPv2/F", "l1_mvaTOPWP/I", "l1_mvaTOPv2WP/I", "l1_index/I",
-    "l2_pt/F", "l2_eta/F" , "l2_phi/F", "l2_mvaTOP/F", "l2_mvaTOPv2/F", "l2_mvaTOPWP/I", "l2_mvaTOPv2WP/I", "l2_index/I",
-    "l3_pt/F", "l3_eta/F" , "l3_phi/F", "l3_mvaTOP/F", "l3_mvaTOPv2/F", "l3_mvaTOPWP/I", "l3_mvaTOPv2WP/I", "l3_index/I",
-    "l4_pt/F", "l4_eta/F" , "l4_phi/F", "l4_mvaTOP/F", "l4_mvaTOPv2/F", "l4_mvaTOPWP/I", "l4_mvaTOPv2WP/I", "l4_index/I",
+    "l1_pt/F", "l1_eta/F" , "l1_phi/F", "l1_mvaTOP/F", "l1_mvaTOPv2/F", "l1_mvaTOPWP/I", "l1_mvaTOPv2WP/I", "l1_index/I", "l1_passFO/O", "l1_passTight/O", "l1_ptCone/F", "l1_ptConeGhent/F",
+    "l2_pt/F", "l2_eta/F" , "l2_phi/F", "l2_mvaTOP/F", "l2_mvaTOPv2/F", "l2_mvaTOPWP/I", "l2_mvaTOPv2WP/I", "l2_index/I", "l2_passFO/O", "l2_passTight/O", "l2_ptCone/F", "l2_ptConeGhent/F",
+    "l3_pt/F", "l3_eta/F" , "l3_phi/F", "l3_mvaTOP/F", "l3_mvaTOPv2/F", "l3_mvaTOPWP/I", "l3_mvaTOPv2WP/I", "l3_index/I", "l3_passFO/O", "l3_passTight/O", "l3_ptCone/F", "l3_ptConeGhent/F",
+    "l4_pt/F", "l4_eta/F" , "l4_phi/F", "l4_mvaTOP/F", "l4_mvaTOPv2/F", "l4_mvaTOPWP/I", "l4_mvaTOPv2WP/I", "l4_index/I", "l4_passFO/O", "l4_passTight/O", "l4_ptCone/F", "l4_ptConeGhent/F",
     "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I,jetId/I]",
     "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F,jetId/I]",
-    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F,mvaTOPv2WP/I,jetBTag/F,sip3d/F,pfRelIso03_all/F]",
+    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F,ptConeGhent/F,mvaTOPv2WP/I,jetBTag/F,sip3d/F,pfRelIso03_all/F,passFO/O,passTight/O]",
     "Z1_l1_index/I", "Z1_l2_index/I", "nonZ1_l1_index/I", "nonZ1_l2_index/I",
     "Z1_phi/F", "Z1_pt/F", "Z1_mass/F", "Z1_cosThetaStar/F", "Z1_eta/F", "Z1_lldPhi/F", "Z1_lldR/F",
     "Muon[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,segmentComp/F,nStations/I,nTrackerLayers/I,mediumId/O,tightId/O,isPFcand/B,isTracker/B,isGlobal/B]",
@@ -956,15 +924,17 @@ read_variables_eft = [
 
 ################################################################################
 # define 3l selections
-if "lepVeto" in args.selection:
-    mu_string  = lepString('mu','VL')
-else:
-    mu_string  = lepString('mu','L') + "&&lep_mediumId"
-    
-ele_string = lepString('ele','L')
+# if "lepVeto" in args.selection:
+#     mu_string  = lepString('mu','VL')
+# else:
+#     mu_string  = lepString('mu','L') + "&&lep_mediumId"
+# 
+# ele_string = lepString('ele','L')
 
-# print mu_string
-# print ele_string
+
+mu_string  = "lep_pt>10&&abs(lep_eta)<2.4&&abs(lep_pdgId)==13&&lep_passFO"
+ele_string = "lep_pt>10&&abs(lep_eta)<2.4&&abs(lep_pdgId)==11&&lep_passFO"
+
 def getLeptonSelection( mode ):
     if   mode=="mumumu":   return "Sum$({mu_string})==3&&Sum$({ele_string})==0".format(mu_string=mu_string,ele_string=ele_string)
     elif mode=="mumue":    return "Sum$({mu_string})==2&&Sum$({ele_string})==1".format(mu_string=mu_string,ele_string=ele_string)
@@ -973,6 +943,7 @@ def getLeptonSelection( mode ):
     elif mode=="mumumumu": return "Sum$({mu_string})==4&&Sum$({ele_string})==0".format(mu_string=mu_string,ele_string=ele_string)
     elif mode=="mumuee":   return "Sum$({mu_string})==2&&Sum$({ele_string})==2".format(mu_string=mu_string,ele_string=ele_string)
     elif mode=="eeee":     return "Sum$({mu_string})==0&&Sum$({ele_string})==4".format(mu_string=mu_string,ele_string=ele_string)
+
 
 ################################################################################
 # Set up channels and values for plotting
@@ -1001,7 +972,7 @@ for i_mode, mode in enumerate(allModes):
         read_variables_MC += new_variables
         read_variables    += new_variables
 
-    weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate'] # 'reweightLeptonMVA'
+    weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate', 'reweightLeptonMVA']
     # weightnames = ['weight']
     sys_weights = {
         "BTag_b_UP"     : ('reweightBTag_SF','reweightBTag_SF_b_Up'),
@@ -1068,8 +1039,6 @@ for i_mode, mode in enumerate(allModes):
 
     # Use some defaults
     selection_string = selectionModifier(cutInterpreter.cutString(args.selection)) if selectionModifier is not None else cutInterpreter.cutString(args.selection)
-    if args.mvaTOPv1:
-        selection_string = selection_string.replace("mvaTOPv2", "mvaTOP")
     Plot.setDefaults(stack = stack, weight = plotweights, selectionString = selection_string)
 
     ################################################################################
@@ -1099,10 +1068,31 @@ for i_mode, mode in enumerate(allModes):
     
     plots.append(Plot(
         name = "N_LepID",
-        texX = 'Number of leptons passing the tight ID', texY = 'Number of Events',
+        texX = 'Number of leptons passing the tight ID (out of first 4)', texY = 'Number of Events',
         attribute = lambda event, sample: event.Nlep_tight,
         binning=[5,-0.5,4.5],
     ))
+    
+    plots.append(Plot(
+        name = "N_Lep",
+        texX = 'Number of leptons ', texY = 'Number of Events',
+        attribute = lambda event, sample: event.Nlep,
+        binning=[7,-0.5,6.5],
+    ))
+    
+    plots.append(Plot(
+        name = "N_Lep_passFO",
+        texX = 'Number of leptons passing FO', texY = 'Number of Events',
+        attribute = lambda event, sample: event.Nlep_passFO,
+        binning=[7,-0.5,6.5],
+    ))
+    
+    plots.append(Plot(
+        name = "N_Lep_passTight",
+        texX = 'Number of leptons passing Tight', texY = 'Number of Events',
+        attribute = lambda event, sample: event.Nlep_passTight,
+        binning=[7,-0.5,6.5],
+    ))        
     
     plots.append(Plot(
         name = "l1_pt",
@@ -1110,7 +1100,7 @@ for i_mode, mode in enumerate(allModes):
         addOverFlowBin='both',
         attribute = TreeVariable.fromString( "l1_pt/F" ),
         binning=[40, 0, 400],
-    ))
+    ))    
     
     plots.append(Plot(
         name = "l2_pt",
@@ -1118,8 +1108,8 @@ for i_mode, mode in enumerate(allModes):
         addOverFlowBin='both',
         attribute = TreeVariable.fromString( "l2_pt/F" ),
         binning=[40, 0, 400],
-    ))
-    
+    ))    
+        
     plots.append(Plot(
         name = "l3_pt",
         texX = 'Trailing lepton p_{T} (GeV)', texY = 'Number of Events / 10 GeV',
@@ -1127,7 +1117,6 @@ for i_mode, mode in enumerate(allModes):
         attribute = TreeVariable.fromString( "l3_pt/F" ),
         binning=[40, 0, 400],
     ))
-    
     
     plots.append(Plot(
         name = "fake_bscore_closest",
@@ -1147,6 +1136,31 @@ for i_mode, mode in enumerate(allModes):
         ))
         
     if args.nicePlots:
+            
+        plots.append(Plot(
+            name = "l1_eta",
+            texX = 'Leading lepton #eta', texY = 'Number of Events',
+            addOverFlowBin='both',
+            attribute = TreeVariable.fromString( "l1_eta/F" ),
+            binning=[30, -3, 3],
+        ))
+        
+        plots.append(Plot(
+            name = "l2_eta",
+            texX = 'Subleading lepton #eta', texY = 'Number of Events',
+            addOverFlowBin='both',
+            attribute = TreeVariable.fromString( "l2_eta/F" ),
+            binning=[30, -3, 3],
+        ))
+            
+        plots.append(Plot(
+            name = "l3_eta",
+            texX = 'Trailing lepton #eta', texY = 'Number of Events',
+            addOverFlowBin='both',
+            attribute = TreeVariable.fromString( "l3_eta/F" ),
+            binning=[30, -3, 3],
+        ))
+            
             
         plots.append(Plot(
             name = "Z1_pt_rebin2",
@@ -1289,10 +1303,38 @@ for i_mode, mode in enumerate(allModes):
         ))
         
         plots.append(Plot(
+            name = "l1_passFO",
+            texX = 'Leading lepton FO ID', texY = 'Number of Events',
+            attribute = lambda event, sample: event.l1_passFO,
+            binning=[3, -1.5, 1.5],
+        ))
+
+        plots.append(Plot(
+            name = "l1_passTight",
+            texX = 'Leading lepton Tight ID', texY = 'Number of Events',
+            attribute = lambda event, sample: event.l1_passTight,
+            binning=[3, -1.5, 1.5],
+        ))
+                
+        plots.append(Plot(
             name = "l2_mvaTOPscore_v2",
             texX = 'Subleading lepton MVA v2 score', texY = 'Number of Events',
             attribute = lambda event, sample: event.l2_mvaTOPv2,
             binning=[30, -1.5, 1.5],
+        ))
+        
+        plots.append(Plot(
+            name = "l2_passFO",
+            texX = 'Subleading lepton FO ID', texY = 'Number of Events',
+            attribute = lambda event, sample: event.l2_passFO,
+            binning=[3, -1.5, 1.5],
+        ))
+
+        plots.append(Plot(
+            name = "l2_passTight",
+            texX = 'Subleading lepton Tight ID', texY = 'Number of Events',
+            attribute = lambda event, sample: event.l2_passTight,
+            binning=[3, -1.5, 1.5],
         ))
                 
         plots.append(Plot(
@@ -1300,6 +1342,20 @@ for i_mode, mode in enumerate(allModes):
             texX = 'Trailing lepton MVA v2 score', texY = 'Number of Events',
             attribute = lambda event, sample: event.l3_mvaTOPv2,
             binning=[30, -1.5, 1.5],
+        ))
+        
+        plots.append(Plot(
+            name = "l3_passFO",
+            texX = 'Trailing lepton FO ID', texY = 'Number of Events',
+            attribute = lambda event, sample: event.l3_passFO,
+            binning=[3, -1.5, 1.5],
+        ))
+
+        plots.append(Plot(
+            name = "l3_passTight",
+            texX = 'Trailing lepton Tight ID', texY = 'Number of Events',
+            attribute = lambda event, sample: event.l3_passTight,
+            binning=[3, -1.5, 1.5],
         ))
                 
         if args.doTTbarReco:

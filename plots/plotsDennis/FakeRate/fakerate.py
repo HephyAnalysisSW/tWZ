@@ -27,7 +27,7 @@ from tWZ.Tools.user                      import plot_directory
 from tWZ.Tools.cutInterpreter            import cutInterpreter
 from tWZ.Tools.objectSelection_UL        import lepString, lepStringNoMVA
 from tWZ.Tools.helpers                   import getCollection, cosThetaStarNew, getTheta, gettheta, getphi
-from tWZ.Tools.leptonSF_topMVA           import leptonSF_topMVA
+# from tWZ.Tools.leptonSF_topMVA           import leptonSF_topMVA
 from tWZ.Tools.triggerPrescale           import triggerPrescale
 
 # Analysis
@@ -36,6 +36,7 @@ from Analysis.Tools.puProfileCache       import *
 from Analysis.Tools.puReweighting        import getReweightingFunction
 from Analysis.Tools.leptonJetArbitration     import cleanJetsAndLeptons
 from Analysis.Tools.WeightInfo           import WeightInfo
+from Analysis.Tools.LeptonSF_UL          import LeptonSF
 
 import Analysis.Tools.syncer
 import numpy as np
@@ -49,16 +50,15 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='FakeRate_v4')
+argParser.add_argument('--plot_directory', action='store', default='FakeRate_v5')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
-argParser.add_argument('--selection',      action='store', default='singlelepL-vetoMET')
+argParser.add_argument('--selection',      action='store', default='singlelepFO-vetoAddLepFO-vetoMET')
 argParser.add_argument('--sys',            action='store', default='central')
 argParser.add_argument('--channel',        action='store', default='muon')
 argParser.add_argument('--noPreScale',     action='store_true')
+argParser.add_argument('--useBRIL',        action='store_true')
 argParser.add_argument('--noLargeWeights', action='store_true')
 argParser.add_argument('--reduce',         action='store_true')
-argParser.add_argument('--noLooseSel',     action='store_true')
-argParser.add_argument('--noLooseWP',      action='store_true')
 argParser.add_argument('--mvaTOPv1',       action='store_true')
 
 args = argParser.parse_args()
@@ -101,13 +101,11 @@ else:
 ################################################################################
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
-if args.mvaTOPv1:                     args.plot_directory += "_mvaTOPv1"
 if args.noData:                       args.plot_directory += "_noData"
+if args.useBRIL:                      args.plot_directory += "_useBRIL"
 if args.noPreScale:                   args.plot_directory += "_noPreScale"
 if args.noLargeWeights:               args.plot_directory += "_noLargeWeights"
 if args.reduce:                       args.plot_directory += "_reduce"
-if args.noLooseSel:                   args.plot_directory += "_noLooseSel"
-if args.noLooseWP:                    args.plot_directory += "_noLooseWP"
 if args.sys is not 'central':         args.plot_directory += "_%s" %(args.sys)
 
 
@@ -318,21 +316,23 @@ if args.reduce:
             
 ################################################################################
 # Lepton SF
-# LeptonWP = "loose"
-# if "trilepVL" in args.selection:
-#     LeptonWP = "VL"
-    
-### TODO: SETUP SF FOR MEDIUM WP
-    
-# leptonSF16 = leptonSF_topMVA(2016, LeptonWP)
-# leptonSF17 = leptonSF_topMVA(2017, LeptonWP)
-# leptonSF18 = leptonSF_topMVA(2018, LeptonWP)
+muonWP = "medium"
+elecWP = "tight"
+
+leptonSF = {
+    "UL2016preVFP":  LeptonSF("UL2016_preVFP", muonWP, elecWP),
+    "UL2016":  LeptonSF("UL2016", muonWP, elecWP),
+    "UL2017":  LeptonSF("UL2017", muonWP, elecWP),
+    "UL2018":  LeptonSF("UL2018", muonWP, elecWP),
+}
+
+
 
 ################################################################################
 # Trigger prescale weights for MC
-prescale16 = triggerPrescale(2016)
-prescale17 = triggerPrescale(2017)
-prescale18 = triggerPrescale(2018)
+prescale16 = triggerPrescale(2016, args.useBRIL)
+prescale17 = triggerPrescale(2017, args.useBRIL)
+prescale18 = triggerPrescale(2018, args.useBRIL)
 
 ################################################################################
 # Text on the plots
@@ -414,61 +414,60 @@ def passedOfflineCut( event, triggername ):
             if event.JetGood_pt[i] > maxjet_pt_separated:
                 maxjet_pt_separated = event.JetGood_pt[i]
     # get conept 
-    ptcone = event.lep_ptCone[event.l1_index]
+    ptcone = event.l1_ptConeGhent
     # check cuts 
     if (ptcone > ptcone_min) and (ptcone < ptcone_max) and (event.l1_pt > leppt_min) and (maxjet_pt_separated > jetpt_min):
         return True 
     else:
         return False
 
-
-def looseSelection(lepindex, event):
-    if args.noLooseSel:
-        return True    
-    
-    if lepindex < 0:
-        return False
-    
-    if event.lep_sip3d[lepindex] > 8:
-        return False
-    if event.lep_pfRelIso03_all[lepindex] > 0.4:
-        return False
-    
-    # elec
-    if abs(event.lep_pdgId[lepindex]) == 11:
-        eleindex = event.lep_eleIndex[lepindex]
-        if not event.Electron_convVeto[eleindex]:
-            return False
-        # if event.Electron_tightCharge[eleindex] < 1:
-        #     return False
-        if ord(event.Electron_lostHits[eleindex]) > 1:
-            return False
-            
-        passID = False
-        # if event.Electron_mvaFall17V2Iso_WP80:
-        if event.lep_jetBTag[lepindex] < 0.1:
-            jetPtRatio = 1/(event.Electron_jetRelIso[eleindex]+1)
-            if (event.year == 2016 and jetPtRatio > 0.5) or (event.year in [2017,2018] and jetPtRatio > 0.4):
-                passID = True
-        if event.l1_mvaTOPv2WP >= 4:
-            passID = True   
-        if not passID:
-            return False
-    
-    # muon
-    if abs(event.lep_pdgId[lepindex]) == 13:
-        muindex = event.lep_muIndex[lepindex]
-        passID = False
-        if event.lep_jetBTag[lepindex] < 0.025:
-            jetPtRatio = 1/(event.Muon_jetRelIso[muindex]+1)
-            if jetPtRatio > 0.45:
-                passID = True
-        if event.l1_mvaTOPv2WP >= 4:
-            passID = True   
-        if not passID:
-            return False                
-                        
-    return True
+# def looseSelection(lepindex, event):
+#     if args.noLooseSel:
+#         return True    
+# 
+#     if lepindex < 0:
+#         return False
+# 
+#     if event.lep_sip3d[lepindex] > 8:
+#         return False
+#     if event.lep_pfRelIso03_all[lepindex] > 0.4:
+#         return False
+# 
+#     # elec
+#     if abs(event.lep_pdgId[lepindex]) == 11:
+#         eleindex = event.lep_eleIndex[lepindex]
+#         if not event.Electron_convVeto[eleindex]:
+#             return False
+#         # if event.Electron_tightCharge[eleindex] < 1:
+#         #     return False
+#         if ord(event.Electron_lostHits[eleindex]) > 1:
+#             return False
+# 
+#         passID = False
+#         # if event.Electron_mvaFall17V2Iso_WP80:
+#         if event.lep_jetBTag[lepindex] < 0.1:
+#             jetPtRatio = 1/(event.Electron_jetRelIso[eleindex]+1)
+#             if (event.year == 2016 and jetPtRatio > 0.5) or (event.year in [2017,2018] and jetPtRatio > 0.4):
+#                 passID = True
+#         if event.l1_mvaTOPv2WP >= 4:
+#             passID = True   
+#         if not passID:
+#             return False
+# 
+#     # muon
+#     if abs(event.lep_pdgId[lepindex]) == 13:
+#         muindex = event.lep_muIndex[lepindex]
+#         passID = False
+#         if event.lep_jetBTag[lepindex] < 0.025:
+#             jetPtRatio = 1/(event.Muon_jetRelIso[muindex]+1)
+#             if jetPtRatio > 0.45:
+#                 passID = True
+#         if event.l1_mvaTOPv2WP >= 4:
+#             passID = True   
+#         if not passID:
+#             return False                
+# 
+#     return True
 
     
 ################################################################################
@@ -521,21 +520,11 @@ def applyAdditionalCuts(sample, event):
         event.passedCuts = False
     ####
     id = event.lep_pdgId[event.l1_index]
-    passedMediumId = True if ( abs(id)==11 or (abs(id)==13 and event.lep_mediumId[event.l1_index]) ) else False
-    passedLooseDef = looseSelection(event.l1_index, event)
-    event.passedLoose = passedLooseDef and event.passedCuts and passedMediumId and (event.l1_mvaTOPv2WP>=2 or args.noLooseWP)
-    event.passedMedium = passedLooseDef and event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=3
-    event.passedTight = passedLooseDef and event.passedCuts and passedMediumId and event.l1_mvaTOPv2WP>=4
-    event.tightLepton = passedLooseDef and passedMediumId and event.l1_mvaTOPv2WP>=4 # also store information about lepton independent from trigger
+    event.passedLoose = event.passedCuts and event.l1_passFO
+    event.passedTight = event.passedCuts and event.l1_passFO and event.l1_passTight
+    event.tightLepton = event.l1_passTight # also store information about lepton independent from trigger
     event.passedTriggers = passedTriggersAndCuts
-    # print event.passedTriggers
     
-    event.sip3d = event.lep_sip3d[event.l1_index]
-    event.Irel = event.lep_pfRelIso03_all[event.l1_index]
-    event.convVeto = event.Electron_convVeto[event.lep_eleIndex[event.l1_index]] if abs(id)==11 else float('nan')
-    event.lostHits = ord(event.Electron_lostHits[event.lep_eleIndex[event.l1_index]]) if abs(id)==11 else float('nan')
-    event.eleMVA = event.Electron_mvaFall17V2Iso_WP80[event.lep_eleIndex[event.l1_index]] if abs(id)==11 else float('nan')
-    event.jetRatio = 1./(event.Electron_jetRelIso[event.lep_eleIndex[event.l1_index]]+1)  if abs(id)==11 else 1./(event.Muon_jetRelIso[event.lep_muIndex[event.l1_index]]+1) 
 sequence.append( applyAdditionalCuts )
     
 def getMTfix(sample, event):
@@ -548,7 +537,7 @@ sequence.append(getMTfix)
 def getBin(sample, event):
     Nbins_pt = len(boundaries_pt)
     Nbins_eta = len(boundaries_eta)
-    pt = event.lep_ptCone[event.l1_index]
+    pt = event.l1_ptConeGhent
     eta = event.l1_eta
     bin_pt = 0
     bin_eta = 0
@@ -595,19 +584,53 @@ def getClosestJetFlavor(sample, event):
     else:
         event.bscore_closest = float('nan')
 sequence.append(getClosestJetFlavor)
+
+def getLeptonSF(sample, event):
+    if sample.isData:
+        return 
+    SF = 1
+    # Only apply if lepton passes tight criterion
+    if event.l1_passTight:
+        # Search for variation type and direction
+        uncert = "syst"
+        if args.sys == "LepIDstat_UP" or args.sys == "LepIDstat_DOWN":
+            uncert = "stat"
+        sigma = 0
+        if args.sys == "LepIDstat_UP" or args.sys == "LepIDsys_UP":
+            sigma = 1
+        elif args.sys == "LepIDstat_DOWN" or args.sys == "LepIDsys_DOWN":
+            sigma = -1
+        idx1 = event.l1_index
+        pdgId = event.lep_pdgId[idx1]
+        eta = event.lep_eta[idx1]
+        if abs(pdgId)==11:
+            eta+=event.Electron_deltaEtaSC[event.lep_eleIndex[idx1]]
+        pt = event.lep_pt[idx1]
+        if event.year == 2016:
+            if event.preVFP:
+                SF *= leptonSF["UL2016preVFP"].getSF(pdgId, pt, eta, uncert, sigma)
+            else:
+                SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
+        elif event.year == 2017:
+                SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
+        elif event.year == 2018:
+                SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
+    event.reweightLeptonMVA = SF
+sequence.append( getLeptonSF )
+
 ################################################################################
 # Read variables
 
 read_variables = [
     "weight/F", "year/I", "preVFP/O", "met_pt/F", "met_phi/F", "nJetGood/I", "PV_npvsGood/I",  "nJet/I", "nBTag/I", 
-    "l1_pt/F", "l1_eta/F" , "l1_phi/F", "l1_mvaTOP/F", "l1_mvaTOPv2/F", "l1_mvaTOPWP/I", "l1_mvaTOPv2WP/I", "l1_index/I",
+    "l1_pt/F", "l1_eta/F" , "l1_phi/F", "l1_mvaTOP/F", "l1_mvaTOPv2/F", "l1_mvaTOPWP/I", "l1_mvaTOPv2WP/I", "l1_index/I", "l1_passFO/O", "l1_passTight/O", "l1_ptCone/F", "l1_ptConeGhent/F",
     # "l2_pt/F", "l2_eta/F" , "l2_phi/F", "l2_mvaTOP/F", "l2_mvaTOPv2/F", "l2_mvaTOPWP/I", "l2_mvaTOPv2WP/I", "l2_index/I",
     # "l3_pt/F", "l3_eta/F" , "l3_phi/F", "l3_mvaTOP/F", "l3_mvaTOPv2/F", "l3_mvaTOPWP/I", "l3_mvaTOPv2WP/I", "l3_index/I",
     # "l4_pt/F", "l4_eta/F" , "l4_phi/F", "l4_mvaTOP/F", "l4_mvaTOPv2/F", "l4_mvaTOPWP/I", "l4_mvaTOPv2WP/I", "l4_index/I",
     "MET_pt/F", "MET_phi/F",
     "JetGood[pt/F,eta/F,phi/F,area/F,btagDeepB/F,btagDeepFlavB/F,index/I]",
     "Jet[pt/F,eta/F,phi/F,mass/F,btagDeepFlavB/F]",
-    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F,jetBTag/F,sip3d/F,pfRelIso03_all/F]",
+    "lep[pt/F,eta/F,phi/F,pdgId/I,muIndex/I,eleIndex/I,mediumId/O,ptCone/F,ptConeGhent/F,jetBTag/F,sip3d/F,pfRelIso03_all/F,passFO/O,passTight/O]",
     # "Z1_l1_index/I", "Z1_l2_index/I", "nonZ1_l1_index/I", "nonZ1_l2_index/I",
     # "Z1_phi/F", "Z1_pt/F", "Z1_mass/F", "Z1_cosThetaStar/F", "Z1_eta/F", "Z1_lldPhi/F", "Z1_lldR/F",
     "Muon[pt/F,eta/F,phi/F,dxy/F,dz/F,ip3d/F,sip3d/F,jetRelIso/F,miniPFRelIso_all/F,pfRelIso03_all/F,mvaTTH/F,pdgId/I,segmentComp/F,nStations/I,nTrackerLayers/I,mediumId/O,tightId/O,isPFcand/B,isTracker/B,isGlobal/B]",
@@ -646,7 +669,7 @@ if args.sys in jet_variations:
     read_variables_MC += new_variables
     read_variables    += new_variables
 
-weightnames = ['weight', 'reweightPU', 'reweightL1Prefire', 'reweightTriggerPrescale'] #'reweightTrigger'] # 'reweightLeptonMVA'
+weightnames = ['weight', 'reweightPU', 'reweightL1Prefire', 'reweightTriggerPrescale', 'reweightLeptonMVA'] #'reweightTrigger']
 # weightnames = ['weight']
 sys_weights = {
     'Trigger_UP'    : ('reweightTrigger','reweightTriggerUp'),
@@ -715,59 +738,6 @@ Plot2D.setDefaults(stack = stack, weight = plotweights, selectionString = select
 
 plots = []
 plots2D = []
-
-plots.append(Plot(
-    name = "sip3d",
-    texX = 'sip3d', texY = 'Number of Events',
-    attribute = lambda event, sample: event.sip3d,
-    addOverFlowBin='upper',
-    binning=[17, -0.5, 16.5],
-))
-
-plots.append(Plot(
-    name = "Irel",
-    texX = 'Irel', texY = 'Number of Events',
-    attribute = lambda event, sample: event.Irel,
-    addOverFlowBin='upper',
-    binning=[20, 0.0, 1.0],
-))
-
-plots.append(Plot(
-    name = "convVeto",
-    texX = 'convVeto', texY = 'Number of Events',
-    attribute = lambda event, sample: event.convVeto,
-    addOverFlowBin='upper',
-    binning=[3, -1.5, 1.5],
-))
-
-plots.append(Plot(
-    name = "lostHits",
-    texX = 'lostHits', texY = 'Number of Events',
-    attribute = lambda event, sample: event.lostHits,
-    addOverFlowBin='upper',
-    binning=[5, -1.5, 3.5],
-))
-
-
-plots.append(Plot(
-    name = "eleMVA",
-    texX = 'Passed electron MVA', texY = 'Number of Events',
-    attribute = lambda event, sample: event.eleMVA,
-    addOverFlowBin='upper',
-    binning=[3, -1.5, 1.5],
-))
-
-
-plots.append(Plot(
-    name = "jetRatio",
-    texX = 'jetRatio', texY = 'Number of Events',
-    attribute = lambda event, sample: event.jetRatio,
-    addOverFlowBin='upper',
-    binning=[30, 0.0, 1.5],
-))
-
-
-
 
 plots.append(Plot(
     name = "dR_closest",
@@ -854,7 +824,14 @@ plots.append(Plot(
 plots.append(Plot(
     name = "L_cone_pt",
     texX = 'Loose Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedLoose else float('nan'),
+    attribute = lambda event, sample: event.l1_ptConeGhent if event.passedLoose else float('nan'),
+    binning=[25, 0, 150],
+))
+
+plots.append(Plot(
+    name = "L_cone_pt_old",
+    texX = 'Loose Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.l1_ptCone if event.passedLoose else float('nan'),
     binning=[25, 0, 150],
 ))
 
@@ -869,43 +846,6 @@ plots.append(Plot(
     name = "L_MTfix",
     texX = 'Loose m_{T}^{fix}', texY = 'Number of Events',
     attribute = lambda event, sample: event.MTfix if event.passedLoose else float('nan'),
-    binning=[10, 0, 140],
-))
-
-###############################
-
-plots.append(Plot(
-    name = "M_MediumId",
-    texX = 'Medium ID', texY = 'Number of Events',
-    attribute = lambda event, sample: event.mediumID if event.passedMedium else float('nan'),
-    binning=[3, -1.5, 1.5],
-))
-
-plots.append(Plot(
-    name = "M_lep_pt",
-    texX = 'Medium Lepton p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = lambda event, sample: event.l1_pt if event.passedMedium else float('nan'),
-    binning=[25, 0, 400],
-))
-
-plots.append(Plot(
-    name = "M_cone_pt",
-    texX = 'Medium Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedMedium else float('nan'),
-    binning=[25, 0, 150],
-))
-
-plots.append(Plot(
-    name = "M_lep_eta",
-    texX = 'Medium Lepton #eta', texY = 'Number of Events',
-    attribute = lambda event, sample: event.l1_eta if event.passedMedium else float('nan'),
-    binning=[30, -3, 3],
-))
-
-plots.append(Plot(
-    name = "M_MTfix",
-    texX = 'Medium m_{T}^{fix}', texY = 'Number of Events',
-    attribute = lambda event, sample: event.MTfix if event.passedMedium else float('nan'),
     binning=[10, 0, 140],
 ))
 
@@ -928,7 +868,7 @@ plots.append(Plot(
 plots.append(Plot(
     name = "T_cone_pt",
     texX = 'Tight Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedTight else float('nan'),
+    attribute = lambda event, sample: event.l1_ptConeGhent if event.passedTight else float('nan'),
     binning=[25, 0, 150],
 ))
 
@@ -962,7 +902,7 @@ for i in range(len(boundaries_pt)):
         plots.append(Plot(
             name = "L_cone_pt"+suffix,
             texX = 'Loose Lepton cone p_{T} (GeV)', texY = 'Number of Events',
-            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.lep_ptCone[event.l1_index]  if (event.passedLoose and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_ptConeGhent  if (event.passedLoose and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
             binning=[25, 0, 150],
         ))
         
@@ -979,32 +919,6 @@ for i in range(len(boundaries_pt)):
             binning=[10, 0, 140],
         ))
         plots.append(Plot(
-            name = "M_lep_pt"+suffix,
-            texX = 'Medium Lepton p_{T} (GeV)', texY = 'Number of Events',
-            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_pt if (event.passedMedium and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
-            binning=[25, 0, 400],
-        ))
-        
-        plots.append(Plot(
-            name = "M_cone_pt"+suffix,
-            texX = 'Medium Lepton cone p_{T} (GeV)', texY = 'Number of Events',
-            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.lep_ptCone[event.l1_index]  if (event.passedMedium and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
-            binning=[25, 0, 150],
-        ))
-        
-        plots.append(Plot(
-            name = "M_lep_eta"+suffix,
-            texX = 'Medium Lepton #eta', texY = 'Number of Events',
-            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_eta if (event.passedMedium and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
-            binning=[30, -3, 3],
-        ))
-        plots.append(Plot(
-            name = "M_MTfix"+suffix,
-            texX = 'Medium m_{T}^{fix}', texY = 'Number of Events',
-            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.MTfix if (event.passedMedium and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
-            binning=[10, 0, 140],
-        ))
-        plots.append(Plot(
             name = "T_lep_pt"+suffix,
             texX = 'Tight Lepton p_{T} (GeV)', texY = 'Number of Events',
             attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_pt if (event.passedTight and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
@@ -1014,7 +928,7 @@ for i in range(len(boundaries_pt)):
         plots.append(Plot(
             name = "T_cone_pt"+suffix,
             texX = 'Tight Lepton cone p_{T} (GeV)', texY = 'Number of Events',
-            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.lep_ptCone[event.l1_index]  if (event.passedTight and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_ptConeGhent  if (event.passedTight and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
             binning=[25, 0, 150],
         ))
         
@@ -1052,28 +966,19 @@ plots2D.append(Plot2D(
     name = "lep_pt_eta_loose",
     texX = 'Lepton cone p_{T} (GeV)', texY = 'Lepton #eta',
     attribute = (
-        lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedLoose else float('nan'), 
-        lambda event, sample: abs(event.l1_eta)                if event.passedLoose else float('nan'),
+        lambda event, sample: event.l1_ptConeGhent if event.passedLoose else float('nan'), 
+        lambda event, sample: abs(event.l1_eta)    if event.passedLoose else float('nan'),
     ),
     binning = [binning_pt, binning_eta],
 ))
 
-plots2D.append(Plot2D(
-    name = "lep_pt_eta_medium",
-    texX = 'Lepton cone p_{T} (GeV)', texY = 'Lepton #eta',
-    attribute = (
-        lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedMedium else float('nan'), 
-        lambda event, sample: abs(event.l1_eta)                if event.passedMedium else float('nan'),
-    ),
-    binning = [binning_pt, binning_eta],
-))
 
 plots2D.append(Plot2D(
     name = "lep_pt_eta_tight",
     texX = 'Lepton cone p_{T} (GeV)', texY = 'Lepton #eta',
     attribute = (
-        lambda event, sample: event.lep_ptCone[event.l1_index] if event.passedTight else float('nan'), 
-        lambda event, sample: abs(event.l1_eta)                if event.passedTight else float('nan'),
+        lambda event, sample: event.l1_ptConeGhent if event.passedTight else float('nan'), 
+        lambda event, sample: abs(event.l1_eta)    if event.passedTight else float('nan'),
     ),
     binning = [binning_pt, binning_eta],
 ))
@@ -1091,7 +996,7 @@ drawPlots(plots)
 ################################################################################
 
 
-plots_root = ["lep_pt_eta_loose", "lep_pt_eta_medium", "lep_pt_eta_tight"] + list_of_binned_plots + list_of_trigger_plots
+plots_root = ["lep_pt_eta_loose", "lep_pt_eta_tight"] + list_of_binned_plots + list_of_trigger_plots
 
 # Write Result Hist in root file
 print "Now write results in root file."

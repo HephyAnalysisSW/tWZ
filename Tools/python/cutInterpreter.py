@@ -37,45 +37,22 @@ for (l1cut, l2cut, l3cut) in failcases:
     leptonTCRstring += ")"
 leptonTCRstring += ")"
 
-
 ################################################################################
 
 from tWZ.Tools.objectSelection import lepString
 special_cuts = {
-    "singlelepVL":     "l1_pt>10&&l1_mvaTOPv2WP>=1",
-    "singlelepL":      "l1_pt>10&&l1_mvaTOPv2WP>=2",
-    "singlelepM":      "l1_pt>10&&l1_mvaTOPv2WP>=3",
-    "singlelepT":      "l1_pt>10&&l1_mvaTOPv2WP>=4",
-    "vetoAddLepVL":    "Sum$(lep_pt>10&&abs(lep_eta)<2.4&&lep_mvaTOPv2WP>=1)==1",
-    "vetoAddLepL":     "Sum$(lep_pt>10&&abs(lep_eta)<2.4&&lep_mvaTOPv2WP>=2)==1",
-    "trilepVL":        "l1_pt>40&&l2_pt>20&&l3_pt>10",
-    "trilepL" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=2&&l2_mvaTOPv2WP>=2&&l3_mvaTOPv2WP>=2",
-    "trilepM" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3",
-    "trilepT" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4",
-    "qualepM" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP>=3",
-    "qualepT" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP>=4",
-    "trilepTCR":       "l1_pt>40&&l2_pt>20&&l3_pt>10&&"+leptonTCRstring,
-    "qualepMCR" :      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&((l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP<3) || (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP<3&&l4_mvaTOPv2WP>=3) || (l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP<3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP>=3) || (l1_mvaTOPv2WP<3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3&&l4_mvaTOPv2WP>=3) )",
-    "qualepTCR" :      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&((l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP<4) || (l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP<4&&l4_mvaTOPv2WP>=4) || (l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP<4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP>=4) || (l1_mvaTOPv2WP<4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4&&l4_mvaTOPv2WP>=4) )",
-    "trilepVetoL":      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP<2&&l2_mvaTOPv2WP<2&&l3_mvaTOPv2WP<2",
-    "trilepVetoM":      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP<3&&l2_mvaTOPv2WP<3&&l3_mvaTOPv2WP<3",
-    "trilepVetoT":      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP<4&&l2_mvaTOPv2WP<4&&l3_mvaTOPv2WP<4",
-    "trilepLnoT":      "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_mvaTOPv2WP>=2&&l2_mvaTOPv2WP>=2&&l3_mvaTOPv2WP>=2&&l1_mvaTOPv2WP<4&&l2_mvaTOPv2WP<4&&l3_mvaTOPv2WP<4",
-    "trilep4tVL":      "l1_pt>60&&l2_pt>30&&l3_pt>20",
-    "trilep4tL" :      "l1_pt>60&&l2_pt>30&&l3_pt>20&&l1_mvaTOPv2WP>=2&&l2_mvaTOPv2WP>=2&&l3_mvaTOPv2WP>=2",
-    "trilep4tM" :      "l1_pt>60&&l2_pt>30&&l3_pt>20&&l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3&&l3_mvaTOPv2WP>=3",
-    "trilep4tT" :      "l1_pt>60&&l2_pt>30&&l3_pt>20&&l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4&&l3_mvaTOPv2WP>=4",
-    "dilepVL":        "l1_pt>40&&l2_pt>20",
-    "dilepL" :        "l1_pt>40&&l2_pt>20&&l1_mvaTOPv2WP>=2&&l2_mvaTOPv2WP>=2",
-    "dilepM" :        "l1_pt>40&&l2_pt>20&&l1_mvaTOPv2WP>=3&&l2_mvaTOPv2WP>=3",
-    "dilepT" :        "l1_pt>40&&l2_pt>20&&l1_mvaTOPv2WP>=4&&l2_mvaTOPv2WP>=4",
+    "singlelepFO":         "l1_pt>10&&abs(l1_eta)<2.4&&l1_passFO",
+    "singlelepT":          "l1_pt>10&&abs(l1_eta)<2.4&&l1_passTight",
+    "vetoAddLepFO":        "Sum$(lep_pt>10&&abs(lep_eta)<2.4&&lep_passFO)==1",
+    "trilepFO":            "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_passFO&&l2_passFO&&l3_passFO&&Sum$(lep_passFO)==3",
+    "trilepT" :            "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_passTight&&l2_passTight&&l3_passTight&&Sum$(lep_passFO)==3",
+    "trilepFOnoT" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_passFO&&l2_passFO&&l3_passFO&&Sum$(lep_passFO)==3&&((!(l1_passTight))||(!(l2_passTight))||(!(l3_passTight)))",
+    "qualepT" :            "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&l1_passTight&&l2_passTight&&l3_passTight&&l4_passTight",
+    "trilepTCR":           "l1_pt>40&&l2_pt>20&&l3_pt>10&&"+leptonTCRstring,
     "onZ1"   : "abs(Z1_mass-91.2)<10",
     "onZ2"   : "abs(Z2_mass-91.2)<10",
     "offZ1"    : "(abs(Z1_mass-91.2)>10)",
     "offZ2"  : "(!(abs(Z2_mass-91.2)<20))",
-    "trilep": "l1_pt>40&&l2_pt>20&&l3_pt>10",
-    "triMuon": "Sum$(lep_pt>40&&abs(lep_eta)<2.4&&lep_mediumId&&abs(lep_pdgId)==13)>=1 && Sum$(lep_pt>20&&abs(lep_eta)<2.4&&lep_mediumId&&abs(lep_pdgId)==13)>=2 && Sum$(lep_pt>10&&abs(lep_eta)<2.4&&lep_mediumId&&abs(lep_pdgId)==13)==3",
-    "vetoElec": "Sum$(lep_pt>10&&abs(lep_eta)<2.4&&abs(lep_pdgId)==11)==0",
     "vetoMET" : "met_pt<20"
   }
 

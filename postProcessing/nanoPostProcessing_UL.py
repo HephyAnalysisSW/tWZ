@@ -776,20 +776,16 @@ def filler( event ):
     
     # Calculate variables for mvaTOP and get mvaTOP score 
     for iLep, lep in enumerate(leptons):
-        # closest jet 
-        dRmin = 0.4
-        bscore_nextjet = 0
         ptCone = 0.67*lep['pt']*(1+lep['jetRelIso']) # if no jet in 0.4, jetRelIso = pfRelIso04_all
         ptConeGhent = 0.66*lep['pt']*(1+lep['jetRelIso']) if abs(lep['pdgId'])==13 else 0.72*lep['pt']*(1+lep['jetRelIso'])
-        for j in all_jets:
-            # print j['eta'], j['phi'], j['btagDeepFlavB']
-            deta = j['eta'] - lep['eta']
-            dphi = deltaPhi(j['phi'], lep['phi']) # deltaPhi has to be between -pi and +pi
-            dR = sqrt( deta*deta + dphi*dphi )
-            if dR < dRmin:
-                dRmin = dR
-                bscore_nextjet = j['btagDeepFlavB']
-                ptCone = 0.67*j['pt'] # modify ptCone if jet is found within 0.4
+        # find closest jet 
+        bscore_nextjet = 0
+        jetidx = lep['jetIdx']
+        if jetidx >= 0:
+            closest_jet = all_jets[jetidx]
+            bscore_nextjet = closest_jet['btagDeepFlavB']
+            ptCone = 0.67*closest_jet['pt'] # modify ptCone if jet is found within 0.4
+        ####
         lep['jetBTag'] = bscore_nextjet
         lep['ptCone'] = ptCone
         lep['ptConeGhent'] = ptConeGhent        

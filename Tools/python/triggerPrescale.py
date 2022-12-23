@@ -1,38 +1,71 @@
 
 class triggerPrescale:
     
-    def __init__(self, year):
-        # Prescales are from 
-        if year == 2016:
-            self.prescales={
-                "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  5140,
-                "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 572.4,
-                "HLT_Mu3_PFJet40":                    4849,
-                "HLT_Mu8":                            9123,
-                "HLT_Mu17":                           127,
-            }
-        elif year == 2017:
-            self.prescales={
-                "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  11364,
-                "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1167,
-                "HLT_Mu3_PFJet40":                    9006,
-                "HLT_Mu8":                            15943,
-                "HLT_Mu17":                           592.9,
-                "HLT_Mu20":                           72.3,
-                "HLT_Mu27":                           224.5,
-            }
-        elif year == 2018:
-            self.prescales={
-                "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  7569,
-                "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1194, 
-                "HLT_Mu3_PFJet40":                    10713,
-                "HLT_Mu8":                            7261,
-                "HLT_Mu17":                           974, 
-                "HLT_Mu20":                           755,  
-                "HLT_Mu27":                           301,
-            }
-        else:
-            raise NotImplementedError("Trigger prescaling not implemented for year = %i"%year)
+    def __init__(self, year, useBril=False):
+        if useBril:
+            # From BRIL
+            if year == 2016:
+                self.prescales={
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  1.,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1.,
+                    "HLT_Mu3_PFJet40":                    1.,
+                    "HLT_Mu8":                            1.,
+                    "HLT_Mu17":                           1.,
+                }
+            elif year == 2017:
+                self.prescales={
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  1.,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1.,
+                    "HLT_Mu3_PFJet40":                    1.,
+                    "HLT_Mu8":                            1.,
+                    "HLT_Mu17":                           1.,
+                    "HLT_Mu20":                           1.,
+                    "HLT_Mu27":                           1.,
+                }
+            elif year == 2018:
+                self.prescales={
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  1.,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1., 
+                    "HLT_Mu3_PFJet40":                    1.,
+                    "HLT_Mu8":                            1.,
+                    "HLT_Mu17":                           1., 
+                    "HLT_Mu20":                           1.,  
+                    "HLT_Mu27":                           1.,
+                }  
+            else:
+                raise NotImplementedError("Trigger prescaling not implemented for year = %i"%year)
+        else:      
+            # Measured myself
+            if year == 2016:
+                self.prescales={
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  1.,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1.,
+                    "HLT_Mu3_PFJet40":                    1.,
+                    "HLT_Mu8":                            1.,
+                    "HLT_Mu17":                           1.,
+                }
+            elif year == 2017:
+                self.prescales={
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  11341.9201097,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1077.31361125,
+                    "HLT_Mu3_PFJet40":                    5942.16123582,
+                    "HLT_Mu8":                            14223.0827619,
+                    "HLT_Mu17":                           667.316989991,
+                    "HLT_Mu20":                           82.2314694334,
+                    "HLT_Mu27":                           210.915192962,
+                }
+            elif year == 2018:
+                self.prescales={
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  7681,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1259, 
+                    "HLT_Mu3_PFJet40":                    10215,
+                    "HLT_Mu8":                            7420,
+                    "HLT_Mu17":                           947, 
+                    "HLT_Mu20":                           715,  
+                    "HLT_Mu27":                           339,
+                }
+            else:
+                raise NotImplementedError("Trigger prescaling not implemented for year = %i"%year)
 
     def getWeight(self, triggerlist):
         # trigger list must contain the names of all triggers that fired (of those implemented here)
