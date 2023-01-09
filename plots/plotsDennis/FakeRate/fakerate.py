@@ -50,7 +50,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='FakeRate_v5')
+argParser.add_argument('--plot_directory', action='store', default='FakeRate_v6')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='singlelepFO-vetoAddLepFO-vetoMET')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -59,7 +59,6 @@ argParser.add_argument('--noPreScale',     action='store_true')
 argParser.add_argument('--useBRIL',        action='store_true')
 argParser.add_argument('--noLargeWeights', action='store_true')
 argParser.add_argument('--reduce',         action='store_true')
-argParser.add_argument('--mvaTOPv1',       action='store_true')
 
 args = argParser.parse_args()
 
@@ -321,9 +320,9 @@ elecWP = "tight"
 
 leptonSF = {
     "UL2016preVFP":  LeptonSF("UL2016_preVFP", muonWP, elecWP),
-    "UL2016":  LeptonSF("UL2016", muonWP, elecWP),
-    "UL2017":  LeptonSF("UL2017", muonWP, elecWP),
-    "UL2018":  LeptonSF("UL2018", muonWP, elecWP),
+    "UL2016":        LeptonSF("UL2016",        muonWP, elecWP),
+    "UL2017":        LeptonSF("UL2017",        muonWP, elecWP),
+    "UL2018":        LeptonSF("UL2018",        muonWP, elecWP),
 }
 
 
@@ -612,9 +611,9 @@ def getLeptonSF(sample, event):
             else:
                 SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
         elif event.year == 2017:
-                SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
+                SF *= leptonSF["UL2017"].getSF(pdgId, pt, eta, uncert, sigma)
         elif event.year == 2018:
-                SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
+                SF *= leptonSF["UL2018"].getSF(pdgId, pt, eta, uncert, sigma)
     event.reweightLeptonMVA = SF
 sequence.append( getLeptonSF )
 
@@ -722,8 +721,6 @@ else:
 
 # Use some defaults
 selection_string = cutInterpreter.cutString(args.selection)
-if args.mvaTOPv1:
-    selection_string = selection_string.replace("mvaTOPv2", "mvaTOP")
     
 if args.channel == "muon":
     selection_string += "&&(abs(lep_pdgId[l1_index])==13)&&lep_mediumId[l1_index]"
