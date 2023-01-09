@@ -52,15 +52,7 @@ python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --tri
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M10to50_LO --nJobs=42 --job=39
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M10to50_LO --nJobs=42 --job=40
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M10to50_LO --nJobs=42 --job=41
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 --nJobs=35 --job=8
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 --nJobs=35 --job=10
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 --nJobs=35 --job=14
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 --nJobs=35 --job=17
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 --nJobs=35 --job=19
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 --nJobs=35 --job=23
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 --nJobs=35 --job=29
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 --nJobs=35 --job=31
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample DYJetsToLL_M50 --nJobs=35 --job=34
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample TTLep_pow_CP5 --nJobs=155 --job=33
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample TTLep_pow_CP5 --nJobs=155 --job=34
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample TTLep_pow_CP5 --nJobs=155 --job=35
@@ -266,8 +258,6 @@ python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --tri
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample TTSingleLep_pow_CP5 --nJobs=200 --job=197
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample TTSingleLep_pow_CP5 --nJobs=200 --job=198
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample TTSingleLep_pow_CP5 --nJobs=200 --job=199
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample WJetsToLNu --nJobs=47 --job=23
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample WJetsToLNu --nJobs=47 --job=30
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample ZZ --nJobs=10 --job=8
 python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample ZZ --nJobs=10 --job=9
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample SingleElectron_Run2016Bver1_preVFPpython nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample SingleElectron_Run2016F_preVFP --nJobs=10 --job=9
+python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim singlelep --triggerSelection --year UL2016_preVFP --processingEra tWZ_UL_nAODv9_v1 --sample SingleElectron_Run2016Bver1_preVFP
