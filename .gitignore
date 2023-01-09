@@ -111,3 +111,6 @@ venv.bak/
 # Data cards
 plots/plotsDennis/DataCards/data/*
 plots/plotsDennis/DataCards/data_statonly/*
+
+# Missing files files
+postProcessing/missingFiles*.sh
