@@ -13,16 +13,19 @@ logger    = logger.get_logger(   "INFO", logFile = None)
 
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
-# path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v5_noPreScale/"
-path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v5_noPreScale_reduce/"
-years = ["UL2017", "UL2018"]
+path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v7_noPreScale/"
+# path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v6_noPreScale_reduce/"
+years = ["UL2016preVFP", "UL2016", "UL2017", "UL2018"]
+# years = ["UL2018"]
+
 channels = ["elec", "muon"]
-# channels = ["elec"]
+# channels = ["muon"]
 selection = "singlelepT-vetoAddLepFO-met40"
 triggerlist = {
     "elec" : ["HLT_Ele8_CaloIdM_TrackIdM_PFJet30","HLT_Ele17_CaloIdM_TrackIdM_PFJet30"],
     "muon" : ["HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17","HLT_Mu20","HLT_Mu27"],
 }
+triggerlist
 
 QCDsamples = {
     "elec": ["QCD_EMEnriched", "QCD_bcToE"],
@@ -51,6 +54,8 @@ for year in years:
     for channel in channels:
         logger.info("Running channel %s", channel)
         for trigger in triggerlist[channel]:
+            # if "2016" in year and trigger in ["HLT_Mu20","HLT_Mu27"]:
+            #     continue
             logger.info("Running trigger %s", trigger)
             backgrounds = ["Wjets","WZ", "ZZ", "WW", "TTbar", "DY"]+QCDsamples[channel]
             filename = path+year+"/"+channel+"/"+selection+"/Results.root"
