@@ -50,7 +50,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v4')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v5')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -76,12 +76,14 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 variations = [
     "Fakerate_UP", "Fakerate_DOWN",
     "Trigger_UP", "Trigger_DOWN",
+    "Prefire_UP", "Prefire_DOWN",
     "LepIDstat_UP", "LepIDstat_DOWN",
     "LepIDsys_UP", "LepIDsys_DOWN",
     "BTag_b_UP", "BTag_b_DOWN",
     "BTag_l_UP", "BTag_l_DOWN",
     "PU_UP", "PU_DOWN",
     "JES_UP", "JES_DOWN",
+    "JER_UP", "JER_DOWN",
     "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN",
 ]
 
@@ -430,14 +432,19 @@ leptonSF = {
 }
 
 
-
+################################################################################
 # FakerateSF 
 dataMC = "MC"
 
 if args.useDataSF:
     dataMC = "DATA"
 
-leptonFakerate18 = leptonFakerate("UL2018", dataMC)
+leptonFakerates = {
+    "UL2016preVFP":  leptonFakerate("UL2016preVFP", dataMC),
+    "UL2016":  leptonFakerate("UL2016", dataMC),
+    "UL2017":  leptonFakerate("UL2017", dataMC),
+    "UL2018":  leptonFakerate("UL2018", dataMC),
+}
 
 ################################################################################
 # Text on the plots
@@ -602,9 +609,9 @@ def getLeptonSF(sample, event):
                 else:
                     SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
             elif event.year == 2017:
-                    SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
+                    SF *= leptonSF["UL2017"].getSF(pdgId, pt, eta, uncert, sigma)
             elif event.year == 2018:
-                    SF *= leptonSF["UL2016"].getSF(pdgId, pt, eta, uncert, sigma)
+                    SF *= leptonSF["UL2018"].getSF(pdgId, pt, eta, uncert, sigma)
     event.reweightLeptonMVA = SF
 sequence.append( getLeptonSF )
 
@@ -626,7 +633,19 @@ def getLeptonFakeRate( sample, event ):
                 pdgId = event.lep_pdgId[i]
                 eta = event.lep_eta[i]
                 pt = event.lep_ptConeGhent[i]
-                fakerate = leptonFakerate18.getFactor(pdgId, pt, eta, "stat", sigma )
+                # Get year
+                if event.year == 2016:
+                    if event.preVFP:
+                        yearstring = "UL2016preVFP"
+                    else:
+                        yearstring = "UL2016"
+                elif event.year == 2017:
+                    yearstring = "UL2017"
+                elif event.year == 2018:
+                    yearstring = "UL2018"
+                # Get fake rate from map
+                fakerate = leptonFakerates[yearstring].getFactor(pdgId, pt, eta, "stat", sigma )
+
                 if fakerate > 0.9:
                     fakerate = 0.9
                 SF *= fakerate/(1-fakerate)
@@ -983,6 +1002,8 @@ for i_mode, mode in enumerate(allModes):
         'Trigger_DOWN'  : ('reweightTrigger','reweightTriggerDown'),
         'PU_UP'         : ('reweightPU','reweightPUUp'),
         'PU_DOWN'       : ('reweightPU','reweightPUDown'),
+        'Prefire_UP'    : ('reweightL1Prefire','reweightL1PrefireUp'),
+        'Prefire_DOWN'  : ('reweightL1Prefire','reweightL1PrefireDown'),
         # For lepton SF this is set in the sequence
     }
 

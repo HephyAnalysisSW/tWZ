@@ -16,16 +16,14 @@ def adjustHistogram(hist):
 
 
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
-path_ZZ  = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v3/UL2018/all/qualepT-minDLmass12-onZ1-onZ2/Results.root"
-path_WZ  = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v3/UL2018/all/trilepT-minDLmass12-onZ1-btag0-met60/Results.root"
-path_ttZ = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v3/UL2018/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/Results.root"
-# path_ttZ_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v3/ULRunII/all/trilepTCR-minDLmass12-offZ1-njet3p-btag1p/Results.root"
+path_ZZ  = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v4/ULRunII/all/qualepT-minDLmass12-onZ1-onZ2/Results.root"
+path_WZ  = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v4/ULRunII/all/trilepT-minDLmass12-onZ1-btag0-met60/Results.root"
+path_ttZ = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v4/ULRunII/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/Results.root"
 
 files = {
     "ZZ" : path_ZZ,
     "WZ" : path_WZ,
     "ttZ": path_ttZ, 
-    # "ttZ_CR" : path_ttZ_CR,
 }
 
 histname = "Z1_pt"
