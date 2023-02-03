@@ -77,7 +77,7 @@ dirs['QCD_bcToE'] =  [
     'QCD_bcToE_20to30',
     'QCD_bcToE_30to80',
     'QCD_bcToE_80to170',
-    # 'QCD_bcToE_170to250',
+    'QCD_bcToE_170to250',
     'QCD_bcToE_250toInf',
 ]
 
