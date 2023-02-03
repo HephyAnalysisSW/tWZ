@@ -24,11 +24,11 @@ def getSample(pd, runName, lumi):
 
 allSamples = []
 
-SingleElectron_Run2016            = getSample('SingleElectron',   'Run2016',           (19.5)*1000)
-SingleMuon_Run2016                = getSample('SingleMuon',       'Run2016',           (19.5)*1000)
-allSamples += [SingleElectron_Run2016, SingleMuon_Run2016]
+SingleElectron_Run2016_preVFP            = getSample('SingleElectron',   'Run2016_preVFP',           (19.5)*1000)
+SingleMuon_Run2016_preVFP                = getSample('SingleMuon',       'Run2016_preVFP',           (19.5)*1000)
+allSamples += [SingleElectron_Run2016_preVFP, SingleMuon_Run2016_preVFP]
 
-Run2016_preVFP = Sample.combine("Run2016_preVFP", [SingleElectron_Run2016, SingleMuon_Run2016], texName = "Run2016")
+Run2016_preVFP = Sample.combine("Run2016_preVFP", [SingleElectron_Run2016_preVFP, SingleMuon_Run2016_preVFP], texName = "Run2016_preVFP")
 Run2016_preVFP.lumi = (19.5)*1000
 allSamples.append(Run2016_preVFP)
 
