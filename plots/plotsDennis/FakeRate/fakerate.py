@@ -50,13 +50,13 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='FakeRate_v6')
+argParser.add_argument('--plot_directory', action='store', default='FakeRate_v7')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='singlelepFO-vetoAddLepFO-vetoMET')
 argParser.add_argument('--sys',            action='store', default='central')
 argParser.add_argument('--channel',        action='store', default='muon')
 argParser.add_argument('--noPreScale',     action='store_true')
-argParser.add_argument('--useBRIL',        action='store_true')
+argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
 argParser.add_argument('--noLargeWeights', action='store_true')
 argParser.add_argument('--reduce',         action='store_true')
 
@@ -101,7 +101,8 @@ else:
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
 if args.noData:                       args.plot_directory += "_noData"
-if args.useBRIL:                      args.plot_directory += "_useBRIL"
+if args.prescalemode == "ghent":      args.plot_directory += "_GHENTprescale"
+if args.prescalemode == "bril":       args.plot_directory += "_BRILprescale"
 if args.noPreScale:                   args.plot_directory += "_noPreScale"
 if args.noLargeWeights:               args.plot_directory += "_noLargeWeights"
 if args.reduce:                       args.plot_directory += "_reduce"
@@ -131,8 +132,8 @@ else:
 triggerlist = []
 if args.channel == "muon":
     triggerlist = ["HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17","HLT_Mu20","HLT_Mu27"]
-    if args.era == "UL2016" or args.era == "UL2016preVFP":
-        triggerlist = ["HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17"]
+    # if args.era == "UL2016" or args.era == "UL2016preVFP":
+    #     triggerlist = ["HLT_Mu3_PFJet40","HLT_Mu8","HLT_Mu17"]
 elif args.channel == "elec":
     triggerlist = ["HLT_Ele8_CaloIdM_TrackIdM_PFJet30","HLT_Ele17_CaloIdM_TrackIdM_PFJet30"]
     
@@ -220,9 +221,15 @@ else:
 from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed_singlelep import *
 
 if args.era == "UL2016":
-    mc = []
+    if args.channel == "muon":
+        mc = [UL2016.QCD_MuEnriched, UL2016.WZ, UL2016.ZZ, UL2016.WW, UL2016.TTbar, UL2016.DY, UL2016.WJetsToLNu]
+    elif args.channel == "elec":
+        mc = [UL2016.QCD_EMEnriched, UL2016.QCD_bcToE, UL2016.WZ, UL2016.ZZ, UL2016.WW, UL2016.TTbar, UL2016.DY, UL2016.WJetsToLNu]
 elif args.era == "UL2016preVFP":
-    mc = []
+    if args.channel == "muon":
+        mc = [UL2016preVFP.QCD_MuEnriched, UL2016preVFP.WZ, UL2016preVFP.ZZ, UL2016preVFP.WW, UL2016preVFP.TTbar, UL2016preVFP.DY, UL2016preVFP.WJetsToLNu]
+    elif args.channel == "elec":
+        mc = [UL2016preVFP.QCD_EMEnriched, UL2016preVFP.QCD_bcToE, UL2016preVFP.WZ, UL2016preVFP.ZZ, UL2016preVFP.WW, UL2016preVFP.TTbar, UL2016preVFP.DY, UL2016preVFP.WJetsToLNu]
 elif args.era == "UL2017":
     if args.channel == "muon":
         mc = [UL2017.QCD_MuEnriched, UL2017.WZ, UL2017.ZZ, UL2017.WW, UL2017.TTbar, UL2017.DY, UL2017.WJetsToLNu]
@@ -234,11 +241,14 @@ elif args.era == "UL2018":
     elif args.channel == "elec":
         mc = [UL2018.QCD_EMEnriched, UL2018.QCD_bcToE, UL2018.WZ, UL2018.ZZ, UL2018.WW, UL2018.TTbar, UL2018.DY, UL2018.WJetsToLNu]
 elif args.era == "ULRunII":
-    mc = []
+    if args.channel == "muon":
+        mc = [QCD_MuEnriched, WZ, ZZ, WW, TTbar, DY, WJetsToLNu]
+    elif args.channel == "elec":
+        mc = [QCD_EMEnriched, QCD_bcToE, WZ, ZZ, WW, TTbar, DY, WJetsToLNu]
 
 ################################################################################
 # Binning for Maps
-boundaries_pt = [0, 20, 30, 45, 65, 120]
+boundaries_pt = [0, 20, 30, 45, 120]
 boundaries_eta = [0, 1.2, 2.1, 2.4]
 if args.channel == "elec":
     boundaries_eta = [0, 0.8, 1.44, 2.4]
@@ -329,9 +339,11 @@ leptonSF = {
 
 ################################################################################
 # Trigger prescale weights for MC
-prescale16 = triggerPrescale(2016, args.useBRIL)
-prescale17 = triggerPrescale(2017, args.useBRIL)
-prescale18 = triggerPrescale(2018, args.useBRIL)
+prescalemode = args.prescalemode
+prescale16preVFP = triggerPrescale("UL2016preVFP", prescalemode)
+prescale16       = triggerPrescale("UL2016", prescalemode)
+prescale17       = triggerPrescale("UL2017", prescalemode)
+prescale18       = triggerPrescale("UL2018", prescalemode)
 
 ################################################################################
 # Text on the plots
@@ -412,7 +424,7 @@ def passedOfflineCut( event, triggername ):
         if sqrt(dEta*dEta+dPhi*dPhi) > 0.7:
             if event.JetGood_pt[i] > maxjet_pt_separated:
                 maxjet_pt_separated = event.JetGood_pt[i]
-    # get conept 
+    # get cone pt 
     ptcone = event.l1_ptConeGhent
     # check cuts 
     if (ptcone > ptcone_min) and (ptcone < ptcone_max) and (event.l1_pt > leppt_min) and (maxjet_pt_separated > jetpt_min):
@@ -491,7 +503,10 @@ def applyTriggerPrescales(sample, event):
                 passedlist_plusOffline.append(trigger)          
         weight = 1.0
         if event.year == 2016:
-            weight = prescale16.getWeight(passedlist_plusOffline)
+            if event.preVFP:
+                weight = prescale16preVFP.getWeight(passedlist_plusOffline)
+            else:
+                weight = prescale16.getWeight(passedlist_plusOffline)
         elif event.year == 2017:
             weight = prescale17.getWeight(passedlist_plusOffline)
         elif event.year == 2018:

@@ -16,8 +16,6 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--channel',        action='store',      default='muon')
 argParser.add_argument('--year',           action='store',      default='UL2018')
-argParser.add_argument('--noLooseSel',     action='store_true')
-argParser.add_argument('--noLooseWP',      action='store_true')
 args = argParser.parse_args()
 
 ################################################################################
@@ -54,7 +52,7 @@ def prepareHist(hist):
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 
-boundaries_pt = [0, 20, 30, 45, 65, 120]
+boundaries_pt = [0, 20, 30, 45, 120]
 boundaries_eta = [0, 1.2, 2.1, 2.4]
 if args.channel == "elec":
     boundaries_eta = [0, 0.8, 1.44, 2.4]
@@ -71,30 +69,20 @@ nonprompt = {
     "elec" : ["QCD_EMEnriched", "QCD_bcToE"],
 }
 
-selection = "singlelepL-vetoAddLepL-vetoMET"
-selectionVL = "singlelepVL-vetoAddLepVL-vetoMET"
+selection = "singlelepFO-vetoAddLepFO-vetoMET"
 plotters = {}
 
 logger.info("Running year %s", year)
 logger.info("Running channel %s", channel)
-filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v4/%s/%s/%s/Results.root" %(year, channel, selection)
+filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v7/%s/%s/%s/Results.root" %(year, channel, selection)
 
-if args.noLooseSel:
-    filename = filename.replace("FakeRate_v4", "FakeRate_v4_noLooseSel")
-    outdir = outdir.replace("CombineInput", "CombineInput_noLooseSel")
-    outdir_plots = outdir_plots.replace("CombineInput", "CombineInput_noLooseSel")
-if args.noLooseWP:
-    filename = filename.replace("FakeRate_v4", "FakeRate_v4_noLooseWP")
-    filename = filename.replace(selection, selectionVL)
-    outdir = outdir.replace("CombineInput", "CombineInput_noLooseWP")
-    outdir_plots = outdir_plots.replace("CombineInput", "CombineInput_noLooseWP")
 
 logger.info("Reading %s", filename)
 for i in range(len(boundaries_pt)):
     for j in range(len(boundaries_eta)):
         ptbin = i+1
         etabin = j+1
-        if ptbin >= 6 or etabin >= 4:
+        if ptbin >= 5 or etabin >= 4:
             continue
         suffix = "__BIN_pt%s_eta%s" %(ptbin, etabin)
         histnameL = "L_MTfix"+suffix

@@ -9,7 +9,6 @@ import Analysis.Tools.syncer
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
-argParser.add_argument('--mergeBins',      action='store_true', default=False)
 args = argParser.parse_args()
 
 import tWZ.Tools.logger as logger
@@ -28,24 +27,6 @@ def getSumOfHistograms(file, histname, processList):
             tmp_hist = file.Get(histname+"__"+process)
             hist.Add(tmp_hist)
     return hist
-
-def mergeBins(map, channel):
-    boundaries_pt = [0, 20, 30, 45, 65, 120]
-    boundaries_pt_new = [0, 20, 30, 45, 120]
-    boundaries_eta = [0, 1.2, 2.1, 2.4]
-    if channel == "elec":
-        boundaries_eta = [0, 0.8, 1.44, 2.4]
-    newmap = createMap(boundaries_pt_new, boundaries_eta)
-    for i in range(len(boundaries_pt_new)-1):
-        for j in range(len(boundaries_eta)-1):
-            ptbin = i+1
-            etabin = j+1
-            if ptbin == len(boundaries_pt_new)-1:
-                content = map.GetBinContent(ptbin, etabin)+map.GetBinContent(ptbin+1, etabin)
-            else:
-                content = map.GetBinContent(ptbin, etabin)
-            newmap.SetBinContent(ptbin, etabin, content)
-    return newmap
 
 def createMap(boundaries_pt, boundaries_eta):
     array_pt = arr.array('d',boundaries_pt)
@@ -93,20 +74,17 @@ def drawMap(map, plotname):
     map.GetYaxis().SetTitle("Lepton |#eta|")
     map.Draw("COLZ")
     map.GetXaxis().SetRangeUser(0, 100)
-    c.Print(plot_directory+"/FakeRate/"+plotname+".pdf")
+    c.Print(plot_directory+"/FakeRate/Maps/"+plotname+".pdf")
     
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 paths = [
-    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v5/",
-    # "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v4_noLooseSel/",
-    # "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v4_noLooseWP/",
+    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v7/",
 ]
 
     
-years = ["UL2018"]
+years = ["UL2016preVFP", "UL2016", "UL2017", "UL2018"]
 channels = ["elec", "muon"]
 selection = "singlelepFO-vetoAddLepFO-vetoMET"
-selection_noLooseWP = "singlelepVL-vetoAddLepVL-vetoMET"
 
 QCDsamples = {
     "elec": ["QCD_EMEnriched", "QCD_bcToE"],
@@ -123,16 +101,8 @@ for year in years:
     logger.info("Running year %s", year)
     for path in paths:
         sel = selection
-        suffix = ""
-        if args.mergeBins:
-            suffix += "__mergedBins"
-        if "_noLooseSel" in path:
-            suffix += "__noLooseSel"
-        if "_noLooseWP" in path:
-            suffix += "__noLooseWP"
-            sel = selection_noLooseWP
         for channel in channels:
-            outputfile = ROOT.TFile("LeptonFakerate__MC__"+year+"__"+channel+suffix+".root", "RECREATE")
+            outputfile = ROOT.TFile("LeptonFakerate__MC__"+year+"__"+channel+".root", "RECREATE")
             filepath =  os.path.join(path, year, channel, sel, "Results.root")
             logger.info("Reading histograms from %s", filepath)
             file = ROOT.TFile(filepath)
@@ -145,14 +115,6 @@ for year in years:
             QCDL =  getSumOfHistograms(file, histnameL, QCDsamples[channel])
             QCDT =  getSumOfHistograms(file, histnameT, QCDsamples[channel])
             
-            if args.mergeBins:
-                backgroundsL = mergeBins(backgroundsL, channel)
-                backgroundsT = mergeBins(backgroundsT, channel)
-                dataL = mergeBins(dataL, channel)
-                dataT = mergeBins(dataT, channel)
-                QCDL = mergeBins(QCDL, channel)
-                QCDT = mergeBins(QCDT, channel)
-            
             mapData, errorData = getRatio(dataT, dataL)
             mapMC, errorMC = getRatio(QCDT, QCDL)
             
@@ -162,13 +124,13 @@ for year in years:
             mapData.Write("Fakerate_DATA")
             errorData.Write("Fakerate_DATA_stat")
             
-            drawMap(QCDL, year+"__"+channel+"__QCD_loose"+suffix)
-            drawMap(QCDT, year+"__"+channel+"__QCD_tight"+suffix)
-            drawMap(backgroundsL, year+"__"+channel+"__Backgrounds_loose"+suffix)
-            drawMap(backgroundsT, year+"__"+channel+"__Backgrounds_tight"+suffix)        
-            drawMap(dataL, year+"__"+channel+"__Data_loose"+suffix)
-            drawMap(mapData, year+"__"+channel+"__Map_Data"+suffix)
-            drawMap(mapMC, year+"__"+channel+"__Map_MC"+suffix)
-            drawMap(errorData, year+"__"+channel+"__Map_Data_statUnc"+suffix)
-            drawMap(errorMC, year+"__"+channel+"__Map_MC_statUnc"+suffix)
+            drawMap(QCDL, year+"__"+channel+"__QCD_loose")
+            drawMap(QCDT, year+"__"+channel+"__QCD_tight")
+            drawMap(backgroundsL, year+"__"+channel+"__Backgrounds_loose")
+            drawMap(backgroundsT, year+"__"+channel+"__Backgrounds_tight")        
+            drawMap(dataL, year+"__"+channel+"__Data_loose")
+            drawMap(mapData, year+"__"+channel+"__Map_Data")
+            drawMap(mapMC, year+"__"+channel+"__Map_MC")
+            drawMap(errorData, year+"__"+channel+"__Map_Data_statUnc")
+            drawMap(errorMC, year+"__"+channel+"__Map_MC_statUnc")
             outputfile.Close()

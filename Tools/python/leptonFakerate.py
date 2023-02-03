@@ -8,7 +8,7 @@ class leptonFakerate:
         # Check inputs
         if not year in ["UL2016", "UL2016preVFP", "UL2017", "UL2018"]:
             raise Exception("Lepton fakerate not known for era %s "%year)
-        if not dataMC in ["MC", "DATA"]:
+        if not dataMC in ["MC"]: # ["MC", "DATA"]
             raise Exception("dataMC switch in lepton fakerate must be 'MC or 'DATA' ")
             
             
@@ -18,20 +18,20 @@ class leptonFakerate:
         self.dataDir = "$CMSSW_BASE/src/tWZ/Tools/data/leptonFakerate/"
         filepath_elec_DATA = self.dataDir+"LeptonFakerate__"+self.year+"__elec.root"
         filepath_muon_DATA = self.dataDir+"LeptonFakerate__"+self.year+"__muon.root"
-        filepath_elec_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__elec__mergedBins.root"
-        filepath_muon_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__muon__mergedBins.root"
+        filepath_elec_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__elec.root"
+        filepath_muon_MC   = self.dataDir+"LeptonFakerate__MC__"+self.year+"__muon.root"
 
         # Store needed maps in dictionary
         self.SFmaps = {
             "muon": {
                 "MC"        :   getObjFromFile(filepath_muon_MC,"Fakerate_MC"),
                 "MC_stat"   :   getObjFromFile(filepath_muon_MC,"Fakerate_MC_stat"),
-                "DATA"      :   getObjFromFile(filepath_muon_DATA,"Fakerate_v1"),
+                # "DATA"      :   getObjFromFile(filepath_muon_DATA,"Fakerate_v1"),
             },
             "elec": {
                 "MC"        :   getObjFromFile(filepath_elec_MC,"Fakerate_MC"),
                 "MC_stat"   :   getObjFromFile(filepath_elec_MC,"Fakerate_MC_stat"),
-                "DATA"      :   getObjFromFile(filepath_elec_DATA,"Fakerate_v1"),
+                # "DATA"      :   getObjFromFile(filepath_elec_DATA,"Fakerate_v1"),
             },
         }
     
@@ -40,8 +40,8 @@ class leptonFakerate:
         eta = abs(eta_)
         if eta > 2.399:
             eta = 2.39 
-        if pt > 64:
-            pt = 64
+        if pt > 100:
+            pt = 100
                         
         # Get uncertainty mode
         uncert = "sys"
