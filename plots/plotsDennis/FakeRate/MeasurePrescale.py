@@ -15,11 +15,11 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v7_noPreScale/"
 # path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v6_noPreScale_reduce/"
-years = ["UL2016preVFP", "UL2016", "UL2017", "UL2018"]
-# years = ["UL2018"]
+# years = ["UL2016preVFP", "UL2016", "UL2017", "UL2018"]
+years = ["UL2018"]
 
-channels = ["elec", "muon"]
-# channels = ["muon"]
+# channels = ["elec", "muon"]
+channels = ["elec"]
 selection = "singlelepT-vetoAddLepFO-met40"
 triggerlist = {
     "elec" : ["HLT_Ele8_CaloIdM_TrackIdM_PFJet30","HLT_Ele17_CaloIdM_TrackIdM_PFJet30"],
@@ -67,6 +67,7 @@ for year in years:
             
             bin_lo = h_data.FindBin(MTmin)
             bin_hi = h_data.FindBin(MTmax)
+            print bin_lo, bin_hi
             
             Nevents = {}
             Nevents["data"] = h_data.Integral(bin_lo, bin_hi)

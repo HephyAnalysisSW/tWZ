@@ -8,7 +8,7 @@ class leptonFakerate:
         # Check inputs
         if not year in ["UL2016", "UL2016preVFP", "UL2017", "UL2018"]:
             raise Exception("Lepton fakerate not known for era %s "%year)
-        if not dataMC in ["MC"]: # ["MC", "DATA"]
+        if not dataMC in ["MC", "DATA"]:
             raise Exception("dataMC switch in lepton fakerate must be 'MC or 'DATA' ")
             
             
@@ -26,12 +26,14 @@ class leptonFakerate:
             "muon": {
                 "MC"        :   getObjFromFile(filepath_muon_MC,"Fakerate_MC"),
                 "MC_stat"   :   getObjFromFile(filepath_muon_MC,"Fakerate_MC_stat"),
-                # "DATA"      :   getObjFromFile(filepath_muon_DATA,"Fakerate_v1"),
+                "DATA"      :   getObjFromFile(filepath_muon_DATA,"Fakerate_v1"),
+                "DATA_stat" :   getObjFromFile(filepath_muon_DATA,"Fakerate_v1_stat"),
             },
             "elec": {
                 "MC"        :   getObjFromFile(filepath_elec_MC,"Fakerate_MC"),
                 "MC_stat"   :   getObjFromFile(filepath_elec_MC,"Fakerate_MC_stat"),
-                # "DATA"      :   getObjFromFile(filepath_elec_DATA,"Fakerate_v1"),
+                "DATA"      :   getObjFromFile(filepath_elec_DATA,"Fakerate_v1"),
+                "DATA_stat" :   getObjFromFile(filepath_elec_DATA,"Fakerate_v1_stat"),
             },
         }
     
