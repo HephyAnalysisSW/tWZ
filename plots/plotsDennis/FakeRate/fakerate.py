@@ -50,7 +50,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='FakeRate_v7')
+argParser.add_argument('--plot_directory', action='store', default='FakeRate_v8')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='singlelepFO-vetoAddLepFO-vetoMET')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -425,7 +425,7 @@ def passedOfflineCut( event, triggername ):
             if event.JetGood_pt[i] > maxjet_pt_separated:
                 maxjet_pt_separated = event.JetGood_pt[i]
     # get cone pt 
-    ptcone = event.l1_ptConeGhent
+    ptcone = event.l1_ptConeGhent if event.l1_passFO and not event.l1_passTight else event.l1_pt
     # check cuts 
     if (ptcone > ptcone_min) and (ptcone < ptcone_max) and (event.l1_pt > leppt_min) and (maxjet_pt_separated > jetpt_min):
         return True 
@@ -551,7 +551,7 @@ sequence.append(getMTfix)
 def getBin(sample, event):
     Nbins_pt = len(boundaries_pt)
     Nbins_eta = len(boundaries_eta)
-    pt = event.l1_ptConeGhent
+    pt = event.l1_ptConeGhent if event.l1_passFO and not event.l1_passTight else event.l1_pt
     eta = event.l1_eta
     bin_pt = 0
     bin_eta = 0
@@ -836,14 +836,14 @@ plots.append(Plot(
 plots.append(Plot(
     name = "L_cone_pt",
     texX = 'Loose Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = lambda event, sample: event.l1_ptConeGhent if event.passedLoose else float('nan'),
+    attribute = lambda event, sample: (event.l1_ptConeGhent if event.l1_passFO and not event.l1_passTight else event.l1_pt) if event.passedLoose else float('nan'),
     binning=[25, 0, 150],
 ))
 
 plots.append(Plot(
     name = "L_cone_pt_old",
     texX = 'Loose Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = lambda event, sample: event.l1_ptCone if event.passedLoose else float('nan'),
+    attribute = lambda event, sample: (event.l1_ptCone if event.l1_passFO and not event.l1_passTight else event.l1_pt) if event.passedLoose else float('nan'),
     binning=[25, 0, 150],
 ))
 
@@ -880,7 +880,7 @@ plots.append(Plot(
 plots.append(Plot(
     name = "T_cone_pt",
     texX = 'Tight Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = lambda event, sample: event.l1_ptConeGhent if event.passedTight else float('nan'),
+    attribute = lambda event, sample: (event.l1_ptConeGhent if event.l1_passFO and not event.l1_passTight else event.l1_pt) if event.passedTight else float('nan'),
     binning=[25, 0, 150],
 ))
 
@@ -914,7 +914,7 @@ for i in range(len(boundaries_pt)):
         plots.append(Plot(
             name = "L_cone_pt"+suffix,
             texX = 'Loose Lepton cone p_{T} (GeV)', texY = 'Number of Events',
-            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_ptConeGhent  if (event.passedLoose and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: (event.l1_ptConeGhent if event.l1_passFO and not event.l1_passTight else event.l1_pt)  if (event.passedLoose and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
             binning=[25, 0, 150],
         ))
         
@@ -940,7 +940,7 @@ for i in range(len(boundaries_pt)):
         plots.append(Plot(
             name = "T_cone_pt"+suffix,
             texX = 'Tight Lepton cone p_{T} (GeV)', texY = 'Number of Events',
-            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: event.l1_ptConeGhent  if (event.passedTight and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
+            attribute = lambda event, sample, i_pt=ptbin, i_eta=etabin: (event.l1_ptConeGhent if event.l1_passFO and not event.l1_passTight else event.l1_pt) if (event.passedTight and event.bin_pt==i_pt and event.bin_eta==i_eta ) else float('nan'),
             binning=[25, 0, 150],
         ))
         
@@ -978,7 +978,7 @@ plots2D.append(Plot2D(
     name = "lep_pt_eta_loose",
     texX = 'Lepton cone p_{T} (GeV)', texY = 'Lepton #eta',
     attribute = (
-        lambda event, sample: event.l1_ptConeGhent if event.passedLoose else float('nan'), 
+        lambda event, sample: (event.l1_ptConeGhent if event.l1_passFO and not event.l1_passTight else event.l1_pt) if event.passedLoose else float('nan'), 
         lambda event, sample: abs(event.l1_eta)    if event.passedLoose else float('nan'),
     ),
     binning = [binning_pt, binning_eta],
@@ -989,7 +989,7 @@ plots2D.append(Plot2D(
     name = "lep_pt_eta_tight",
     texX = 'Lepton cone p_{T} (GeV)', texY = 'Lepton #eta',
     attribute = (
-        lambda event, sample: event.l1_ptConeGhent if event.passedTight else float('nan'), 
+        lambda event, sample: (event.l1_ptConeGhent if event.l1_passFO and not event.l1_passTight else event.l1_pt) if event.passedTight else float('nan'), 
         lambda event, sample: abs(event.l1_eta)    if event.passedTight else float('nan'),
     ),
     binning = [binning_pt, binning_eta],
