@@ -144,7 +144,7 @@ def muonSelector( lepton_selection, year, ptCut = 10):
                 and l["sip3d"]          < 8.0 \
                 and l['miniPFRelIso_all'] < 0.40 \
                 and l['mediumId']\
-                and ( (l['mvaTOP'] > 0.64) or (l['jetPtRelv2']> 0.45 and (l['jetBTag'] <  0.025 if l['jetIdx'] >= 0 else True)) )
+                and ( (l['mvaTOP'] > 0.64) or (1/(l['jetRelIso']+1) > 0.45 and (l['jetBTag'] <  0.025 if l['jetIdx'] >= 0 else True)) )
     elif lepton_selection == 'preselv2':
         # presel for mvaTOPv2
         def func(l):
@@ -304,7 +304,7 @@ def eleSelector( lepton_selection, year, ptCut = 10):
                 and ord(l["lostHits"])  < 2 \
                 and l['convVeto']\
                 and l['tightCharge']    >= 2\
-                and ((l['mvaTOP'] > 0.81) or (l['mvaFall17V2noIso_WPL'] and (l['jetPtRelv2']> pt_ratio and (l['jetBTag'] <  0.1 if l['jetIdx'] >= 0 else True) ) ))
+                and ((l['mvaTOP'] > 0.81) or (l['mvaFall17V2noIso_WPL'] and (1/(l['jetRelIso']+1) > pt_ratio and (l['jetBTag'] <  0.1 if l['jetIdx'] >= 0 else True) ) ))
     elif lepton_selection == 'preselv2':
         # presel for mvaTOPv2
         def func(l):
