@@ -50,10 +50,10 @@ prefix_SR = "trilepT-"
 
 
 selections = [
-    "minDLmass12/",
-    "minDLmass12-btag0-met60/",
-    "minDLmass12-njet3p-btag1p/",
-    "minDLmass12-onZ1/",
+    # "minDLmass12/",
+    # "minDLmass12-btag0-met60/",
+    # "minDLmass12-njet3p-btag1p/",
+    # "minDLmass12-onZ1/",
     "minDLmass12-onZ1-btag0-met60/",
     "minDLmass12-onZ1-njet3p-btag1p/",
 ]

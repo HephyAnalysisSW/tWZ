@@ -18,8 +18,6 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 argParser.add_argument('--channel',        action='store',      default='muon')
 argParser.add_argument('--year',           action='store',      default='UL2018')
 argParser.add_argument('--plotPrefit',     action='store_true', default=False)
-argParser.add_argument('--noLooseSel',     action='store_true')
-argParser.add_argument('--noLooseWP',      action='store_true')
 args = argParser.parse_args()
 
 logger.info("Plot post fit distributions")
@@ -29,10 +27,7 @@ logger.info("Plot post fit distributions")
 # Some functions
 def getPrefit(plotname, process):
     path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput/"
-    if args.noLooseSel:
-        path = path.replace("CombineInput", "CombineInput_noLooseSel")
-    if args.noLooseWP:
-        path = path.replace("CombineInput", "CombineInput_noLooseWP")
+
         
     filename_L = path+"FakeRate_"+plotname+"_LOOSE.root"
     filename_T = path+"FakeRate_"+plotname+"_TIGHT.root"
@@ -43,10 +38,6 @@ def getPrefit(plotname, process):
     
 def getPostfit(plotname, process):
     path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits/"
-    if args.noLooseSel:
-        path = path.replace("Fits", "Fits_noLooseSel")
-    if args.noLooseWP:
-        path = path.replace("Fits", "Fits_noLooseWP")
     prefix = "fitDiagnostics."
     histdir_L = "shapes_fit_s/Fakerate_"+plotname+"_LOOSE_1_13TeV/"
     histdir_T = "shapes_fit_s/Fakerate_"+plotname+"_TIGHT_1_13TeV/"
@@ -87,7 +78,7 @@ def drawMap(map, plotname):
     map.GetYaxis().SetTitle("Lepton |#eta|")
     map.Draw("COLZ")
     map.GetXaxis().SetRangeUser(0, 100)
-    c.Print(plot_directory+"/FakeRate/"+plotname+".pdf")
+    c.Print(plot_directory+"/FakeRate/Maps_data/"+plotname+".pdf")
         
 def getRateAndError(h1, h2):
     N1 = 0
@@ -118,7 +109,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 year = args.year
 channel = args.channel
-boundaries_pt = [0, 20, 30, 45, 65, 120]
+boundaries_pt = [0, 20, 30, 45, 120]
 boundaries_eta = [0, 1.2, 2.1, 2.4]
 if args.channel == "elec":
     boundaries_eta = [0, 0.8, 1.44, 2.4]
@@ -136,7 +127,7 @@ for i in range(len(boundaries_pt)):
     for j in range(len(boundaries_eta)):
         ptbin = i+1
         etabin = j+1
-        if ptbin >= 6 or etabin >= 4:
+        if ptbin >= 5 or etabin >= 4:
             continue
         plotname = year+"_"+channel+"_PT"+str(ptbin)+"_ETA"+str(etabin)
         # Get prefit histograms
@@ -160,10 +151,6 @@ for i in range(len(boundaries_pt)):
         h_post_nonprompt_T = ConvertBinning(h_post_nonprompt_T, dummy_pre)
         
         plotdir = plot_directory+"/FakeRate/PostFit/"
-        if args.noLooseSel:
-            plotdir = plotdir.replace("PostFit", "PostFit_noLooseSel")
-        if args.noLooseWP:
-            plotdir = plotdir.replace("PostFit", "PostFit_noLooseWP")
         
         if args.plotPrefit:
             plotdir = plotdir.replace("PostFit", "PreFit")
@@ -235,19 +222,13 @@ for i in range(len(boundaries_pt)):
             logger.info("PT%s ETA%s, v1 and v2 not compatible: v1=%s, v2=%s, v3=%s", ptbin, etabin, fakerate_v1, fakerate_v2, fakerate_v3)
                                         
 
-suffix = ""
-if args.noLooseSel:
-    suffix = "__noLooseSel"
-if args.noLooseWP:
-    suffix = "__noLooseWP"
-    
 if not args.plotPrefit:
-    drawMap(FakerateMap_v1, year+"__"+channel+"__Map_DATA_v1"+suffix)
-    drawMap(FakerateMap_v2, year+"__"+channel+"__Map_DATA_v2"+suffix)
-    drawMap(FakerateMap_v3, year+"__"+channel+"__Map_DATA_v3"+suffix)
-    drawMap(FakerateMap_v1_stat, year+"__"+channel+"__Map_DATA_v1_stat"+suffix)
-    drawMap(FakerateMap_v2_stat, year+"__"+channel+"__Map_DATA_v2_stat"+suffix)
-    drawMap(FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3_stat"+suffix)
+    drawMap(FakerateMap_v1, year+"__"+channel+"__Map_DATA_v1")
+    drawMap(FakerateMap_v2, year+"__"+channel+"__Map_DATA_v2")
+    drawMap(FakerateMap_v3, year+"__"+channel+"__Map_DATA_v3")
+    drawMap(FakerateMap_v1_stat, year+"__"+channel+"__Map_DATA_v1_stat")
+    drawMap(FakerateMap_v2_stat, year+"__"+channel+"__Map_DATA_v2_stat")
+    drawMap(FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3_stat")
 
 
 for name in plotters:
@@ -257,7 +238,7 @@ for name in plotters:
 
 # Store maps in file
 if not args.plotPrefit:
-    outfile = ROOT.TFile("LeptonFakerate__"+year+"__"+channel+suffix+".root", "RECREATE")
+    outfile = ROOT.TFile("LeptonFakerate__"+year+"__"+channel+".root", "RECREATE")
     outfile.cd()
     FakerateMap_v1.Write("Fakerate_v1")
     FakerateMap_v2.Write("Fakerate_v2")

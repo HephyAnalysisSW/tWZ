@@ -49,12 +49,8 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v5/"
 path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v5_FakeRateSF_useDataSF/"
 
-
-    
-
-prefix_CR = "trilepFOnoT-"
 prefix_SR = "trilepT-"
-
+prefix_CR = "trilepFOnoT-"
 
 selections = [
     "minDLmass12-offZ1/",
@@ -91,7 +87,15 @@ xmax = {
     "l3_pt": 100,
 }
 
-prompt_processes = ["tWZ", "ttZ", "ttX", "tZq", "WZ", "triBoson", "ZZ"]
+prompt_processes = [
+    ("tWZ", "tWZ", color.TWZ),
+    ("ttZ", "ttZ", color.TTZ),
+    ("ttX", "ttX", color.TTX_rare),
+    ("tZq", "tZq", color.TZQ),
+    ("WZ",  "WZ",  color.WZ),
+    ("triBoson", "Triboson", color.triBoson),
+    ("ZZ", "ZZ", color.ZZ),
+]
 
 plotters = {}
 
@@ -101,23 +105,6 @@ for year in years:
         logger.info("Selection = %s", selection)
         for channel in channels:
             for histname in histnames:
-                histnames_prompt = []
-                for p in prompt_processes:
-                    histnames_prompt.append(histname+"__"+p)       
-                filename_SR = path_SR+year+"/"+channel+"/"+prefix_SR+selection+"/Results.root"
-                filename_CR = path_CR+year+"/"+channel+"/"+prefix_CR+selection+"/Results.root"
-                # logger.info("Reading SR from %s", filename_SR)
-                # logger.info("Reading CR from %s", filename_CR)
-                hist_SR = getObjFromFile(filename_SR, histname+"__data") 
-                hist_CR = getObjFromFile(filename_CR, histname+"__data")
-                # Get prompt contribution and subtract from data
-                hist_SR_prompt = getSumOfHistograms(filename_SR, histnames_prompt) 
-                hist_CR_prompt = getSumOfHistograms(filename_SR, histnames_prompt) 
-                hist_SR.Add(hist_SR_prompt, -1)
-                hist_CR.Add(hist_CR_prompt, -1)
-                ####
-                hist_SR = adjustHistogram(hist_SR, rebin[histname], xmax[histname])
-                hist_CR = adjustHistogram(hist_CR, rebin[histname], xmax[histname]) 
                 plotdir = plot_directory+"/FakeRate/ClosureTest_data/"+selection
                 if not os.path.exists( plotdir ): os.makedirs( plotdir )
                 p = Plotter(year+"__"+channel+"__"+histname)
@@ -126,8 +113,30 @@ for year in years:
                 p.ratiorange = (0.2, 1.8)
                 p.xtitle = object[histname]+" p_{T} [GeV]"
                 if "N_jets" in histname: p.xtitle = object[histname]
-                p.addData(hist_SR, "Data [SR]")
-                p.addBackground(hist_CR, "Data [CR*fakerate]", 15)
+                # Get File names
+                filename_SR = path_SR+year+"/"+channel+"/"+prefix_SR+selection+"/Results.root"
+                filename_CR = path_CR+year+"/"+channel+"/"+prefix_CR+selection+"/Results.root"
+                # Get Data in SR
+                h_data_SR = getObjFromFile(filename_SR, histname+"__data") 
+                h_data_SR = adjustHistogram(h_data_SR, rebin[histname], xmax[histname])
+                p.addData(h_data_SR, "Data")
+                # Get nonpromt = Data in CR * fakerate
+                # h_nonpromt = getObjFromFile(filename_SR, histname+"__nonprompt")
+                h_nonpromt = getObjFromFile(filename_CR, histname+"__data")
+                h_nonpromt = adjustHistogram(h_nonpromt, rebin[histname], xmax[histname]) 
+                p.addBackground(h_nonpromt, "Nonprompt", 15)
+                # Get uncertainty 
+                h_nonpromt_up = getObjFromFile(filename_CR.replace("FakeRateSF_useDataSF", "FakeRateSF_useDataSF_Fakerate_UP"), histname+"__data")
+                h_nonpromt_up = adjustHistogram(h_nonpromt_up, rebin[histname], xmax[histname]) 
+                h_nonpromt_down = getObjFromFile(filename_CR.replace("FakeRateSF_useDataSF", "FakeRateSF_useDataSF_Fakerate_DOWN"), histname+"__data")
+                h_nonpromt_down = adjustHistogram(h_nonpromt_down, rebin[histname], xmax[histname]) 
+                p.addSystematic(h_nonpromt_up, h_nonpromt_down, "Fakerate", "Nonprompt")
+                p.addNormSystematic("Nonprompt", 0.3)
+                # Get all prompt backgrounds
+                for (process,legname,color) in prompt_processes:
+                    h_bkg = getObjFromFile(filename_SR, histname+"__"+process) 
+                    h_bkg = adjustHistogram(h_bkg, rebin[histname], xmax[histname]) 
+                    p.addBackground(h_bkg, legname, color)
                 plotters[year+selection+channel+histname] = p
 
 for name in plotters:

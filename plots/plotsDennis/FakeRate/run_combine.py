@@ -8,8 +8,6 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 argParser.add_argument('--channel',        action='store',      default='muon')
 argParser.add_argument('--year',           action='store',      default='UL2018')
-argParser.add_argument('--noLooseSel',     action='store_true')
-argParser.add_argument('--noLooseWP',      action='store_true')
 args = argParser.parse_args()
 
 logger.info("Script to run combine fits in fakerate measurement")
@@ -17,18 +15,14 @@ logger.info("Script to run combine fits in fakerate measurement")
 inputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput/datacards/"
 outputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits/"
 
-if args.noLooseSel:
-    inputdir = inputdir.replace("CombineInput", "CombineInput_noLooseSel")
-    outputdir = outputdir.replace("Fits", "Fits_noLooseSel")
-if args.noLooseWP:
-    inputdir = inputdir.replace("CombineInput", "CombineInput_noLooseWP")
-    outputdir = outputdir.replace("Fits", "Fits_noLooseWP")
-    
 prefix = "Fakerate_"
 year = args.year
 channel = args.channel
-boundaries_pt = [0, 20, 30, 45, 65, 120]
+
+boundaries_pt = [0, 20, 30, 45, 120]
 boundaries_eta = [0, 1.2, 2.1, 2.4]
+if args.channel == "elec":
+    boundaries_eta = [0, 0.8, 1.44, 2.4]
 WPs = ["LOOSE", "TIGHT"]
 
 text2workspace_cmd = 'text2workspace.py <TXTFILE> -m 0 -o <ROOTFILE>'
