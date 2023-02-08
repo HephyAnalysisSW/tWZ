@@ -1,14 +1,19 @@
+python plotPostFit.py --year=UL2016preVFP --channel=muon
+python plotPostFit.py --year=UL2016preVFP --channel=elec
+python plotPostFit.py --year=UL2016preVFP --channel=muon --plotPrefit
+python plotPostFit.py --year=UL2016preVFP --channel=elec --plotPrefit
+
+python plotPostFit.py --year=UL2016 --channel=muon
+python plotPostFit.py --year=UL2016 --channel=elec
+python plotPostFit.py --year=UL2016 --channel=muon --plotPrefit
+python plotPostFit.py --year=UL2016 --channel=elec --plotPrefit
+
+python plotPostFit.py --year=UL2017 --channel=muon
+python plotPostFit.py --year=UL2017 --channel=elec
+python plotPostFit.py --year=UL2017 --channel=muon --plotPrefit
+python plotPostFit.py --year=UL2017 --channel=elec --plotPrefit
+
 python plotPostFit.py --year=UL2018 --channel=muon
 python plotPostFit.py --year=UL2018 --channel=elec
 python plotPostFit.py --year=UL2018 --channel=muon --plotPrefit
 python plotPostFit.py --year=UL2018 --channel=elec --plotPrefit
-
-python plotPostFit.py --year=UL2018 --channel=muon --noLooseSel
-python plotPostFit.py --year=UL2018 --channel=elec --noLooseSel
-python plotPostFit.py --year=UL2018 --channel=muon --noLooseSel --plotPrefit
-python plotPostFit.py --year=UL2018 --channel=elec --noLooseSel --plotPrefit
-
-python plotPostFit.py --year=UL2018 --channel=muon --noLooseWP
-python plotPostFit.py --year=UL2018 --channel=elec --noLooseWP
-python plotPostFit.py --year=UL2018 --channel=muon --noLooseWP --plotPrefit
-python plotPostFit.py --year=UL2018 --channel=elec --noLooseWP --plotPrefit
