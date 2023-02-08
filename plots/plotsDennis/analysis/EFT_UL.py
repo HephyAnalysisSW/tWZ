@@ -37,6 +37,7 @@ from Analysis.Tools.puReweighting        import getReweightingFunction
 from Analysis.Tools.leptonJetArbitration     import cleanJetsAndLeptons
 from Analysis.Tools.WeightInfo           import WeightInfo
 from Analysis.Tools.LeptonSF_UL          import LeptonSF
+from Analysis.Tools.EGammaSF             import EGammaSF
 
 import Analysis.Tools.syncer
 import numpy as np
@@ -50,7 +51,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v5')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v6')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -61,7 +62,7 @@ argParser.add_argument('--doTTbarReco',    action='store_true', default=False)
 argParser.add_argument('--applyFakerate',  action='store_true', default=False)
 argParser.add_argument('--nonpromptOnly',  action='store_true', default=False)
 argParser.add_argument('--splitnonprompt', action='store_true', default=False)
-argParser.add_argument('--useDataSF',      action='store_true')
+argParser.add_argument('--useDataSF',      action='store_true', default=False)
 args = argParser.parse_args()
 
 ################################################################################
@@ -77,16 +78,31 @@ variations = [
     "Fakerate_UP", "Fakerate_DOWN",
     "Trigger_UP", "Trigger_DOWN",
     "Prefire_UP", "Prefire_DOWN",
-    "LepIDstat_UP", "LepIDstat_DOWN",
+    "LepReco_UP", "LepReco_DOWN",
+    "LepIDstat_UP_2016preVFP", "LepIDstat_DOWN_2016preVFP",
+    "LepIDstat_UP_2016", "LepIDstat_DOWN_2016",
+    "LepIDstat_UP_2017", "LepIDstat_DOWN_2017",
+    "LepIDstat_UP_2018", "LepIDstat_DOWN_2018",
     "LepIDsys_UP", "LepIDsys_DOWN",
     "BTag_b_UP", "BTag_b_DOWN",
     "BTag_l_UP", "BTag_l_DOWN",
+    # "BTag_b_UP_correlated", "BTag_b_DOWN_correlated",
+    # "BTag_l_UP_correlated", "BTag_l_DOWN_correlated",
+    # "BTag_b_UP_uncorrelated_2016preVFP", "BTag_b_DOWN_uncorrelated_2016preVFP",
+    # "BTag_l_UP_uncorrelated_2016preVFP", "BTag_l_DOWN_uncorrelated_2016preVFP",
+    # "BTag_b_UP_uncorrelated_2016", "BTag_b_DOWN_uncorrelated_2016",
+    # "BTag_l_UP_uncorrelated_2016", "BTag_l_DOWN_uncorrelated_2016",
+    # "BTag_b_UP_uncorrelated_2017", "BTag_b_DOWN_uncorrelated_2017",
+    # "BTag_l_UP_uncorrelated_2017", "BTag_l_DOWN_uncorrelated_2017",
+    # "BTag_b_UP_uncorrelated_2018", "BTag_b_DOWN_uncorrelated_2018",
+    # "BTag_l_UP_uncorrelated_2018", "BTag_l_DOWN_uncorrelated_2018",    
     "PU_UP", "PU_DOWN",
     "JES_UP", "JES_DOWN",
     "JER_UP", "JER_DOWN",
     "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN",
 ]
 
+    
 jet_variations = {
     "JES_UP": "jesTotalUp",
     "JES_DOWN": "jesTotalDown",
@@ -101,8 +117,11 @@ if args.sys not in variations:
     else:
         raise RuntimeError( "Variation %s not among the known: %s", args.sys, ",".join( variations ) )
 else:
-    logger.info( "Running sys variation %s, noData is set to 'True'", args.sys)
-    args.noData = True
+    if "Fakerate" in args.sys:
+        logger.info( "Running sys variation %s, this varies the Data!", args.sys)
+    else:
+        logger.info( "Running sys variation %s, noData is set to 'True'", args.sys)
+        args.noData = True
 
 
 ################################################################################
@@ -447,6 +466,16 @@ leptonFakerates = {
 }
 
 ################################################################################
+# ElectronRecoSF 
+ElectronRecoSFs = {
+    "UL2016preVFP":  EGammaSF("UL2016_preVFP"),
+    "UL2016":  EGammaSF("UL2016"),
+    "UL2017":  EGammaSF("UL2017"),
+    "UL2018":  EGammaSF("UL2018"),
+}
+
+
+################################################################################
 # Text on the plots
 tex = ROOT.TLatex()
 tex.SetNDC()
@@ -585,14 +614,39 @@ def getLeptonSF(sample, event):
     # Only apply SF when also cutting on WP
     if "trilepT" in args.selection or "qualepT" in args.selection:
         # Search for variation type and direction
+        # Statistical should only be applied for the corresponding year
         uncert = "syst"
-        if args.sys == "LepIDstat_UP" or args.sys == "LepIDstat_DOWN":
-            uncert = "stat"
         sigma = 0
-        if args.sys == "LepIDstat_UP" or args.sys == "LepIDsys_UP":
+        if args.sys == "LepIDsys_UP":
+            uncert = "syst" 
             sigma = 1
-        elif args.sys == "LepIDstat_DOWN" or args.sys == "LepIDsys_DOWN":
+        elif args.sys == "LepIDsys_DOWN":
+            uncert = "syst"
             sigma = -1
+        elif args.sys == "LepIDstat_UP_2016preVFP" and event.year == 2016 and event.preVFP:
+            uncert = "stat"
+            sigma = 1
+        elif args.sys == "LepIDstat_DOWN_2016preVFP" and event.year == 2016 and event.preVFP:
+            uncert = "stat"
+            sigma = -1        
+        elif args.sys == "LepIDstat_UP_2016" and event.year == 2016 and not event.preVFP:
+            uncert = "stat"
+            sigma = 1
+        elif args.sys == "LepIDstat_DOWN_2016" and event.year == 2016 and not event.preVFP:
+            uncert = "stat"
+            sigma = -1          
+        elif args.sys == "LepIDstat_UP_2017" and event.year == 2017:
+            uncert = "stat"
+            sigma = 1
+        elif args.sys == "LepIDstat_DOWN_2017" and event.year == 2017:
+            uncert = "stat"
+            sigma = -1  
+        elif args.sys == "LepIDstat_UP_2018" and event.year == 2018:
+            uncert = "stat"
+            sigma = 1
+        elif args.sys == "LepIDstat_DOWN_2018" and event.year == 2018:
+            uncert = "stat"
+            sigma = -1  
         # Go through the 3 leptons and multiply SF
         idx1 = event.l1_index
         idx2 = event.l2_index
@@ -615,6 +669,41 @@ def getLeptonSF(sample, event):
     event.reweightLeptonMVA = SF
 sequence.append( getLeptonSF )
 
+def getElectronRecoSF(sample, event):
+    if sample.isData:
+        return 
+    SF = 1
+    # decide if central or variation
+    var = "sf"
+    if args.sys == "LepReco_UP":
+        var = "sfup"
+    elif args.sys == "LepReco_DOWN":
+        var = "sfdown"
+    # Go through the 3 leptons and multiply SF
+    idx1 = event.l1_index
+    idx2 = event.l2_index
+    idx3 = event.l3_index
+    for i in [idx1, idx2, idx3]:
+        pdgId = event.lep_pdgId[i]
+        if abs(pdgId)==11:
+            eta = event.lep_eta[i]+event.Electron_deltaEtaSC[event.lep_eleIndex[i]]
+            pt = event.lep_pt[i]
+            if pt < 20:
+                WP = "RecoBelow20"
+            else:
+                WP = "RecoAbove20"
+            if event.year == 2016 and event.preVFP:
+                SF *= ElectronRecoSFs["UL2016preVFP"].getSF(pt, eta, var, WP)
+            elif event.year == 2016 and not event.preVFP:
+                SF *= ElectronRecoSFs["UL2016"].getSF(pt, eta, var, WP)
+            elif event.year == 2017:
+                SF *= ElectronRecoSFs["UL2017"].getSF(pt, eta, var, WP)
+            elif event.year == 2018:
+                SF *= ElectronRecoSFs["UL2018"].getSF(pt, eta, var, WP)
+    # print SF
+    event.reweightElectronRecoSF = SF
+sequence.append( getElectronRecoSF )
+
 def getLeptonFakeRate( sample, event ):
     sigma = 0
     if args.sys == "Fakerate_UP":
@@ -632,7 +721,7 @@ def getLeptonFakeRate( sample, event ):
                 Nfakes += 1
                 pdgId = event.lep_pdgId[i]
                 eta = event.lep_eta[i]
-                pt = event.lep_ptConeGhent[i]
+                pt = event.lep_ptConeGhent[i] if event.lep_passFO[i] and not event.lep_passTight[i] else event.lep_pt[i]
                 # Get year
                 if event.year == 2016:
                     if event.preVFP:
@@ -991,20 +1080,41 @@ for i_mode, mode in enumerate(allModes):
         read_variables_MC += new_variables
         read_variables    += new_variables
 
-    weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate', 'reweightLeptonMVA']
+    weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate', 'reweightLeptonMVA', 'reweightElectronRecoSF']
     # weightnames = ['weight']
+    
     sys_weights = {
         "BTag_b_UP"     : ('reweightBTag_SF','reweightBTag_SF_b_Up'),
         "BTag_b_DOWN"   : ('reweightBTag_SF','reweightBTag_SF_b_Down'),
         "BTag_l_UP"     : ('reweightBTag_SF','reweightBTag_SF_l_Up'),
         "BTag_l_DOWN"   : ('reweightBTag_SF','reweightBTag_SF_l_Down'),
+        # "BTag_b_UP_correlated"                : ('reweightBTag_SF','reweightBTag_SF_b_Up_Correlated'),
+        # "BTag_b_DOWN_correlated"              : ('reweightBTag_SF','reweightBTag_SF_b_Down_Correlated'),
+        # "BTag_l_UP_correlated"                : ('reweightBTag_SF','reweightBTag_SF_l_Up_Correlated'),
+        # "BTag_l_DOWN_correlated"              : ('reweightBTag_SF','reweightBTag_SF_l_Down_Correlated'),
+        # "BTag_b_UP_uncorrelated_2016preVFP"   : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016preVFP'), 
+        # "BTag_b_DOWN_uncorrelated_2016preVFP" : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016preVFP'), 
+        # "BTag_b_UP_uncorrelated_2016"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016'), 
+        # "BTag_b_DOWN_uncorrelated_2016"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016'), 
+        # "BTag_b_UP_uncorrelated_2017"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2017'), 
+        # "BTag_b_DOWN_uncorrelated_2017"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2017'), 
+        # "BTag_b_UP_uncorrelated_2018"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2018'), 
+        # "BTag_b_DOWN_uncorrelated_2018"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2018'),         
+        # "BTag_l_UP_uncorrelated_2016preVFP"   : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016preVFP'), 
+        # "BTag_l_DOWN_uncorrelated_2016preVFP" : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016preVFP'), 
+        # "BTag_l_UP_uncorrelated_2016"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016'), 
+        # "BTag_l_DOWN_uncorrelated_2016"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016'), 
+        # "BTag_l_UP_uncorrelated_2017"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2017'), 
+        # "BTag_l_DOWN_uncorrelated_2017"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2017'), 
+        # "BTag_l_UP_uncorrelated_2018"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2018'), 
+        # "BTag_l_DOWN_uncorrelated_2018"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2018'), 
         'Trigger_UP'    : ('reweightTrigger','reweightTriggerUp'),
         'Trigger_DOWN'  : ('reweightTrigger','reweightTriggerDown'),
         'PU_UP'         : ('reweightPU','reweightPUUp'),
         'PU_DOWN'       : ('reweightPU','reweightPUDown'),
         'Prefire_UP'    : ('reweightL1Prefire','reweightL1PrefireUp'),
         'Prefire_DOWN'  : ('reweightL1Prefire','reweightL1PrefireDown'),
-        # For lepton SF this is set in the sequence
+        # For leptonID and leptonReco SF this is set in the sequence
     }
 
     if args.sys in sys_weights:
@@ -1036,11 +1146,20 @@ for i_mode, mode in enumerate(allModes):
             w *= scale_weight
         return w
 
+    weightnames_data = ['reweightLeptonFakerate'] # For data only the lepton fake rate should be re-weighted
+    getters_data = map( operator.attrgetter, weightnames_data)
+    def weight_function_data( event, sample):
+        # Calculate weight, this becomes: w = event.weightnames[0]*event.weightnames[1]*...
+        w = reduce(operator.mul, [g(event) for g in getters_data], 1)
+        return w
 
     for sample in mc:
         sample.read_variables = read_variables_MC
         sample.setSelectionString([getLeptonSelection(mode)])
         sample.weight = weight_function
+
+    if not args.noData:
+        data_sample.weight = weight_function_data
 
     for param in params:
         param['sample'].read_variables = read_variables_MC + read_variables_eft
@@ -1270,6 +1389,14 @@ for i_mode, mode in enumerate(allModes):
         ))
         
         plots.append(Plot(
+            name = "SF_LeptonReco",
+            texX = 'Lepton Reco SF', texY = 'Number of Events',
+            attribute = lambda event, sample: event.reweightElectronRecoSF if not sample.isData else -1,
+            addOverFlowBin='both',
+            binning=[50, 0.5, 1.5],
+        ))
+        
+        plots.append(Plot(
             name = "SF_Fakerate",
             texX = 'Fakerate SF', texY = 'Number of Events',
             attribute = lambda event, sample: event.reweightLeptonFakerate if not sample.isData else -1,
@@ -1456,7 +1583,8 @@ for i_mode, mode in enumerate(allModes):
     dataMCScale        = yields[mode]["data"]/yields[mode]["MC"] if yields[mode]["MC"] != 0 else float('nan')
 
 
-    if args.nicePlots: drawPlots(plots, mode, dataMCScale)
+    if args.nicePlots and args.sys == "central": 
+        drawPlots(plots, mode, dataMCScale)
 
     allPlots[mode] = plots
 
@@ -1482,7 +1610,7 @@ for plot in allPlots['all']:
                         j.Add(l)
 
 
-if args.nicePlots:
+if args.nicePlots and args.sys == "central":
     drawPlots(allPlots['all'], "all", dataMCScale)
 
 plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "N_jets"]

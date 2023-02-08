@@ -1,13 +1,13 @@
-# python fakerate.py --channel=muon --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016preVFP
-# python fakerate.py --channel=elec --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016preVFP
-# 
-# python fakerate.py --channel=muon --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016
-# python fakerate.py --channel=elec --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016
-# 
-# python fakerate.py --channel=muon --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2017
-# python fakerate.py --channel=elec --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2017
+python fakerate.py --channel=muon --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016preVFP
+python fakerate.py --channel=elec --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016preVFP
 
-# python fakerate.py --channel=muon --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2018
+python fakerate.py --channel=muon --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016
+python fakerate.py --channel=elec --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016
+
+python fakerate.py --channel=muon --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2017
+python fakerate.py --channel=elec --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2017
+
+python fakerate.py --channel=muon --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2018
 python fakerate.py --channel=elec --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2018
 
 # python fakerate.py --channel=muon --selection=singlelepFO-vetoAddLepFO-vetoMET --prescalemode=ghent --era=UL2016preVFP
