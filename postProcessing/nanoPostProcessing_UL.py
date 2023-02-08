@@ -556,7 +556,17 @@ if addSystematicVariations:
 # Btag weights Method 1a
 for var in btagEff.btagWeightNames:
     if var!='MC':
-        new_variables.append('reweightBTag_'+var+'/F')
+        # For the uncorrelated part of b tag uncertainties, add one weight per year
+        # Later in the code, these are only filled if the year fits.
+        # e.g. in a 2018 sample, the uncorrelated_2016preVFP/2016/2017 are set to the central SF 
+        if "Uncorrelated" in var:
+            new_variables.append('reweightBTag_'+var+'_2016preVFP/F')
+            new_variables.append('reweightBTag_'+var+'_2016/F')
+            new_variables.append('reweightBTag_'+var+'_2017/F')
+            new_variables.append('reweightBTag_'+var+'_2018/F')
+        else:
+            new_variables.append('reweightBTag_'+var+'/F')
+        
 
 if not options.skipNanoTools:
     ### nanoAOD postprocessor
@@ -1062,7 +1072,31 @@ def filler( event ):
             btagEff.addBTagEffToJet(j)
         for var in btagEff.btagWeightNames:
             if var!='MC':
-                setattr(event, 'reweightBTag_'+var, btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                # For the uncerrelated uncertainties, fill only the current year 
+                # The values for other years are set to the central "SF"
+                if "Uncorrelated" in var:
+                    if event.year == 2016 and event.preVFP:
+                        setattr(event, 'reweightBTag_'+var+'_2016preVFP', btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2016', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2017', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2018', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                    elif event.year == 2016 and not event.preVFP: 
+                        setattr(event, 'reweightBTag_'+var+'_2016preVFP', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2016', btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2017', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2018', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                    elif event.year == 2017:
+                        setattr(event, 'reweightBTag_'+var+'_2016preVFP', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2016', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2017', btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2018', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                    elif event.year == 2018: 
+                        setattr(event, 'reweightBTag_'+var+'_2016preVFP', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2016', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2017', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                        setattr(event, 'reweightBTag_'+var+'_2018', btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
+                else:
+                    setattr(event, 'reweightBTag_'+var, btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
 
 
 # Create a maker. Maker class will be compiled. This instance will be used as a parent in the loop
