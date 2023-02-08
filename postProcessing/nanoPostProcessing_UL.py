@@ -786,7 +786,6 @@ def filler( event ):
     
     # Calculate variables for mvaTOP and get mvaTOP score 
     for iLep, lep in enumerate(leptons):
-        ptCone = 0.67*lep['pt']*(1+lep['jetRelIso']) # if no jet in 0.4, jetRelIso = pfRelIso04_all
         ptConeGhent = 0.66*lep['pt']*(1+lep['jetRelIso']) if abs(lep['pdgId'])==13 else 0.72*lep['pt']*(1+lep['jetRelIso'])
         # find closest jet 
         bscore_nextjet = 0
@@ -794,10 +793,8 @@ def filler( event ):
         if jetidx >= 0:
             closest_jet = all_jets[jetidx]
             bscore_nextjet = closest_jet['btagDeepFlavB']
-            ptCone = 0.67*closest_jet['pt'] # modify ptCone if jet is found within 0.4
         ####
         lep['jetBTag'] = bscore_nextjet
-        lep['ptCone'] = ptCone
         lep['ptConeGhent'] = ptConeGhent        
         lep['jetPtRatio'] = 1/(lep['jetRelIso']+1)
         mvaScore, WPv1, mvaScorev2, WPv2 = mvaTOPreader_.getmvaTOPScore(lep)
@@ -811,6 +808,7 @@ def filler( event ):
         elif abs(lep['pdgId']) == 11 :
             lep['passFO'] = FOeleSelector(lep)
             lep['passTight'] = True if lep['mvaTOPWP'] >= 4 else False # tight WP for electrons
+        lep['ptCone'] = lep['pt'] if lep['passTight'] else lep['ptConeGhent'] 
         
     # Remove leptons that do not fulfil quality criteria
     all_leptons = list(leptons) # Copy list to not loop over the list from which we remove entries 
