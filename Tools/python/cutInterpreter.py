@@ -41,8 +41,10 @@ leptonTCRstring += ")"
 
 from tWZ.Tools.objectSelection import lepString
 special_cuts = {
+    "singlelepFOconept":   "l1_ptCone>10&&abs(l1_eta)<2.4&&l1_passFO",
     "singlelepFO":         "l1_pt>10&&abs(l1_eta)<2.4&&l1_passFO",
     "singlelepT":          "l1_pt>10&&abs(l1_eta)<2.4&&l1_passTight",
+    "vetoAddLepFOconept":  "Sum$(lep_ptCone>10&&abs(lep_eta)<2.4&&lep_passFO)==1",
     "vetoAddLepFO":        "Sum$(lep_pt>10&&abs(lep_eta)<2.4&&lep_passFO)==1",
     "trilepFO":            "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_passFO&&l2_passFO&&l3_passFO&&Sum$(lep_passFO)==3",
     "trilepT" :            "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_passTight&&l2_passTight&&l3_passTight&&Sum$(lep_passFO)==3",

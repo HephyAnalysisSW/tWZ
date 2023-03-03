@@ -453,10 +453,7 @@ leptonSF = {
 
 ################################################################################
 # FakerateSF 
-dataMC = "MC"
-
-if args.useDataSF:
-    dataMC = "DATA"
+dataMC = "DATA" if args.useDataSF else "MC"
 
 leptonFakerates = {
     "UL2016preVFP":  leptonFakerate("UL2016preVFP", dataMC),
