@@ -50,7 +50,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='FakeRate_v8')
+argParser.add_argument('--plot_directory', action='store', default='FakeRate_v10')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='singlelepFO-vetoAddLepFO-vetoMET')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -403,15 +403,24 @@ def getPassedTriggers( event ):
     return passedlist
     
 def passedOfflineCut( event, triggername ):
+    # cuts = {
+    #     "HLT_Ele8_CaloIdM_TrackIdM_PFJet30": (15,45,8,30),
+    #     "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": (25,100,17,30),
+    #     "HLT_Mu3_PFJet40": (10,32,3,45),
+    #     "HLT_Mu8": (15,100,8,30),
+    #     "HLT_Mu17": (32,100,17,30),
+    #     "HLT_Mu20": (32,100,20,30),
+    #     "HLT_Mu27": (45,100,27,30),  
+    # } 
     cuts = {
-        "HLT_Ele8_CaloIdM_TrackIdM_PFJet30": (15,45,8,30),
-        "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": (25,100,17,30),
-        "HLT_Mu3_PFJet40": (10,32,3,45),
-        "HLT_Mu8": (15,100,8,30),
-        "HLT_Mu17": (32,100,17,30),
-        "HLT_Mu20": (32,100,20,30),
-        "HLT_Mu27": (45,100,27,30),  
-    }   
+        "HLT_Ele8_CaloIdM_TrackIdM_PFJet30": (0,1000,9,30),
+        "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": (0,1000,18,30),
+        "HLT_Mu3_PFJet40": (0,1000,4,45),
+        "HLT_Mu8": (0,1000,9,30),
+        "HLT_Mu17": (0,1000,18,30),
+        "HLT_Mu20": (0,1000,21,30),
+        "HLT_Mu27": (0,1000,28,30),  
+    }      
     if triggername not in cuts.keys():
         raise RuntimeError( "Trigger %s not defined for additional cuts", triggername)
     (ptcone_min, ptcone_max, leppt_min, jetpt_min) = cuts[triggername]
@@ -841,9 +850,9 @@ plots.append(Plot(
 ))
 
 plots.append(Plot(
-    name = "L_cone_pt_old",
+    name = "L_cone_pt_edit",
     texX = 'Loose Lepton cone p_{T} (GeV)', texY = 'Number of Events / 40 GeV',
-    attribute = lambda event, sample: (event.l1_ptCone if event.l1_passFO and not event.l1_passTight else event.l1_pt) if event.passedLoose else float('nan'),
+    attribute = lambda event, sample: event.l1_ptCone if event.passedLoose else float('nan'),
     binning=[25, 0, 150],
 ))
 
@@ -967,7 +976,7 @@ for trigger in triggerlist:
         name = "T_MTfix"+suffix,
         texX = 'Tight m_{T}^{fix}', texY = 'Number of Events',
         attribute = lambda event, sample, tr=trigger: event.MTfix if (event.tightLepton and tr in event.passedTriggers ) else float('nan'),
-        binning=[10, 0, 140],
+        binning=[16, 0, 160],
     ))
     list_of_trigger_plots.append("T_MTfix"+suffix)
 ###############################
