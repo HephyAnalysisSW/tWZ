@@ -39,11 +39,11 @@ def makeDummySys(hist, variation):
 ################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
-path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v5_noData_nonpromptOnly/"
-path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v5_noData_nonpromptOnly_FakeRateSF/"
+path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v6_noData_nonpromptOnly/"
+path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v6_noData_nonpromptOnly_FakeRateSF/"
 if args.splitnonprompt:
-    path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v5_noData_nonpromptOnly_splitnonprompt/"
-    path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v5_noData_nonpromptOnly_splitnonprompt_FakeRateSF/"
+    path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v6_noData_nonpromptOnly_splitnonprompt/"
+    path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v6_noData_nonpromptOnly_splitnonprompt_FakeRateSF/"
 
 prefix_CR = "trilepFOnoT-"
 prefix_SR = "trilepT-"
@@ -62,12 +62,13 @@ systematics = ["Fakerate"]
 
 channels = ["all"]
 
-histnames = ["N_jets", "Z1_pt", "l1_pt", "l2_pt", "l3_pt"]
+histnames = ["N_jets", "Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt"]
 # histnames = ["Z1_pt"]
 
 object = {
     "N_jets": "Number of jets",
     "Z1_pt": "Z", 
+    "M3l": "m_{3l}", 
     "l1_pt": "Leading lepton", 
     "l2_pt": "Sub-leading lepton", 
     "l3_pt": "Trailing lepton",
@@ -76,6 +77,7 @@ object = {
 rebin = {
     "N_jets": 1,
     "Z1_pt": 2, 
+    "M3l": 2, 
     "l1_pt": 4, 
     "l2_pt": 4, 
     "l3_pt": 4,
@@ -84,6 +86,7 @@ rebin = {
 xmax = {
     "N_jets": 10.5, 
     "Z1_pt": 300, 
+    "M3l": 400, 
     "l1_pt": 200, 
     "l2_pt": 150, 
     "l3_pt": 100,

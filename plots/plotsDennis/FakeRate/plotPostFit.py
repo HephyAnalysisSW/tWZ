@@ -18,6 +18,7 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 argParser.add_argument('--channel',        action='store',      default='muon')
 argParser.add_argument('--year',           action='store',      default='UL2018')
 argParser.add_argument('--plotPrefit',     action='store_true', default=False)
+argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
 args = argParser.parse_args()
 
 logger.info("Plot post fit distributions")
@@ -25,10 +26,7 @@ logger.info("Plot post fit distributions")
     
 ################################################################################
 # Some functions
-def getPrefit(plotname, process):
-    path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput/"
-
-        
+def getPrefit(plotname, process, path):
     filename_L = path+"FakeRate_"+plotname+"_LOOSE.root"
     filename_T = path+"FakeRate_"+plotname+"_TIGHT.root"
     
@@ -36,8 +34,7 @@ def getPrefit(plotname, process):
     hist_T = getObjFromFile(filename_T, "singlelep/"+process) 
     return hist_L, hist_T
     
-def getPostfit(plotname, process):
-    path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits/"
+def getPostfit(plotname, process, path):
     prefix = "fitDiagnostics."
     histdir_L = "shapes_fit_s/Fakerate_"+plotname+"_LOOSE_1_13TeV/"
     histdir_T = "shapes_fit_s/Fakerate_"+plotname+"_TIGHT_1_13TeV/"
@@ -64,7 +61,7 @@ def createMap(boundaries_pt, boundaries_eta):
     map = ROOT.TH2F("hist", "hist", len(array_pt)-1, array_pt, len(array_eta)-1, array_eta)
     return map
 
-def drawMap(map, plotname):
+def drawMap(map, plotname, dir):
     ROOT.gStyle.SetLegendBorderSize(0)
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)
@@ -78,7 +75,7 @@ def drawMap(map, plotname):
     map.GetYaxis().SetTitle("Lepton |#eta|")
     map.Draw("COLZ")
     map.GetXaxis().SetRangeUser(0, 100)
-    c.Print(plot_directory+"/FakeRate/Maps_data/"+plotname+".pdf")
+    c.Print(dir+plotname+".pdf")
         
 def getRateAndError(h1, h2):
     N1 = 0
@@ -107,6 +104,16 @@ def getRateAndError(h1, h2):
 ################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
+prefitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput/"
+postfitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits/"
+plotdir = plot_directory+"/FakeRate/Maps_data/"
+
+if args.prescalemode == "bril":
+    prefitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput_BRIL/"
+    postfitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits_BRIL/"
+    plotdir = plot_directory+"/FakeRate/Maps_data_BRIL/"
+
+
 year = args.year
 channel = args.channel
 boundaries_pt = [0, 20, 30, 45, 120]
@@ -131,17 +138,17 @@ for i in range(len(boundaries_pt)):
             continue
         plotname = year+"_"+channel+"_PT"+str(ptbin)+"_ETA"+str(etabin)
         # Get prefit histograms
-        h_pre_prompt_L, h_pre_prompt_T = getPrefit(plotname, "prompt")
-        h_pre_nonprompt_L, h_pre_nonprompt_T = getPrefit(plotname, "nonprompt")
-        h_pre_data_L, h_pre_data_T = getPrefit(plotname, "data_obs")
+        h_pre_prompt_L, h_pre_prompt_T = getPrefit(plotname, "prompt", prefitpath)
+        h_pre_nonprompt_L, h_pre_nonprompt_T = getPrefit(plotname, "nonprompt", prefitpath)
+        h_pre_data_L, h_pre_data_T = getPrefit(plotname, "data_obs", prefitpath)
         
         # Create a dummy histogram that has correct binning
         dummy_pre = h_pre_data_L.Clone()
         dummy_pre.Reset()
         
         # Get postfit histograms
-        h_post_prompt_L, h_post_prompt_T = getPostfit(plotname, "prompt")
-        h_post_nonprompt_L, h_post_nonprompt_T = getPostfit(plotname, "nonprompt")
+        h_post_prompt_L, h_post_prompt_T = getPostfit(plotname, "prompt", postfitpath)
+        h_post_nonprompt_L, h_post_nonprompt_T = getPostfit(plotname, "nonprompt", postfitpath)
 
 
         # Convert postfit since they have different binning scheme than prefit 
@@ -151,10 +158,12 @@ for i in range(len(boundaries_pt)):
         h_post_nonprompt_T = ConvertBinning(h_post_nonprompt_T, dummy_pre)
         
         plotdir = plot_directory+"/FakeRate/PostFit/"
+        if args.prescalemode == "bril":
+            plotdir = plot_directory+"/FakeRate/PostFit_BRIL/"
         
         if args.plotPrefit:
             plotdir = plotdir.replace("PostFit", "PreFit")
-            
+                
             
         if not os.path.exists( plotdir ): os.makedirs( plotdir )
         
@@ -223,12 +232,12 @@ for i in range(len(boundaries_pt)):
                                         
 
 if not args.plotPrefit:
-    drawMap(FakerateMap_v1, year+"__"+channel+"__Map_DATA_v1")
-    drawMap(FakerateMap_v2, year+"__"+channel+"__Map_DATA_v2")
-    drawMap(FakerateMap_v3, year+"__"+channel+"__Map_DATA_v3")
-    drawMap(FakerateMap_v1_stat, year+"__"+channel+"__Map_DATA_v1_stat")
-    drawMap(FakerateMap_v2_stat, year+"__"+channel+"__Map_DATA_v2_stat")
-    drawMap(FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3_stat")
+    drawMap(FakerateMap_v1, year+"__"+channel+"__Map_DATA_v1", plotdir)
+    drawMap(FakerateMap_v2, year+"__"+channel+"__Map_DATA_v2", plotdir)
+    drawMap(FakerateMap_v3, year+"__"+channel+"__Map_DATA_v3", plotdir)
+    drawMap(FakerateMap_v1_stat, year+"__"+channel+"__Map_DATA_v1_stat", plotdir)
+    drawMap(FakerateMap_v2_stat, year+"__"+channel+"__Map_DATA_v2_stat", plotdir)
+    drawMap(FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3_stat", plotdir)
 
 
 for name in plotters:
@@ -238,7 +247,10 @@ for name in plotters:
 
 # Store maps in file
 if not args.plotPrefit:
-    outfile = ROOT.TFile("LeptonFakerate__"+year+"__"+channel+".root", "RECREATE")
+    suffix = ""
+    if args.prescalemode == "bril":
+        suffix = "__BRIL"
+    outfile = ROOT.TFile("LeptonFakerate__"+year+"__"+channel+suffix+".root", "RECREATE")
     outfile.cd()
     FakerateMap_v1.Write("Fakerate_v1")
     FakerateMap_v2.Write("Fakerate_v2")

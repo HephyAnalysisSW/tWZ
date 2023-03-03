@@ -9,6 +9,7 @@ import Analysis.Tools.syncer
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
+argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
 args = argParser.parse_args()
 
 import tWZ.Tools.logger as logger
@@ -60,7 +61,7 @@ def getRatio(h1, h2):
     return h_ratio, h_error
 
 
-def drawMap(map, plotname):
+def drawMap(map, plotname, dir):
     ROOT.gStyle.SetLegendBorderSize(0)
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)
@@ -74,17 +75,22 @@ def drawMap(map, plotname):
     map.GetYaxis().SetTitle("Lepton |#eta|")
     map.Draw("COLZ")
     map.GetXaxis().SetRangeUser(0, 100)
-    c.Print(plot_directory+"/FakeRate/Maps/"+plotname+".pdf")
+    c.Print(dir+plotname+".pdf")
     
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
-paths = [
-    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v7/",
-]
+path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v10"
 
+if args.prescalemode == "bril": 
+    path += "_BRILprescale"
+
+path += "/"
+    
     
 years = ["UL2016preVFP", "UL2016", "UL2017", "UL2018"]
+# years = ["UL2016preVFP", "UL2016"]
 channels = ["elec", "muon"]
-selection = "singlelepFO-vetoAddLepFO-vetoMET"
+# selection = "singlelepFO-vetoAddLepFO-vetoMET"
+selection = "singlelepFOconept-vetoAddLepFOconept-vetoMET"
 
 QCDsamples = {
     "elec": ["QCD_EMEnriched", "QCD_bcToE"],
@@ -99,38 +105,43 @@ histnameT = "lep_pt_eta_tight"
 logger.info("Script to create lepton fake rate maps")
 for year in years:
     logger.info("Running year %s", year)
-    for path in paths:
-        sel = selection
-        for channel in channels:
-            outputfile = ROOT.TFile("LeptonFakerate__MC__"+year+"__"+channel+".root", "RECREATE")
-            filepath =  os.path.join(path, year, channel, sel, "Results.root")
-            logger.info("Reading histograms from %s", filepath)
-            file = ROOT.TFile(filepath)
-            backgroundsL =  getSumOfHistograms(file, histnameL, backgrounds)
-            backgroundsT =  getSumOfHistograms(file, histnameT, backgrounds)
-            dataL = getSumOfHistograms(file, histnameL, ["data"])
-            dataT = getSumOfHistograms(file, histnameT, ["data"])
-            dataL.Add(backgroundsL, -1.0)
-            dataT.Add(backgroundsT, -1.0)
-            QCDL =  getSumOfHistograms(file, histnameL, QCDsamples[channel])
-            QCDT =  getSumOfHistograms(file, histnameT, QCDsamples[channel])
-            
-            mapData, errorData = getRatio(dataT, dataL)
-            mapMC, errorMC = getRatio(QCDT, QCDL)
-            
-            outputfile.cd()
-            mapMC.Write("Fakerate_MC")
-            errorMC.Write("Fakerate_MC_stat")
-            mapData.Write("Fakerate_DATA")
-            errorData.Write("Fakerate_DATA_stat")
-            
-            drawMap(QCDL, year+"__"+channel+"__QCD_loose")
-            drawMap(QCDT, year+"__"+channel+"__QCD_tight")
-            drawMap(backgroundsL, year+"__"+channel+"__Backgrounds_loose")
-            drawMap(backgroundsT, year+"__"+channel+"__Backgrounds_tight")        
-            drawMap(dataL, year+"__"+channel+"__Data_loose")
-            drawMap(mapData, year+"__"+channel+"__Map_Data")
-            drawMap(mapMC, year+"__"+channel+"__Map_MC")
-            drawMap(errorData, year+"__"+channel+"__Map_Data_statUnc")
-            drawMap(errorMC, year+"__"+channel+"__Map_MC_statUnc")
-            outputfile.Close()
+    sel = selection
+    for channel in channels:
+        suffix = ""
+        if args.prescalemode == "bril":
+            suffix = "__BRIL"
+        outputfile = ROOT.TFile("LeptonFakerate__MC__"+year+"__"+channel+suffix+".root", "RECREATE")
+        filepath =  os.path.join(path, year, channel, sel, "Results.root")
+        logger.info("Reading histograms from %s", filepath)
+        file = ROOT.TFile(filepath)
+        backgroundsL =  getSumOfHistograms(file, histnameL, backgrounds)
+        backgroundsT =  getSumOfHistograms(file, histnameT, backgrounds)
+        dataL = getSumOfHistograms(file, histnameL, ["data"])
+        dataT = getSumOfHistograms(file, histnameT, ["data"])
+        dataL.Add(backgroundsL, -1.0)
+        dataT.Add(backgroundsT, -1.0)
+        QCDL =  getSumOfHistograms(file, histnameL, QCDsamples[channel])
+        QCDT =  getSumOfHistograms(file, histnameT, QCDsamples[channel])
+        
+        mapData, errorData = getRatio(dataT, dataL)
+        mapMC, errorMC = getRatio(QCDT, QCDL)
+        
+        outputfile.cd()
+        mapMC.Write("Fakerate_MC")
+        errorMC.Write("Fakerate_MC_stat")
+        mapData.Write("Fakerate_DATA")
+        errorData.Write("Fakerate_DATA_stat")
+        
+        plotdir = plot_directory+"/FakeRate/Maps/"
+        if args.prescalemode == "bril":
+            plotdir = plotdir.replace("Maps", "Maps_BRIL")
+        drawMap(QCDL, year+"__"+channel+"__QCD_loose", plotdir)
+        drawMap(QCDT, year+"__"+channel+"__QCD_tight", plotdir)
+        drawMap(backgroundsL, year+"__"+channel+"__Backgrounds_loose", plotdir)
+        drawMap(backgroundsT, year+"__"+channel+"__Backgrounds_tight", plotdir)        
+        drawMap(dataL, year+"__"+channel+"__Data_loose", plotdir)
+        drawMap(mapData, year+"__"+channel+"__Map_Data", plotdir)
+        drawMap(mapMC, year+"__"+channel+"__Map_MC", plotdir)
+        drawMap(errorData, year+"__"+channel+"__Map_Data_statUnc", plotdir)
+        drawMap(errorMC, year+"__"+channel+"__Map_MC_statUnc", plotdir)
+        outputfile.Close()

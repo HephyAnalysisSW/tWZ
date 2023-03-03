@@ -26,14 +26,14 @@ class leptonFakerate:
             "muon": {
                 "MC"        :   getObjFromFile(filepath_muon_MC,"Fakerate_MC"),
                 "MC_stat"   :   getObjFromFile(filepath_muon_MC,"Fakerate_MC_stat"),
-                "DATA"      :   getObjFromFile(filepath_muon_DATA,"Fakerate_v1"),
-                "DATA_stat" :   getObjFromFile(filepath_muon_DATA,"Fakerate_v1_stat"),
+                "DATA"      :   getObjFromFile(filepath_muon_DATA,"Fakerate_v3"),
+                "DATA_stat" :   getObjFromFile(filepath_muon_DATA,"Fakerate_v3_stat"),
             },
             "elec": {
                 "MC"        :   getObjFromFile(filepath_elec_MC,"Fakerate_MC"),
                 "MC_stat"   :   getObjFromFile(filepath_elec_MC,"Fakerate_MC_stat"),
-                "DATA"      :   getObjFromFile(filepath_elec_DATA,"Fakerate_v1"),
-                "DATA_stat" :   getObjFromFile(filepath_elec_DATA,"Fakerate_v1_stat"),
+                "DATA"      :   getObjFromFile(filepath_elec_DATA,"Fakerate_v3"),
+                "DATA_stat" :   getObjFromFile(filepath_elec_DATA,"Fakerate_v3_stat"),
             },
         }
     

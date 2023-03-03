@@ -16,6 +16,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--channel',        action='store',      default='muon')
 argParser.add_argument('--year',           action='store',      default='UL2018')
+argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
 args = argParser.parse_args()
 
 ################################################################################
@@ -63,18 +64,24 @@ year = args.year
 outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput/"
 outdir_plots = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/CombineInput/"
 
+if args.prescalemode == "bril": 
+    outdir = outdir.replace("CombineInput", "CombineInput_BRIL")
+    outdir_plots = outdir_plots.replace("CombineInput", "CombineInput_BRIL")
+
 prompt = ["Wjets", "WZ", "ZZ", "WW", "TTbar", "DY"]
 nonprompt = {
     "muon" : ["QCD_MuEnriched"],
     "elec" : ["QCD_EMEnriched", "QCD_bcToE"],
 }
 
-selection = "singlelepFO-vetoAddLepFO-vetoMET"
+selection = "singlelepFOconept-vetoAddLepFOconept-vetoMET"
 plotters = {}
 
 logger.info("Running year %s", year)
 logger.info("Running channel %s", channel)
-filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v7/%s/%s/%s/Results.root" %(year, channel, selection)
+filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v10/%s/%s/%s/Results.root" %(year, channel, selection)
+if args.prescalemode == "bril": 
+    filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v10_BRILprescale/%s/%s/%s/Results.root" %(year, channel, selection)
 
 
 logger.info("Reading %s", filename)

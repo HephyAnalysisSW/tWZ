@@ -8,12 +8,17 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 argParser.add_argument('--channel',        action='store',      default='muon')
 argParser.add_argument('--year',           action='store',      default='UL2018')
+argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
 args = argParser.parse_args()
 
 logger.info("Script to run combine fits in fakerate measurement")
 
 inputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput/datacards/"
 outputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits/"
+
+if args.prescalemode == "bril": 
+    inputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput_BRIL/datacards/"
+    outputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits_BRIL/"    
 
 prefix = "Fakerate_"
 year = args.year
@@ -26,7 +31,7 @@ if args.channel == "elec":
 WPs = ["LOOSE", "TIGHT"]
 
 text2workspace_cmd = 'text2workspace.py <TXTFILE> -m 0 -o <ROOTFILE>'
-combine_cmd = "combine <NAME> -M FitDiagnostics --saveShapes --saveWithUnc --numToysForShape 2000  --preFitValue 1 --setParameterRanges r=0.1,10 -n <OUTNAME>"
+combine_cmd = "combine <NAME> -M FitDiagnostics --saveShapes --saveWithUnc --numToysForShape 2000  --preFitValue 1 --setParameterRanges r=0.01,10 -n <OUTNAME>"
 
 logger.info("Comands to run:")
 logger.info("  - %s", text2workspace_cmd)
@@ -37,7 +42,7 @@ for i in range(len(boundaries_pt)):
     for j in range(len(boundaries_eta)):
         ptbin = i+1
         etabin = j+1
-        if ptbin >= 6 or etabin >= 4:
+        if ptbin >= 5 or etabin >= 4:
             continue
         for WP in WPs:
             filenames.append(inputdir+prefix+year+"_"+channel+"_PT"+str(ptbin)+"_ETA"+str(etabin)+"_"+WP+"_1_13TeV_0.txt")
