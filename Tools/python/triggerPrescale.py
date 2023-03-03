@@ -53,43 +53,43 @@ class triggerPrescale:
             # From BRIL
             if year == "UL2016preVFP":
                 self.prescales={
-                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  1.,
-                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1.,
-                    "HLT_Mu3_PFJet40":                    1.,
-                    "HLT_Mu8":                            1.,
-                    "HLT_Mu17":                           1.,
-                    "HLT_Mu20":                           1.,
-                    "HLT_Mu27":                           1.,
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  5141.899251,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 572.584500448,
+                    "HLT_Mu3_PFJet40":                    4848.34089913,
+                    "HLT_Mu8":                            9129.17601399,
+                    "HLT_Mu17":                           127.041635445,
+                    "HLT_Mu20":                           256.862153226,
+                    "HLT_Mu27":                           143.472338012,
                 }
             elif year == "UL2016":
                 self.prescales={
-                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  1.,
-                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1.,
-                    "HLT_Mu3_PFJet40":                    1.,
-                    "HLT_Mu8":                            1.,
-                    "HLT_Mu17":                           1.,
-                    "HLT_Mu20":                           1.,
-                    "HLT_Mu27":                           1.,
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  5141.899251,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 572.584500448,
+                    "HLT_Mu3_PFJet40":                    4848.34089913,
+                    "HLT_Mu8":                            9129.17601399,
+                    "HLT_Mu17":                           127.041635445,
+                    "HLT_Mu20":                           256.862153226,
+                    "HLT_Mu27":                           143.472338012,
                 }
             elif year == "UL2017":
                 self.prescales={
-                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  1.,
-                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1.,
-                    "HLT_Mu3_PFJet40":                    1.,
-                    "HLT_Mu8":                            1.,
-                    "HLT_Mu17":                           1.,
-                    "HLT_Mu20":                           1.,
-                    "HLT_Mu27":                           1.,
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  11360.5330533,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1165.85200291,
+                    "HLT_Mu3_PFJet40":                    9002.09070805,
+                    "HLT_Mu8":                            15940.9827565,
+                    "HLT_Mu17":                           592.522518622,
+                    "HLT_Mu20":                           72.0652540143,
+                    "HLT_Mu27":                           224.404773677,
                 }
             elif year == "UL2018":
                 self.prescales={
-                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  1.,
-                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1., 
-                    "HLT_Mu3_PFJet40":                    1.,
-                    "HLT_Mu8":                            1.,
-                    "HLT_Mu17":                           1., 
-                    "HLT_Mu20":                           1.,  
-                    "HLT_Mu27":                           1.,
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  9315.15991869,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1536.9429043, 
+                    "HLT_Mu3_PFJet40":                    22125.3782748,
+                    "HLT_Mu8":                            6984.35039719,
+                    "HLT_Mu17":                           1304.90350437, 
+                    "HLT_Mu20":                           1080.77634328,  
+                    "HLT_Mu27":                           474.985077468,
                 }  
             else:
                 raise NotImplementedError("Trigger prescaling not implemented for year = %s"%year)
@@ -97,43 +97,43 @@ class triggerPrescale:
             # Measured myself
             if year == "UL2016preVFP":
                 self.prescales={
-                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  6229.62660079,
-                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 440.740081094,
-                    "HLT_Mu3_PFJet40":                    7178.45712872,
-                    "HLT_Mu8":                            4203.38687734,
-                    "HLT_Mu17":                           72.2525081456,
-                    "HLT_Mu20":                           153.637292859,
-                    "HLT_Mu27":                           99.089848659,
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  6465.5767026,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 526.134215655,
+                    "HLT_Mu3_PFJet40":                    7310.09061493,
+                    "HLT_Mu8":                            4982.8340468,
+                    "HLT_Mu17":                           74.7897935104,
+                    "HLT_Mu20":                           162.651473263,
+                    "HLT_Mu27":                           112.836933305,
                 }
             elif year == "UL2016":
                 self.prescales={
-                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  7922.26097063,
-                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1801.8398497,
-                    "HLT_Mu3_PFJet40":                    7737.95144378,
-                    "HLT_Mu8":                            18921.8348027,
-                    "HLT_Mu17":                           569.536792274,
-                    "HLT_Mu20":                           432.703777024,
-                    "HLT_Mu27":                           132.47687128,
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  8309.00642408,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 2448.77749586,
+                    "HLT_Mu3_PFJet40":                    8341.62859509,
+                    "HLT_Mu8":                            24111.8217713,
+                    "HLT_Mu17":                           600.532648006,
+                    "HLT_Mu20":                           435.516828392,
+                    "HLT_Mu27":                           139.29890913,
                 }
             elif year == "UL2017":
                 self.prescales={
-                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  11378.4826614,
-                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1078.97277512,
-                    "HLT_Mu3_PFJet40":                    5996.83773323,
-                    "HLT_Mu8":                            14280.9420492,
-                    "HLT_Mu17":                           668.742986599,
-                    "HLT_Mu20":                           82.3808120496,
-                    "HLT_Mu27":                           211.32230202,
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  10921.9128316,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1135.00059454,
+                    "HLT_Mu3_PFJet40":                    5998.44830411,
+                    "HLT_Mu8":                            19275.0825695,
+                    "HLT_Mu17":                           704.719311802,
+                    "HLT_Mu20":                           67.721568649,
+                    "HLT_Mu27":                           211.943332799,
                 }
             elif year == "UL2018":
                 self.prescales={
-                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  7284.59076069,
-                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1207.62241777,
-                    "HLT_Mu3_PFJet40":                    10215,
-                    "HLT_Mu8":                            7420,
-                    "HLT_Mu17":                           947, 
-                    "HLT_Mu20":                           715,  
-                    "HLT_Mu27":                           339,
+                    "HLT_Ele8_CaloIdM_TrackIdM_PFJet30":  6579.1822458,
+                    "HLT_Ele17_CaloIdM_TrackIdM_PFJet30": 1336.75017094,
+                    "HLT_Mu3_PFJet40":                    8697.97949292,
+                    "HLT_Mu8":                            9507.38839664,
+                    "HLT_Mu17":                           1547.61001665, 
+                    "HLT_Mu20":                           970.223642099,  
+                    "HLT_Mu27":                           425.548142026,
                 }
             else:
                 raise NotImplementedError("Trigger prescaling not implemented for year = %s"%year)
