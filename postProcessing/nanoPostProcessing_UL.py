@@ -131,7 +131,7 @@ if isDiLep:
 elif isTriLep:
     skimConds.append( "Sum$(Electron_pt>20&&abs(Electron_eta)&&Electron_pfRelIso03_all<0.4) + Sum$(Muon_pt>20&&abs(Muon_eta)<2.5&&Muon_pfRelIso03_all<0.4)>=2 && Sum$(Electron_pt>10&&abs(Electron_eta)<2.5)+Sum$(Muon_pt>10&&abs(Muon_eta)<2.5)>=3" )
 elif isSingleLep:
-    skimConds.append( "Sum$(Electron_pt>10&&abs(Electron_eta)<2.5) + Sum$(Muon_pt>10&&abs(Muon_eta)<2.5)>=1" )
+    skimConds.append( "Sum$(Electron_pt>8&&abs(Electron_eta)<2.5) + Sum$(Muon_pt>3&&abs(Muon_eta)<2.5)>=1" )
 
 if isInclusive:
     skimConds.append('(1)')
@@ -645,12 +645,16 @@ reader = sample.treeReader( \
 
 # eleSelector_ = eleSelector( "preselv2", year = yearint )
 # muSelector_  = muonSelector("preselv2", year = yearint )
-eleSelector_ = eleSelector( "presel", year = yearint )
-muSelector_  = muonSelector("presel", year = yearint )
+
+el_cut_presel = 10.0 if isTriLep else 8.0
+mu_cut_presel = 10.0 if isTriLep else 3.0
+
+eleSelector_ = eleSelector( "presel", year = yearint, ptCut=el_cut_presel )
+muSelector_  = muonSelector("presel", year = yearint, ptCut=mu_cut_presel )
 
 #FO lepton selector
-FOeleSelector = eleSelector( "FOmvaTOPT", year = yearint )
-FOmuSelector  = muonSelector("FOmvaTOPT", year = yearint )
+FOeleSelector = eleSelector( "FOmvaTOPT", year = yearint, ptCut=el_cut_presel )
+FOmuSelector  = muonSelector("FOmvaTOPT", year = yearint, ptCut=mu_cut_presel )
 ################################################################################
 # FILL EVENT INFO HERE
 ################################################################################
@@ -813,7 +817,7 @@ def filler( event ):
     # Remove leptons that do not fulfil quality criteria
     all_leptons = list(leptons) # Copy list to not loop over the list from which we remove entries 
     for lep in all_leptons:
-        if not lep['passFO']:
+        if not lep['passFO'] or lep['ptCone'] < 10:
             leptons.remove(lep)
             
     # Now set index corresponding to cleaned list
@@ -889,7 +893,7 @@ def filler( event ):
                 jets_sys[var]       = filter(lambda j:j['pt_'+var]>30, clean_jets_acc)
                 bjets_sys[var]      = filter(lambda j: isBJet(j) and abs(j['eta'])<2.4, jets_sys[var])
                 nonBjets_sys[var]   = filter(lambda j: not ( isBJet(j) and abs(j['eta'])<2.4), jets_sys[var])
-
+                
                 setattr(event, "nJetGood_"+var, len(jets_sys[var]))
                 setattr(event, "nBTag_"+var,    len(bjets_sys[var]))
 
