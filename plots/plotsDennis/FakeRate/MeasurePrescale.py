@@ -17,6 +17,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',   action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 argParser.add_argument('--year',       action='store',      default='UL2018')
+argParser.add_argument('--noQCD',      action='store_true', default=False)
 args = argParser.parse_args()
 
 path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v10_noPreScale_reduce/"
@@ -45,6 +46,8 @@ QCDsamples = {
     "muon": ["QCD_MuEnriched"]
 }
 
+    
+
 MTmin = 90
 MTmax = 130
 
@@ -69,7 +72,9 @@ for channel in channels:
         # if "2016" in year and trigger in ["HLT_Mu20","HLT_Mu27"]:
         #     continue
         logger.info("Running trigger %s", trigger)
-        backgrounds = ["Wjets","WZ", "ZZ", "WW", "TTbar", "DY"]+QCDsamples[channel]
+        backgrounds = ["Wjets","WZ", "ZZ", "WW", "TTbar", "DY"]
+        if not args.noQCD:
+            backgrounds += QCDsamples[channel]
         filename = path+year+"/"+channel+"/"+selection+"/Results.root"
         hist_prefix = "T_MTfix__TRIGGER_"
         h_data = getObjFromFile(filename, hist_prefix+trigger+"__data")
@@ -90,6 +95,9 @@ for channel in channels:
         prescales[trigger] = Nevents["MC"]/Nevents["data"]
         
         plotdir = plot_directory+"/FakeRate_prescales/"
+        if args.noQCD:
+            plotdir = plot_directory+"/FakeRate_prescales_noQCD/"
+        
         if not os.path.exists( plotdir ): os.makedirs( plotdir )
         p = Plotter(year+"__"+channel+"__"+trigger)
         p.plot_dir = plotdir
