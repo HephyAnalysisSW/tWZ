@@ -151,6 +151,7 @@ def nonEmptyFile(f, treeName='Events'):
     return nonEmpty
 
 def getObjFromFile(fname, hname):
+    gDir = ROOT.gDirectory.GetName()
     f = ROOT.TFile(fname)
     assert not f.IsZombie()
     f.cd()
@@ -159,16 +160,17 @@ def getObjFromFile(fname, hname):
     ROOT.gDirectory.cd('PyROOT:/')
     res = htmp.Clone()
     f.Close()
+    ROOT.gDirectory.cd(gDir+':/')
     return res
 
-def writeObjToFile(fname, obj, update=False):
+def writeObjToFile(fname, obj, writename, update=False):
     gDir = ROOT.gDirectory.GetName()
     if update:
         f = ROOT.TFile(fname, 'UPDATE')
     else:
         f = ROOT.TFile(fname, 'recreate')
     objw = obj.Clone()
-    objw.Write()
+    objw.Write(writename)
     f.Close()
     ROOT.gDirectory.cd(gDir+':/')
     return

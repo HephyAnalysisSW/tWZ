@@ -46,8 +46,8 @@ def makeDummySys(hist, variation):
 ################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
-path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v5/"
-path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v5_FakeRateSF_useDataSF/"
+path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v6/"
+path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v6_FakeRateSF_useDataSF/"
 
 
     

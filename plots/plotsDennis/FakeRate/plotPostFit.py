@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import os
+import os, sys
 import ROOT
 import Analysis.Tools.syncer
 import array as arr
 from math                                        import sqrt
 from tWZ.Tools.user                              import plot_directory
-from tWZ.Tools.helpers                           import getObjFromFile
+from tWZ.Tools.helpers                           import getObjFromFile, writeObjToFile
 from tWZ.samples.color                           import color
 from MyRootTools.plotter.Plotter                 import Plotter
 import tWZ.Tools.logger as logger
@@ -22,14 +22,12 @@ argParser.add_argument('--prescalemode',   action='store', type=str, default="mi
 args = argParser.parse_args()
 
 logger.info("Plot post fit distributions")
-
     
 ################################################################################
 # Some functions
 def getPrefit(plotname, process, path):
     filename_L = path+"FakeRate_"+plotname+"_LOOSE.root"
     filename_T = path+"FakeRate_"+plotname+"_TIGHT.root"
-    
     hist_L = getObjFromFile(filename_L, "singlelep/"+process) 
     hist_T = getObjFromFile(filename_T, "singlelep/"+process) 
     return hist_L, hist_T
@@ -44,9 +42,16 @@ def getPostfit(plotname, process, path):
     hist_T = getObjFromFile(filename_T, histdir_T+process) 
     return hist_L, hist_T
     
-def ConvertBinning(h_post, dummy):
-    h_new = dummy.Clone()
-    Nbins = h_post.GetSize()-2
+def ConvertBinning(h_post, dummy, name):
+    # Get Binning from pre fit
+    Nbins = dummy.GetSize()-2
+    binning = []
+    for i in range(Nbins):
+        bin = i+1
+        binning.append(dummy.GetXaxis().GetBinLowEdge(bin))
+        if bin == Nbins:
+            binning.append(dummy.GetXaxis().GetBinUpEdge(bin))
+    h_new = ROOT.TH1F(name, name, Nbins, arr.array('d',binning))
     if Nbins != dummy.GetSize()-2:
         print "Bin number does not match!"
     for i in range(Nbins):
@@ -55,10 +60,10 @@ def ConvertBinning(h_post, dummy):
         h_new.SetBinError(bin, h_post.GetBinError(bin))
     return h_new
     
-def createMap(boundaries_pt, boundaries_eta):
+def createMap(boundaries_pt, boundaries_eta, name):
     array_pt = arr.array('d',boundaries_pt)
     array_eta = arr.array('d',boundaries_eta)
-    map = ROOT.TH2F("hist", "hist", len(array_pt)-1, array_pt, len(array_eta)-1, array_eta)
+    map = ROOT.TH2F(name, name, len(array_pt)-1, array_pt, len(array_eta)-1, array_eta)
     return map
 
 def drawMap(map, plotname, dir):
@@ -97,38 +102,76 @@ def getRateAndError(h1, h2):
     error = sqrt( pow((e1/N2),2) + pow((-N1*e2/(N2*N2)),2) )
     return (ratio, error)
     
+def combinePDFs(names, outname, dir):
+    cmd = "gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -sOutputFile="+outname+".pdf "
+    for name in names:
+        cmd += name+".pdf "
+    cmd += " >/dev/null 2>&1"
+        
+    current_dir = os.getcwd()
+    os.chdir(dir)
+    os.system(cmd)
+    os.chdir(current_dir)
+    # print cmd
+
+def make1Dprojection(map, map_uncert, name, boundaries_pt):
+    histograms = {}
+    NbinsX = map.GetXaxis().GetNbins()
+    NbinsY = map.GetYaxis().GetNbins()
+    for j in range(NbinsY):
+        etabin = j+1
+        hname = name+"_ETA"+str(etabin)
+        hist = ROOT.TH1F(hname, hname, len(boundaries_pt)-1, arr.array('d',boundaries_pt) )
+        for i in range(NbinsX):
+            ptbin = i+1
+            content = map.GetBinContent(ptbin, etabin)
+            error = map_uncert.GetBinContent(ptbin, etabin)
+            hist.SetBinContent(ptbin, content)
+            hist.SetBinError(ptbin, error)
+        histograms["ETA"+str(etabin)] = hist
+    return histograms
+
 # various methods to get fake rate:
 # - from postfit nonprompt only 
 # - from prefit (data-prompt)
 # - from postfit (data-prompt)
 ################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
+year = args.year
+channel = args.channel
 
 prefitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput/"
 postfitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits/"
-plotdir = plot_directory+"/FakeRate/Maps_data/"
+plotdir = plot_directory+"/FakeRate/PostFit/"
+plotdir_maps = plot_directory+"/FakeRate/Maps_data/"
+outname = year+"_"+channel
 
 if args.prescalemode == "bril":
     prefitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput_BRIL/"
     postfitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits_BRIL/"
-    plotdir = plot_directory+"/FakeRate/Maps_data_BRIL/"
+    plotdir = plot_directory+"/FakeRate/PostFit_BRIL/"
+    plotdir_maps = plot_directory+"/FakeRate/Maps_data_BRIL/"
+
+if args.plotPrefit:
+    plotdir = plotdir.replace("PostFit", "PreFit")
+    
+if not os.path.exists( plotdir ): os.makedirs( plotdir )
+if not os.path.exists( plotdir_maps ): os.makedirs( plotdir_maps )
 
 
-year = args.year
-channel = args.channel
 boundaries_pt = [0, 20, 30, 45, 120]
 boundaries_eta = [0, 1.2, 2.1, 2.4]
 if args.channel == "elec":
     boundaries_eta = [0, 0.8, 1.44, 2.4]
     
-plotters = {}
+FakerateMap_v1 = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v1")
+FakerateMap_v1_stat = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v1_stat")
+FakerateMap_v2 = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v2")
+FakerateMap_v2_stat = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v2_stat")
+FakerateMap_v3 = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v3")
+FakerateMap_v3_stat = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v3_stat")
 
-FakerateMap_v1 = createMap(boundaries_pt, boundaries_eta)
-FakerateMap_v1_stat = createMap(boundaries_pt, boundaries_eta)
-FakerateMap_v2 = createMap(boundaries_pt, boundaries_eta)
-FakerateMap_v2_stat = createMap(boundaries_pt, boundaries_eta)
-FakerateMap_v3 = createMap(boundaries_pt, boundaries_eta)
-FakerateMap_v3_stat = createMap(boundaries_pt, boundaries_eta)
+allnames = []
 
 for i in range(len(boundaries_pt)):
     for j in range(len(boundaries_eta)):
@@ -152,22 +195,16 @@ for i in range(len(boundaries_pt)):
 
 
         # Convert postfit since they have different binning scheme than prefit 
-        h_post_prompt_L = ConvertBinning(h_post_prompt_L, dummy_pre)
-        h_post_prompt_T = ConvertBinning(h_post_prompt_T, dummy_pre)
-        h_post_nonprompt_L = ConvertBinning(h_post_nonprompt_L, dummy_pre)
-        h_post_nonprompt_T = ConvertBinning(h_post_nonprompt_T, dummy_pre)
+        h_post_prompt_L = ConvertBinning(h_post_prompt_L, dummy_pre, plotname+"_prompt_LOOSE")
+        h_post_prompt_T = ConvertBinning(h_post_prompt_T, dummy_pre, plotname+"_prompt_TIGHT")
+        h_post_nonprompt_L = ConvertBinning(h_post_nonprompt_L, dummy_pre, plotname+"_nonprompt_LOOSE")
+        h_post_nonprompt_T = ConvertBinning(h_post_nonprompt_T, dummy_pre, plotname+"_nonprompt_TIGHT")
         
-        plotdir = plot_directory+"/FakeRate/PostFit/"
-        if args.prescalemode == "bril":
-            plotdir = plot_directory+"/FakeRate/PostFit_BRIL/"
-        
-        if args.plotPrefit:
-            plotdir = plotdir.replace("PostFit", "PreFit")
-                
-            
-        if not os.path.exists( plotdir ): os.makedirs( plotdir )
+        ptstring = "%i < p_{T} < %i GeV" %(boundaries_pt[i], boundaries_pt[i+1])
+        etastring = "%.1f < |#eta| < %.1f" %(boundaries_eta[j], boundaries_eta[j+1])
         
         # Loose plots
+        allnames.append(plotname+"_LOOSE")
         p_L = Plotter(plotname+"_LOOSE")
         p_L.plot_dir = plotdir
         p_L.drawRatio = True
@@ -180,9 +217,13 @@ for i in range(len(boundaries_pt)):
             p_L.addBackground(h_post_prompt_L, "prompt", ROOT.kRed)
             p_L.addBackground(h_post_nonprompt_L, "nonprompt", ROOT.kBlue)
         p_L.addData(h_pre_data_L)
-        plotters[plotname+"_LOOSE"] = p_L
+        p_L.addText(0.24, 0.7, ptstring, size=14)
+        p_L.addText(0.24, 0.65, etastring, size=14)
+        p_L.addText(0.24, 0.6, "Loose", size=14)
+        p_L.draw()
 
         # Tight plots 
+        allnames.append(plotname+"_TIGHT")
         p_T = Plotter(plotname+"_TIGHT")
         p_T.plot_dir = plotdir
         p_T.drawRatio = True
@@ -195,8 +236,11 @@ for i in range(len(boundaries_pt)):
             p_T.addBackground(h_post_prompt_T, "prompt", ROOT.kRed)
             p_T.addBackground(h_post_nonprompt_T, "nonprompt", ROOT.kBlue)
         p_T.addData(h_pre_data_T)
-        plotters[plotname+"_TIGHT"] = p_T
-        
+        p_T.addText(0.24, 0.7, ptstring, size=14)
+        p_T.addText(0.24, 0.65, etastring, size=14)
+        p_T.addText(0.24, 0.6, "Tight", size=14)
+        p_T.draw()
+
         # Fakerate maps 
         # Version 1: nonprompt = data - prompt_postfit
         h_nonprompt_data_L = h_pre_data_L.Clone()
@@ -229,34 +273,42 @@ for i in range(len(boundaries_pt)):
         d23 = fakerate_v2 - fakerate_v3
         if d12 > 0.4 or d13 > 0.4 or d23 > 0.4:
             logger.info("PT%s ETA%s, v1 and v2 not compatible: v1=%s, v2=%s, v3=%s", ptbin, etabin, fakerate_v1, fakerate_v2, fakerate_v3)
-                                        
+                            
 
+        
 if not args.plotPrefit:
-    drawMap(FakerateMap_v1, year+"__"+channel+"__Map_DATA_v1", plotdir)
-    drawMap(FakerateMap_v2, year+"__"+channel+"__Map_DATA_v2", plotdir)
-    drawMap(FakerateMap_v3, year+"__"+channel+"__Map_DATA_v3", plotdir)
-    drawMap(FakerateMap_v1_stat, year+"__"+channel+"__Map_DATA_v1_stat", plotdir)
-    drawMap(FakerateMap_v2_stat, year+"__"+channel+"__Map_DATA_v2_stat", plotdir)
-    drawMap(FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3_stat", plotdir)
-
-
-for name in plotters:
-    plotters[name].draw()
-
-# del plotters
-
-# Store maps in file
-if not args.plotPrefit:
+    drawMap(FakerateMap_v1, year+"__"+channel+"__Map_DATA_v1", plotdir_maps)
+    drawMap(FakerateMap_v2, year+"__"+channel+"__Map_DATA_v2", plotdir_maps)
+    drawMap(FakerateMap_v3, year+"__"+channel+"__Map_DATA_v3", plotdir_maps)
+    drawMap(FakerateMap_v1_stat, year+"__"+channel+"__Map_DATA_v1_stat", plotdir_maps)
+    drawMap(FakerateMap_v2_stat, year+"__"+channel+"__Map_DATA_v2_stat", plotdir_maps)
+    drawMap(FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3_stat", plotdir_maps)
+    
+    # 1D projection of the maps
+    hists_1D_v3 = make1Dprojection(FakerateMap_v3, FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3", boundaries_pt)
+    for etabin in hists_1D_v3:
+        etabinint = int(etabin.replace("ETA", ""))-1
+        etastring = "%.1f < |#eta| < %.1f" %(boundaries_eta[etabinint], boundaries_eta[etabinint+1])
+        p = Plotter(year+"__"+channel+"__Map_DATA_v3_1D_"+etabin)
+        p.plot_dir = plotdir_maps
+        p.xtitle = "p_{T}^{cone} [GeV]"
+        p.ytitle = "Fake rate"
+        p.setCustomYRange(0.0, 1.0)
+        p.addData(hists_1D_v3[etabin])
+        p.addText(0.24, 0.7, etastring, size=14)
+        p.draw()
+    
+    # Store maps in file
     suffix = ""
     if args.prescalemode == "bril":
         suffix = "__BRIL"
-    outfile = ROOT.TFile("LeptonFakerate__"+year+"__"+channel+suffix+".root", "RECREATE")
-    outfile.cd()
-    FakerateMap_v1.Write("Fakerate_v1")
-    FakerateMap_v2.Write("Fakerate_v2")
-    FakerateMap_v3.Write("Fakerate_v3")
-    FakerateMap_v1_stat.Write("Fakerate_v1_stat")
-    FakerateMap_v2_stat.Write("Fakerate_v2_stat")
-    FakerateMap_v3_stat.Write("Fakerate_v3_stat")
-    outfile.Close()
-####
+    mapfilename = "LeptonFakerate__"+year+"__"+channel+suffix+".root"
+    writeObjToFile(mapfilename, FakerateMap_v1, "Fakerate_v1")
+    writeObjToFile(mapfilename, FakerateMap_v2, "Fakerate_v2")
+    writeObjToFile(mapfilename, FakerateMap_v3, "Fakerate_v3")
+    writeObjToFile(mapfilename, FakerateMap_v1_stat, "Fakerate_v1_stat")
+    writeObjToFile(mapfilename, FakerateMap_v2_stat, "Fakerate_v2_stat")
+    writeObjToFile(mapfilename, FakerateMap_v3_stat, "Fakerate_v3_stat")
+
+
+combinePDFs(allnames, outname, plotdir)

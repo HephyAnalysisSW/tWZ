@@ -2,7 +2,7 @@
 
 import ROOT
 from math                                import sqrt
-import array
+import array as arr
 import Analysis.Tools.syncer
 from tWZ.Tools.helpers                           import getObjFromFile
 from MyRootTools.plotter.Plotter                 import Plotter
@@ -44,9 +44,21 @@ def getPlotter(name, dir, h_prompt, h_nonprompt, h_data):
     p.addData(h_data)
     return p 
     
-def prepareHist(hist):
-    newhist = hist.Clone()
-    newhist.GetXaxis().SetRangeUser(0., 56.)
+def prepareHist(hist, Nbinmax):
+    Nbins = hist.GetSize()-2
+    binning = []
+    # Only do first 4 bins:
+    if Nbins > Nbinmax: Nbins = Nbinmax
+    for i in range(Nbins):
+        bin = i+1
+        binning.append(hist.GetXaxis().GetBinLowEdge(bin))
+        if bin == Nbins:
+            binning.append(hist.GetXaxis().GetBinUpEdge(bin))
+    newhist = ROOT.TH1F("h", "h", Nbins, arr.array('d',binning))
+    for i in range(Nbins):
+        bin = i+1
+        newhist.SetBinContent(bin, hist.GetBinContent(bin))
+        newhist.SetBinError(bin, hist.GetBinError(bin))
     return newhist
 ################################################################################
 ### Setup
@@ -111,12 +123,12 @@ for i in range(len(boundaries_pt)):
         hist_data_L = getObjFromFile(filename, histnameL+"__data")             
         hist_data_T = getObjFromFile(filename, histnameT+"__data")
                 
-        hist_prompt_L = prepareHist(hist_prompt_L)
-        hist_prompt_T = prepareHist(hist_prompt_T)
-        hist_nonprompt_L = prepareHist(hist_nonprompt_L)
-        hist_nonprompt_T = prepareHist(hist_nonprompt_T)
-        hist_data_L = prepareHist(hist_data_L)
-        hist_data_T = prepareHist(hist_data_T)
+        hist_prompt_L = prepareHist(hist_prompt_L, 4)
+        hist_prompt_T = prepareHist(hist_prompt_T, 4)
+        hist_nonprompt_L = prepareHist(hist_nonprompt_L, 4)
+        hist_nonprompt_T = prepareHist(hist_nonprompt_T, 4)
+        hist_data_L = prepareHist(hist_data_L, 4)
+        hist_data_T = prepareHist(hist_data_T, 4)
         
         # Write loose
         plotname_L = "FakeRate_%s_%s_PT%s_ETA%s_LOOSE" %(year,channel,ptbin,etabin)
