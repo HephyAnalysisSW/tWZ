@@ -50,7 +50,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='LeptonPtScan_v1')
+argParser.add_argument('--plot_directory', action='store', default='LeptonPtScan_v2')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='singlelepFO-vetoAddLepFO-vetoMET')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -231,7 +231,7 @@ elif args.era == "ULRunII":
 ################################################################################
 # Binning for Maps
 boundaries_mva = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0]
-    
+boundaries_mva_WP = [0.0, 0.20, 0.41, 0.64, 0.81, 1.0]
 
 ################################################################################
 # Creating a list of weights
@@ -337,17 +337,33 @@ def drawPlots(plots):
 # Define sequences
 sequence       = []
 
+def adjustptcone(sample, event):
+    f_mu = 0.933
+    f_el = 0.91
+    if event.l1_passFO and not event.l1_passTight:
+        i_lep = event.l1_index
+        if abs(event.lep_pdgId[i_lep]) == 11:
+            event.l1_ptCone = f_el*event.l1_ptCone
+        elif abs(event.lep_pdgId[i_lep]) == 13:
+            event.l1_ptCone = f_mu*event.l1_ptCone    
+sequence.append(adjustptcone)
+    
+
 def getBin(sample, event):
-    Nbins_mva = len(boundaries_mva)
     mvascore = event.l1_mvaTOP
+    Nbins_mva = len(boundaries_mva)
     bin_mva = 0
     for i in range(Nbins_mva):
         if mvascore > boundaries_mva[i]:
             bin_mva += 1
     event.bin_mva = bin_mva
-    # print "----------------------------"
-    # print boundaries_mva
-    # print mvascore, event.bin_mva
+    #####
+    Nbins_mva_WP = len(boundaries_mva_WP)
+    bin_mva_WP = 0
+    for i in range(Nbins_mva_WP):
+        if mvascore > boundaries_mva_WP[i]:
+            bin_mva_WP += 1
+    event.bin_mva_WP = bin_mva_WP    
 sequence.append(getBin)
 
 
@@ -474,7 +490,18 @@ for i in range(len(boundaries_mva)):
         binning=[25, 0, 150],
     ))
     list_of_binned_plots.append("L_cone_pt"+suffix)
-        
+
+for i in range(len(boundaries_mva_WP)):
+    mvabin = i+1
+    suffix = "__BIN_WP_mva%s" %(mvabin)
+    plots.append(Plot(
+        name = "L_cone_pt"+suffix,
+        texX = 'Lepton p_{T}^{Cone} (GeV)', texY = 'Number of Events',
+        attribute = lambda event, sample, i_mva=mvabin: event.l1_ptCone if (event.bin_mva_WP==i_mva) else float('nan'),
+        binning=[25, 0, 150],
+    ))
+    list_of_binned_plots.append("L_cone_pt"+suffix)
+            
 plotting.fill(plots+plots2D, read_variables = read_variables, sequence = sequence)
 
 
