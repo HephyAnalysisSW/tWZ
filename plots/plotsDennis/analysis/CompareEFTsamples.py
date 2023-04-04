@@ -51,7 +51,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v7')
+argParser.add_argument('--plot_directory', action='store', default='CompareEFTsamples_v1')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -60,9 +60,6 @@ argParser.add_argument('--twoD',           action='store_true', default=False)
 argParser.add_argument('--triplet',        action='store_true', default=False)
 argParser.add_argument('--doTTbarReco',    action='store_true', default=False)
 argParser.add_argument('--applyFakerate',  action='store_true', default=False)
-argParser.add_argument('--nonpromptOnly',  action='store_true', default=False)
-argParser.add_argument('--splitnonprompt', action='store_true', default=False)
-argParser.add_argument('--splitTTX',       action='store_true', default=False)
 argParser.add_argument('--useDataSF',      action='store_true', default=False)
 argParser.add_argument('--useBRILSF',      action='store_true', default=False)
 argParser.add_argument('--tunePtCone',     action='store_true', default=False)
@@ -132,9 +129,6 @@ else:
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
 if args.noData:                       args.plot_directory += "_noData"
-if args.nonpromptOnly:                args.plot_directory += "_nonpromptOnly"
-if args.splitnonprompt:               args.plot_directory += "_splitnonprompt"
-if args.splitTTX:                     args.plot_directory += "_splitTTX"
 if args.applyFakerate:                args.plot_directory += "_FakeRateSF"
 if args.useDataSF:                    args.plot_directory += "_useDataSF"
 if args.useBRILSF:                    args.plot_directory += "_useBRILSF"
@@ -251,54 +245,24 @@ else:
 from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
 
 if args.era == "UL2016":
-    mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
-    if args.splitTTX:
-        mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare_noTTW, UL2016.TTW, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
-    if args.nonpromptOnly:
-        if args.splitnonprompt:
-            mc = [UL2016.WW, UL2016.Top, UL2016.DY]
-        else:
-            mc = [UL2016.nonprompt_3l]
+    mc = []
     samples_eft = []
 elif args.era == "UL2016preVFP":
-    mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
-    if args.splitTTX:
-        mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare_noTTW, UL2016preVFP.TTW, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
-    if args.nonpromptOnly:
-        if args.splitnonprompt:
-            mc = [UL2016preVFP.WW, UL2016preVFP.Top, UL2016preVFP.DY]
-        else:
-            mc = [UL2016preVFP.nonprompt_3l]
+    mc = []
     samples_eft = []
 elif args.era == "UL2017":
-    mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
-    if args.splitTTX:
-        mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare_noTTW, UL2017.TTW, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
-    if args.nonpromptOnly:
-        if args.splitnonprompt:
-            mc = [UL2017.WW, UL2017.Top, UL2017.DY]
-        else:
-            mc = [UL2017.nonprompt_3l]
+    mc = []
     samples_eft = []
 elif args.era == "UL2018":
-    mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
-    if args.splitTTX:
-        mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare_noTTW, UL2018.TTW, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
-    if args.nonpromptOnly:
-        if args.splitnonprompt:
-            mc = [UL2018.WW, UL2018.Top, UL2018.DY]
-        else:
-            mc = [UL2018.nonprompt_3l]
+    if "qualepT" in args.selection:
+        mc = [UL2018.ZZ, UL2018.ZZ_EFT]
+    elif "njet3p-btag1p" in args.selection:
+        mc = [UL2018.TTZ, UL2018.TTZ_EFT]
+    elif "btag0-met60" in args.selection:        
+        mc = [UL2018.WZTo3LNu, UL2018.WZ_EFT]
     samples_eft = []
 elif args.era == "ULRunII":
-    mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
-    if args.splitTTX:
-        mc = [TWZ_NLO_DR, TTZ, TTX_rare_noTTW, TTW, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
-    if args.nonpromptOnly:
-        if args.splitnonprompt:
-            mc = [WW, Top, DY]
-        else:
-            mc = [nonprompt_3l]
+    mc = []
     samples_eft = []
 
 ################################################################################
@@ -1739,13 +1703,16 @@ for mode in allModes+["all"]:
                     elif "tWZToLL01j_lepWFilter" in histname: process = "tWZ"
                     elif "ttZ01j_lepWFilter" in histname: process = "ttZ"
                     elif "ttZ01j" in histname: process = "ttZ"
+                    elif "TTZ_EFT" in histname: process = "ttZ_EFT"
                     elif "TTZ" in histname: process = "ttZ"
                     elif "TTX_rare_noTTW" in histname: process = "ttX_noTTW"
                     elif "TTX_rare" in histname: process = "ttX"
                     elif "TTW" in histname: process = "ttW"
                     elif "TZQ" in histname: process = "tZq"
                     elif "WZTo3LNu" in histname: process = "WZ"
+                    elif "WZ_EFT" in histname: process = "WZ_EFT"
                     elif "WZ" in histname: process = "WZ"
+                    elif "ZZ_EFT" in histname: process = "ZZ_EFT"
                     elif "ZZ" in histname: process = "ZZ"
                     elif "triBoson" in histname: process = "triBoson"
                     elif "nonprompt" in histname: process = "nonprompt"
