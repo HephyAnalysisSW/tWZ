@@ -147,21 +147,25 @@ if options.small:
     options.nJobs = 10000 # set high to just run over 1 input file
 
 if options.year == "UL2016":
-    from Samples.nanoAOD.UL16_nanoAODv9           import allSamples as mcSamples
-    from Samples.nanoAOD.UL16_DATA_nanoAODv9      import allSamples as dataSamples
-    allSamples = mcSamples + dataSamples
+    from Samples.nanoAOD.UL16_privateDennis_nanoAODv9  import allSamples as eftSamples
+    from Samples.nanoAOD.UL16_nanoAODv9                import allSamples as mcSamples
+    from Samples.nanoAOD.UL16_DATA_nanoAODv9           import allSamples as dataSamples
+    allSamples = mcSamples + dataSamples + eftSamples
 elif options.year == "UL2016_preVFP": #AODAPV samples
-    from Samples.nanoAOD.UL16_nanoAODAPVv9        import allSamples as mcSamples
-    from Samples.nanoAOD.UL16_DATA_nanoAODAPVv9   import allSamples as dataSamples
-    allSamples = mcSamples + dataSamples
+    from Samples.nanoAOD.UL16_privateDennis_nanoAODAPVv9  import allSamples as eftSamples
+    from Samples.nanoAOD.UL16_nanoAODAPVv9                import allSamples as mcSamples
+    from Samples.nanoAOD.UL16_DATA_nanoAODAPVv9           import allSamples as dataSamples
+    allSamples = mcSamples + dataSamples + eftSamples
 elif options.year == "UL2017":
-    from Samples.nanoAOD.UL17_nanoAODv9           import allSamples as mcSamples
-    from Samples.nanoAOD.UL17_DATA_nanoAODv9      import allSamples as dataSamples
-    allSamples = mcSamples + dataSamples
+    from Samples.nanoAOD.UL17_privateDennis_nanoAODv9  import allSamples as eftSamples
+    from Samples.nanoAOD.UL17_nanoAODv9                import allSamples as mcSamples
+    from Samples.nanoAOD.UL17_DATA_nanoAODv9           import allSamples as dataSamples
+    allSamples = mcSamples + dataSamples + eftSamples
 elif options.year == "UL2018":
-    from Samples.nanoAOD.UL18_nanoAODv9           import allSamples as mcSamples
-    from Samples.nanoAOD.UL18_DATA_nanoAODv9      import allSamples as dataSamples
-    allSamples = mcSamples + dataSamples
+    from Samples.nanoAOD.UL18_privateDennis_nanoAODv9  import allSamples as eftSamples
+    from Samples.nanoAOD.UL18_nanoAODv9                import allSamples as mcSamples
+    from Samples.nanoAOD.UL18_DATA_nanoAODv9           import allSamples as dataSamples
+    allSamples = mcSamples + dataSamples + eftSamples
 
 samples = []
 for selected in options.samples:
