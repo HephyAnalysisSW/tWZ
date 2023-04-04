@@ -28,6 +28,13 @@ if args.year not in ["UL2016preVFP", "UL2016", "UL2017", "UL2018"]:
     
 year = args.year
 
+lumi = {
+    "UL2016preVFP": "19.5", 
+    "UL2016": "16.5", 
+    "UL2017": "41.5", 
+    "UL2018": "60.0",
+}
+
 channels = ["elec", "muon"]
 # channels = ["elec"]
 # selection = "singlelepT-vetoAddLepFO-met40"
@@ -104,7 +111,8 @@ for channel in channels:
         p.drawRatio = True
         p.xtitle = "m_{T}^{fix}"
         p.yfactor = 2.0
-        p.lumi = "60"
+        p.lumi = lumi[year]
+        p.addText(.55, .75, trigger)
         p.legshift = (-0.35, +0.02, -0.4, -0.14) 
         p.addData(h_data, "Data")
         for bkg in backgrounds:

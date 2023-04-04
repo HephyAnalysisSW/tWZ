@@ -19,6 +19,7 @@ argParser.add_argument('--channel',        action='store',      default='muon')
 argParser.add_argument('--year',           action='store',      default='UL2018')
 argParser.add_argument('--plotPrefit',     action='store_true', default=False)
 argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
+argParser.add_argument('--tunePtCone',     action='store_true')
 args = argParser.parse_args()
 
 logger.info("Plot post fit distributions")
@@ -71,13 +72,21 @@ def drawMap(map, plotname, dir):
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)
     ROOT.gStyle.SetOptStat(0)
+    ROOT.gStyle.SetPalette(ROOT.kSunset)
     c = ROOT.TCanvas("c", "c", 600, 600)
-    ROOT.gPad.SetRightMargin(0.19)
+    ROOT.gPad.SetRightMargin(0.23)
     ROOT.gPad.SetLeftMargin(0.19)
     ROOT.gPad.SetBottomMargin(0.12)
     map.SetTitle(" ")
     map.GetXaxis().SetTitle("Lepton p_{T}^{cone}")
     map.GetYaxis().SetTitle("Lepton |#eta|")
+    ztitle = "Fake rate"
+    if "stat" in plotname: ztitle = "Stat. uncertainty"
+    if "statrel" in plotname: ztitle = "Relative stat. uncertainty"
+    map.GetZaxis().SetTitle(ztitle)
+    map.GetZaxis().SetTitleOffset(1.3)
+    # print plotname, map.GetMaximum()
+    # map.GetZaxis().SetRangeUser(0., 1.)
     map.Draw("COLZ")
     map.GetXaxis().SetRangeUser(0, 100)
     c.Print(dir+plotname+".pdf")
@@ -151,7 +160,13 @@ if args.prescalemode == "bril":
     postfitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits_BRIL/"
     plotdir = plot_directory+"/FakeRate/PostFit_BRIL/"
     plotdir_maps = plot_directory+"/FakeRate/Maps_data_BRIL/"
-
+    
+if args.tunePtCone:
+    prefitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput_tunePtCone/"
+    postfitpath = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits_tunePtCone/"
+    plotdir = plot_directory+"/FakeRate/PostFit_tunePtCone/"
+    plotdir_maps = plot_directory+"/FakeRate/Maps_data_tunePtCone/"
+    
 if args.plotPrefit:
     plotdir = plotdir.replace("PostFit", "PreFit")
     
@@ -166,10 +181,13 @@ if args.channel == "elec":
     
 FakerateMap_v1 = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v1")
 FakerateMap_v1_stat = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v1_stat")
+FakerateMap_v1_statrel = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v1_statrel")
 FakerateMap_v2 = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v2")
 FakerateMap_v2_stat = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v2_stat")
+FakerateMap_v2_statrel = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v2_statrel")
 FakerateMap_v3 = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v3")
 FakerateMap_v3_stat = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v3_stat")
+FakerateMap_v3_statrel = createMap(boundaries_pt, boundaries_eta, "FakerateMap_v3_statrel")
 
 allnames = []
 
@@ -250,6 +268,7 @@ for i in range(len(boundaries_pt)):
         fakerate_v1, fakerate_v1_stat = getRateAndError(h_nonprompt_data_T, h_nonprompt_data_L)
         FakerateMap_v1.SetBinContent(ptbin, etabin, fakerate_v1)
         FakerateMap_v1_stat.SetBinContent(ptbin, etabin, fakerate_v1_stat)
+        FakerateMap_v1_statrel.SetBinContent(ptbin, etabin, fakerate_v1_stat/fakerate_v1)
 
         # Version 2: nonprompt = data - prompt_prefit
         h_nonprompt_data_pre_L = h_pre_data_L.Clone()
@@ -259,6 +278,7 @@ for i in range(len(boundaries_pt)):
         fakerate_v2, fakerate_v2_stat = getRateAndError(h_nonprompt_data_pre_T, h_nonprompt_data_pre_L)
         FakerateMap_v2.SetBinContent(ptbin, etabin, fakerate_v2)
         FakerateMap_v2_stat.SetBinContent(ptbin, etabin, fakerate_v2_stat)        
+        FakerateMap_v2_statrel.SetBinContent(ptbin, etabin, fakerate_v2_stat/fakerate_v2)
         
         # Version 3: nonprompt = nonprompt_postfit
         h_nonprompt_fit_L = h_post_nonprompt_L.Clone()
@@ -266,6 +286,7 @@ for i in range(len(boundaries_pt)):
         fakerate_v3, fakerate_v3_stat = getRateAndError(h_nonprompt_fit_T, h_nonprompt_fit_L)
         FakerateMap_v3.SetBinContent(ptbin, etabin, fakerate_v3)
         FakerateMap_v3_stat.SetBinContent(ptbin, etabin, fakerate_v3_stat)     
+        FakerateMap_v3_statrel.SetBinContent(ptbin, etabin, fakerate_v3_stat/fakerate_v3)
         
         # Check compatibility of various methods
         d12 = fakerate_v1 - fakerate_v2
@@ -283,7 +304,10 @@ if not args.plotPrefit:
     drawMap(FakerateMap_v1_stat, year+"__"+channel+"__Map_DATA_v1_stat", plotdir_maps)
     drawMap(FakerateMap_v2_stat, year+"__"+channel+"__Map_DATA_v2_stat", plotdir_maps)
     drawMap(FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3_stat", plotdir_maps)
-    
+    drawMap(FakerateMap_v1_statrel, year+"__"+channel+"__Map_DATA_v1_statrel", plotdir_maps)
+    drawMap(FakerateMap_v2_statrel, year+"__"+channel+"__Map_DATA_v2_statrel", plotdir_maps)
+    drawMap(FakerateMap_v3_statrel, year+"__"+channel+"__Map_DATA_v3_statrel", plotdir_maps)
+        
     # 1D projection of the maps
     hists_1D_v3 = make1Dprojection(FakerateMap_v3, FakerateMap_v3_stat, year+"__"+channel+"__Map_DATA_v3", boundaries_pt)
     for etabin in hists_1D_v3:
@@ -302,13 +326,15 @@ if not args.plotPrefit:
     suffix = ""
     if args.prescalemode == "bril":
         suffix = "__BRIL"
+    if args.tunePtCone:
+        suffix = "__tunePtCone"
     mapfilename = "LeptonFakerate__"+year+"__"+channel+suffix+".root"
     writeObjToFile(mapfilename, FakerateMap_v1, "Fakerate_v1")
-    writeObjToFile(mapfilename, FakerateMap_v2, "Fakerate_v2")
-    writeObjToFile(mapfilename, FakerateMap_v3, "Fakerate_v3")
-    writeObjToFile(mapfilename, FakerateMap_v1_stat, "Fakerate_v1_stat")
-    writeObjToFile(mapfilename, FakerateMap_v2_stat, "Fakerate_v2_stat")
-    writeObjToFile(mapfilename, FakerateMap_v3_stat, "Fakerate_v3_stat")
+    writeObjToFile(mapfilename, FakerateMap_v2, "Fakerate_v2", update=True)
+    writeObjToFile(mapfilename, FakerateMap_v3, "Fakerate_v3", update=True)
+    writeObjToFile(mapfilename, FakerateMap_v1_stat, "Fakerate_v1_stat", update=True)
+    writeObjToFile(mapfilename, FakerateMap_v2_stat, "Fakerate_v2_stat", update=True)
+    writeObjToFile(mapfilename, FakerateMap_v3_stat, "Fakerate_v3_stat", update=True)
 
 
 combinePDFs(allnames, outname, plotdir)

@@ -58,6 +58,7 @@ argParser.add_argument('--noPreScale',     action='store_true')
 argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
 argParser.add_argument('--noLargeWeights', action='store_true')
 argParser.add_argument('--reduce',         action='store_true')
+argParser.add_argument('--tunePtCone',     action='store_true')
 
 args = argParser.parse_args()
 
@@ -102,6 +103,7 @@ if args.small:                        args.plot_directory += "_small"
 if args.noData:                       args.plot_directory += "_noData"
 if args.prescalemode == "ghent":      args.plot_directory += "_GHENTprescale"
 if args.prescalemode == "bril":       args.plot_directory += "_BRILprescale"
+if args.tunePtCone:                   args.plot_directory += "_tunePtCone"
 if args.noPreScale:                   args.plot_directory += "_noPreScale"
 if args.noLargeWeights:               args.plot_directory += "_noLargeWeights"
 if args.reduce:                       args.plot_directory += "_reduce"
@@ -493,7 +495,22 @@ def passedOfflineCut( event, triggername ):
 # Define sequences
 sequence       = []
 
-def leptonVariables(event, sample):
+def tuneptCone(sample, event):
+    if args.tunePtCone:
+        f_mu = 0.933
+        f_el = 0.91
+        if event.l1_passFO and not event.l1_passTight:
+            i_lep = event.l1_index
+            if abs(event.lep_pdgId[i_lep]) == 11:
+                event.l1_ptConeGhent = f_el*event.l1_ptCone
+                event.l1_ptCone      = f_el*event.l1_ptCone
+            elif abs(event.lep_pdgId[i_lep]) == 13:
+                event.l1_ptConeGhent = f_mu*event.l1_ptCone
+                event.l1_ptCone      = f_mu*event.l1_ptCone 
+sequence.append(tuneptCone)
+    
+
+def leptonVariables(sample, event):
     pdgid = event.lep_pdgId[event.l1_index]
     event.pdgid = pdgid
     

@@ -10,6 +10,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
+argParser.add_argument('--tunePtCone',     action='store_true')
 args = argParser.parse_args()
 
 import tWZ.Tools.logger as logger
@@ -66,6 +67,7 @@ def drawMap(map, plotname, dir):
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)
     ROOT.gStyle.SetOptStat(0)
+    ROOT.gStyle.SetPalette(ROOT.kSunset)
     c = ROOT.TCanvas("c", "c", 600, 600)
     ROOT.gPad.SetRightMargin(0.19)
     ROOT.gPad.SetLeftMargin(0.19)
@@ -73,6 +75,7 @@ def drawMap(map, plotname, dir):
     map.SetTitle(" ")
     map.GetXaxis().SetTitle("Lepton p_{T}^{cone}")
     map.GetYaxis().SetTitle("Lepton |#eta|")
+    map.GetZaxis().SetRangeUser(0., 1.5*map.GetMaximum())
     map.Draw("COLZ")
     map.GetXaxis().SetRangeUser(0, 100)
     c.Print(dir+plotname+".pdf")
@@ -83,14 +86,17 @@ path = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v10"
 if args.prescalemode == "bril": 
     path += "_BRILprescale"
 
+if args.tunePtCone:
+    path += "_tunePtCone"
+
 path += "/"
     
     
 years = ["UL2016preVFP", "UL2016", "UL2017", "UL2018"]
 # years = ["UL2016preVFP", "UL2016"]
 channels = ["elec", "muon"]
-# selection = "singlelepFO-vetoAddLepFO-vetoMET"
-selection = "singlelepFOconept-vetoAddLepFOconept-vetoMET"
+selection = "singlelepFO-vetoAddLepFO-vetoMET"
+# selection = "singlelepFOconept-vetoAddLepFOconept-vetoMET"
 
 QCDsamples = {
     "elec": ["QCD_EMEnriched", "QCD_bcToE"],
@@ -110,6 +116,8 @@ for year in years:
         suffix = ""
         if args.prescalemode == "bril":
             suffix = "__BRIL"
+        if args.tunePtCone:
+            suffix = "__tunePtCone"
         outputfile = ROOT.TFile("LeptonFakerate__MC__"+year+"__"+channel+suffix+".root", "RECREATE")
         filepath =  os.path.join(path, year, channel, sel, "Results.root")
         logger.info("Reading histograms from %s", filepath)
@@ -135,6 +143,9 @@ for year in years:
         plotdir = plot_directory+"/FakeRate/Maps/"
         if args.prescalemode == "bril":
             plotdir = plotdir.replace("Maps", "Maps_BRIL")
+        if args.tunePtCone:
+            plotdir = plotdir.replace("Maps", "Maps_tunePtCone")
+            
         drawMap(QCDL, year+"__"+channel+"__QCD_loose", plotdir)
         drawMap(QCDT, year+"__"+channel+"__QCD_tight", plotdir)
         drawMap(backgroundsL, year+"__"+channel+"__Backgrounds_loose", plotdir)
