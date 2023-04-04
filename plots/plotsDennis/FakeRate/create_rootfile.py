@@ -17,6 +17,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--channel',        action='store',      default='muon')
 argParser.add_argument('--year',           action='store',      default='UL2018')
 argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
+argParser.add_argument('--tunePtCone',     action='store_true')
 args = argParser.parse_args()
 
 ################################################################################
@@ -80,6 +81,11 @@ if args.prescalemode == "bril":
     outdir = outdir.replace("CombineInput", "CombineInput_BRIL")
     outdir_plots = outdir_plots.replace("CombineInput", "CombineInput_BRIL")
 
+if args.tunePtCone:
+    outdir = outdir.replace("CombineInput", "CombineInput_tunePtCone")
+    outdir_plots = outdir_plots.replace("CombineInput", "CombineInput_tunePtCone")    
+    
+
 prompt = ["Wjets", "WZ", "ZZ", "WW", "TTbar", "DY"]
 nonprompt = {
     "muon" : ["QCD_MuEnriched"],
@@ -91,10 +97,16 @@ plotters = {}
 
 logger.info("Running year %s", year)
 logger.info("Running channel %s", channel)
-filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v10/%s/%s/%s/Results.root" %(year, channel, selection)
-if args.prescalemode == "bril": 
-    filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_v10_BRILprescale/%s/%s/%s/Results.root" %(year, channel, selection)
 
+version = "v10"
+
+filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_"+version+"/%s/%s/%s/Results.root" %(year, channel, selection)
+if args.prescalemode == "bril": 
+    filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_"+version+"_BRILprescale/%s/%s/%s/Results.root" %(year, channel, selection)
+
+if args.tunePtCone:
+    filename = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/FakeRate/FakeRate_"+version+"_tunePtCone/%s/%s/%s/Results.root" %(year, channel, selection)
+    
 
 logger.info("Reading %s", filename)
 for i in range(len(boundaries_pt)):

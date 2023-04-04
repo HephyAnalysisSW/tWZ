@@ -9,6 +9,7 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 argParser.add_argument('--channel',        action='store',      default='muon')
 argParser.add_argument('--year',           action='store',      default='UL2018')
 argParser.add_argument('--prescalemode',   action='store', type=str, default="mine")
+argParser.add_argument('--tunePtCone',     action='store_true')
 args = argParser.parse_args()
 
 logger.info("Script to run combine fits in fakerate measurement")
@@ -20,6 +21,10 @@ if args.prescalemode == "bril":
     inputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput_BRIL/datacards/"
     outputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits_BRIL/"    
 
+if args.tunePtCone:
+    inputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/CombineInput_tunePtCone/datacards/"
+    outputdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/Fakerate/Fits_tunePtCone/"  
+    
 prefix = "Fakerate_"
 year = args.year
 channel = args.channel

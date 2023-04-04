@@ -42,27 +42,50 @@
 # python fakerate.py --prescalemode=bril --channel=muon --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2018
 # python fakerate.py --prescalemode=bril --channel=elec --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2018
 
+### NORMAL FAKERATE RUN WITH PT CONE TUNE ######################################
+
+python fakerate.py --channel=muon --tunePtCone --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016preVFP
+python fakerate.py --channel=elec --tunePtCone --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016preVFP
+python fakerate.py --channel=muon --tunePtCone --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2016preVFP
+python fakerate.py --channel=elec --tunePtCone --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2016preVFP
+
+python fakerate.py --channel=muon --tunePtCone --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016
+python fakerate.py --channel=elec --tunePtCone --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2016
+python fakerate.py --channel=muon --tunePtCone --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2016
+python fakerate.py --channel=elec --tunePtCone --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2016
+
+python fakerate.py --channel=muon --tunePtCone --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2017
+python fakerate.py --channel=elec --tunePtCone --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2017
+python fakerate.py --channel=muon --tunePtCone --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2017
+python fakerate.py --channel=elec --tunePtCone --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2017
+
+python fakerate.py --channel=muon --tunePtCone --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2018
+python fakerate.py --channel=elec --tunePtCone --selection=singlelepFO-vetoAddLepFO-vetoMET --era=UL2018
+python fakerate.py --channel=muon --tunePtCone --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2018
+python fakerate.py --channel=elec --tunePtCone --selection=singlelepFOconept-vetoAddLepFOconept-vetoMET --era=UL2018
+
+
 ### FAKERATE RUN TO MEASURE PRESCALES (REDUCE TT) ##############################
 
-python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2016preVFP --reduce
-python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2016preVFP --reduce
-python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2016preVFP --reduce
-python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2016preVFP --reduce
-
-python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2016 --reduce
-python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2016 --reduce
-python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2016 --reduce
-python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2016 --reduce
-
-python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2017 --reduce
-python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2017 --reduce
-python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2017 --reduce
-python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2017 --reduce
-
-python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2018 --reduce
-python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2018 --reduce
-python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2018 --reduce
-python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2018 --reduce
+# python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2016preVFP --reduce
+# python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2016preVFP --reduce
+# python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2016preVFP --reduce
+# python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2016preVFP --reduce
+# 
+# python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2016 --reduce
+# python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2016 --reduce
+# python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2016 --reduce
+# python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2016 --reduce
+# 
+# python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2017 --reduce
+# python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2017 --reduce
+# python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2017 --reduce
+# python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2017 --reduce
+# 
+# python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2018 --reduce
+# python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFO-met40 --noPreScale --era=UL2018 --reduce
+# python fakerate.py --channel=muon --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2018 --reduce
+# python fakerate.py --channel=elec --selection=singlelepT-vetoAddLepFOconept-met40 --noPreScale --era=UL2018 --reduce
 
 ### FAKERATE RUN TO MEASURE PRESCALES ##########################################
 
