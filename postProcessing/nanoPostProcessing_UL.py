@@ -27,6 +27,7 @@ from tWZ.Tools.objectSelection_UL     import getGenZs
 from tWZ.Tools.overlapRemovalTTG   import hasMesonMother, getParentIds
 from tWZ.Tools.triggerEfficiency   import triggerEfficiency
 from tWZ.Tools.leptonSF            import leptonSF as leptonSF_
+from tWZ.Tools.EFTweightCheck      import removeDamagedFiles
 
 from Analysis.Tools.mvaTOPreader             import mvaTOPreader
 from Analysis.Tools.metFiltersUL              import getFilterCut
@@ -81,13 +82,13 @@ options = get_parser().parse_args()
 
 if options.year not in [ 'UL2016', 'UL2016_preVFP', 'UL2017', 'UL2018' ]:
     raise Exception("Year %s not known"%year)
-yearint = 2018 
-if "UL2016" == options.year: 
-    yearint = 2016 
-if "UL2016_preVFP" == options.year: 
+yearint = 2018
+if "UL2016" == options.year:
+    yearint = 2016
+if "UL2016_preVFP" == options.year:
     yearint = 2016
 elif "UL2017" == options.year:
-    yearint = 2017 
+    yearint = 2017
 elif "UL2018" == options.year:
     yearint = 2018
 
@@ -270,6 +271,14 @@ if hasattr( sample, "reweight_pkl" ):
 
     logger.info("Adding reweights. Expect to read %i base point weights.", weightInfo.nid)
 
+
+################################################################################
+## remove certain files that do not have the correct number of EFT weights:
+oldlength=len(sample.files)
+sample.files = removeDamagedFiles( options.year, options.samples, sample.files )
+if len(sample.files) != oldlength:
+    logger.info( "removeDamagedFiles: Removed %i of %i files because they contain wrong EFT weights."%(oldlength-len(sample.files), oldlength) )
+
 ################################################################################
 ## sort the list of files?
 len_orig = len(sample.files)
@@ -388,7 +397,7 @@ else:
     logger.info( "Sample will NOT have top pt reweighting. topScaleF=%f",topScaleF )
 
 ################################################################################
-# CR reweighting 
+# CR reweighting
 if options.doCRReweighting:
     from Analysis.Tools.colorReconnectionReweighting import getCRWeight, getCRDrawString
     logger.info( "Sample will have CR reweighting." )
@@ -510,7 +519,7 @@ new_variables += [\
 if sample.isData: new_variables.extend( ['jsonPassed/I','isData/I'] )
 new_variables.extend( ['nBTag/I', 'm3/F', 'minDLmass/F'] )
 
-new_variables.append( 'lep[%s]'% ( ','.join(lepVars) + ',ptCone/F' + ',ptConeGhent/F'+ ',jetBTag/F' + ',mvaTOP/F' + ',mvaTOPv2/F' + ',jetPtRatio/F' +',jetNDauCharged/I'+',jetRelIso/F') ) 
+new_variables.append( 'lep[%s]'% ( ','.join(lepVars) + ',ptCone/F' + ',ptConeGhent/F'+ ',jetBTag/F' + ',mvaTOP/F' + ',mvaTOPv2/F' + ',jetPtRatio/F' +',jetNDauCharged/I'+',jetRelIso/F') )
 
 if isTriLep or isDiLep or isSingleLep:
     new_variables.extend( ['nGoodMuons/I', 'nGoodElectrons/I', 'nGoodLeptons/I' ] )
@@ -562,7 +571,7 @@ for var in btagEff.btagWeightNames:
     if var!='MC':
         # For the uncorrelated part of b tag uncertainties, add one weight per year
         # Later in the code, these are only filled if the year fits.
-        # e.g. in a 2018 sample, the uncorrelated_2016preVFP/2016/2017 are set to the central SF 
+        # e.g. in a 2018 sample, the uncorrelated_2016preVFP/2016/2017 are set to the central SF
         if "Uncorrelated" in var:
             new_variables.append('reweightBTag_'+var+'_2016preVFP/F')
             new_variables.append('reweightBTag_'+var+'_2016/F')
@@ -570,7 +579,7 @@ for var in btagEff.btagWeightNames:
             new_variables.append('reweightBTag_'+var+'_2018/F')
         else:
             new_variables.append('reweightBTag_'+var+'/F')
-        
+
 
 if not options.skipNanoTools:
     ### nanoAOD postprocessor
@@ -603,7 +612,7 @@ if not options.skipNanoTools:
 
     runPeriod = None
     if sample.isData:
-        runString = sample.name 
+        runString = sample.name
         runString = runString.replace("_preVFP", "")
         runString = runString.replace("ver1", "")
         runString = runString.replace("ver2", "")
@@ -636,7 +645,7 @@ if not options.skipNanoTools:
     sample.files = newFileList
     sample.clear()
 
-# Define mvaTOP reader 
+# Define mvaTOP reader
 mvaTOPreader_ = mvaTOPreader(year = options.year)
 
 # Define a reader
@@ -708,7 +717,7 @@ def filler( event ):
     # PU reweighting
     if isMC and hasattr(r, "Pileup_nTrueInt"):
         from Analysis.Tools.puWeightsUL			import getPUReweight
-        event.reweightPU     = getPUReweight( r.Pileup_nTrueInt, year=options.year, weight="nominal") 
+        event.reweightPU     = getPUReweight( r.Pileup_nTrueInt, year=options.year, weight="nominal")
         event.reweightPUDown = getPUReweight( r.Pileup_nTrueInt, year=options.year, weight="down" )
         event.reweightPUUp   = getPUReweight( r.Pileup_nTrueInt, year=options.year, weight="up" )
 
@@ -731,16 +740,15 @@ def filler( event ):
         for i,w in enumerate(scale_weights):
             event.Scale_Weight[i] = w
         event.nScale = r.nLHEScaleWeight
-        
+
         pdf_weights = [reader.sample.chain.GetLeaf("LHEPdfWeight").GetValue(i_weight) for i_weight in range(r.nLHEPdfWeight)]
         for i,w in enumerate(pdf_weights):
             event.PDF_Weight[i] = w
         event.nPDF = r.nLHEPdfWeight
-        
-    ################################################################################
-    # reweights        
-    if addReweights:
 
+    ################################################################################
+    # reweights
+    if addReweights:
         include_missing_refpoint = False
         if weightInfo.nid == r.nLHEReweightingWeight + 1:
             logger.debug( "addReweights: pkl file has %i base-points but nLHEReweightWeight=%i, hence it is likely that the ref-point is among the base points and is missing. Fingers crossed.", weightInfo.nid, r.nLHEReweightingWeight )
@@ -750,7 +758,8 @@ def filler( event ):
         elif weightInfo.nid == r.nLHEReweightingWeight:
             pass
         else:
-            raise RuntimeError("reweight_pkl and nLHEReweightWeight are inconsistent.")
+            # logger.info( "reweight_pkl and nLHEReweightWeight are inconsistent: %i weights in reweight_pkl, nLHEReweightingWeight = %i, will remove event ", weightInfo.nid, r.nLHEReweightingWeight)
+            raise RuntimeError("reweight_pkl and nLHEReweightWeight are inconsistent: %i weights in reweight_pkl, nLHEReweightingWeight = %i ", weightInfo.nid, r.nLHEReweightingWeight)
 
         # here we check the consistency with miniAOD, hence multiply with LHEWeight_originalXWGTUP
         weights = [reader.sample.chain.GetLeaf("LHEReweightingWeight").GetValue(i_weight) for i_weight in range(r.nLHEReweightingWeight)]
@@ -766,11 +775,10 @@ def filler( event ):
 
         for n in xrange( hyperPoly.ndof ):
             event.p_C[n] = coeff[n]
-    #    p_C_nanoAOD.append( [ coeff[n] for n in xrange(hyperPoly.ndof) ] )
 
     allSlimmedJets      = getJets(r)
     event.reweightL1Prefire, event.reweightL1PrefireUp, event.reweightL1PrefireDown = r.L1PreFiringWeight_Nom, r.L1PreFiringWeight_Up, r.L1PreFiringWeight_Dn
-    
+
     # get electrons and muons
     electrons_pt10  = getGoodElectrons(r, ele_selector = eleSelector_)
     muons_pt10      = getGoodMuons    (r, mu_selector  = muSelector_ )
@@ -779,23 +787,23 @@ def filler( event ):
         e['pdgId']      = int( -11*e['charge'] )
         e['eleIndex']   = e['index']
         e['muIndex']    = -1
-        
+
     for m in muons_pt10:
         m['pdgId']      = int( -13*m['charge'] )
         m['muIndex']    = m['index']
         m['eleIndex']   = -1
-        
-    # make list of leptons 
+
+    # make list of leptons
     leptons = electrons_pt10+muons_pt10
     leptons.sort(key = lambda p:-p['pt'])
 
     # Get all jets because they are needed to calculate the lepton mvaTOP
     all_jets     = getJets(r, jetVars=jetVarNames)
-    
-    # Calculate variables for mvaTOP and get mvaTOP score 
+
+    # Calculate variables for mvaTOP and get mvaTOP score
     for iLep, lep in enumerate(leptons):
         ptConeGhent = 0.66*lep['pt']*(1+lep['jetRelIso']) if abs(lep['pdgId'])==13 else 0.72*lep['pt']*(1+lep['jetRelIso'])
-        # find closest jet 
+        # find closest jet
         bscore_nextjet = 0
         jetidx = lep['jetIdx']
         if jetidx >= 0:
@@ -803,7 +811,7 @@ def filler( event ):
             bscore_nextjet = closest_jet['btagDeepFlavB']
         ####
         lep['jetBTag'] = bscore_nextjet
-        lep['ptConeGhent'] = ptConeGhent        
+        lep['ptConeGhent'] = ptConeGhent
         lep['jetPtRatio'] = 1/(lep['jetRelIso']+1)
         mvaScore, WPv1, mvaScorev2, WPv2 = mvaTOPreader_.getmvaTOPScore(lep)
         lep['mvaTOP'] = mvaScore
@@ -816,18 +824,18 @@ def filler( event ):
         elif abs(lep['pdgId']) == 11 :
             lep['passFO'] = FOeleSelector(lep)
             lep['passTight'] = True if lep['mvaTOPWP'] >= 4 else False # tight WP for electrons
-        lep['ptCone'] = lep['pt'] if lep['passTight'] else lep['ptConeGhent'] 
-        
+        lep['ptCone'] = lep['pt'] if lep['passTight'] else lep['ptConeGhent']
+
     # Remove leptons that do not fulfil quality criteria
-    all_leptons = list(leptons) # Copy list to not loop over the list from which we remove entries 
+    all_leptons = list(leptons) # Copy list to not loop over the list from which we remove entries
     for lep in all_leptons:
         if not lep['passFO'] or lep['ptCone'] < 10:
             leptons.remove(lep)
-            
+
     # Now set index corresponding to cleaned list
     for iLep, lep in enumerate(leptons):
         lep['index'] = iLep
-    
+
     # Now create cleaned jets, b jets, ...
     clean_jets,_ = cleanJetsAndLeptons( all_jets, leptons )
     clean_jets_id = filter(lambda j:abs(j['jetId'])>=6, clean_jets)
@@ -837,13 +845,13 @@ def filler( event ):
     nonBJets     = filter(lambda j:not ( isBJet(j, tagger=b_tagger, year=options.year) and abs(j['eta'])<=2.4 ), jets)
 
 
-                
-        
+
+
     fill_vector_collection( event, "lep", lepVarNames, leptons)
     event.nlep = len(leptons)
     event.minDLmass = getMinDLMass(leptons)
-    
-    
+
+
     # store the correct MET (EE Fix for 2017)
 
     if options.year == 2017:# and not options.fastSim:
@@ -897,7 +905,7 @@ def filler( event ):
                 jets_sys[var]       = filter(lambda j:j['pt_'+var]>30, clean_jets_acc)
                 bjets_sys[var]      = filter(lambda j: isBJet(j) and abs(j['eta'])<2.4, jets_sys[var])
                 nonBjets_sys[var]   = filter(lambda j: not ( isBJet(j) and abs(j['eta'])<2.4), jets_sys[var])
-                
+
                 setattr(event, "nJetGood_"+var, len(jets_sys[var]))
                 setattr(event, "nBTag_"+var,    len(bjets_sys[var]))
 
@@ -1078,7 +1086,7 @@ def filler( event ):
             btagEff.addBTagEffToJet(j)
         for var in btagEff.btagWeightNames:
             if var!='MC':
-                # For the uncerrelated uncertainties, fill only the current year 
+                # For the uncerrelated uncertainties, fill only the current year
                 # The values for other years are set to the central "SF"
                 if "Uncorrelated" in var:
                     if event.year == 2016 and event.preVFP:
@@ -1086,7 +1094,7 @@ def filler( event ):
                         setattr(event, 'reweightBTag_'+var+'_2016', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
                         setattr(event, 'reweightBTag_'+var+'_2017', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
                         setattr(event, 'reweightBTag_'+var+'_2018', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
-                    elif event.year == 2016 and not event.preVFP: 
+                    elif event.year == 2016 and not event.preVFP:
                         setattr(event, 'reweightBTag_'+var+'_2016preVFP', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
                         setattr(event, 'reweightBTag_'+var+'_2016', btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
                         setattr(event, 'reweightBTag_'+var+'_2017', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
@@ -1096,7 +1104,7 @@ def filler( event ):
                         setattr(event, 'reweightBTag_'+var+'_2016', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
                         setattr(event, 'reweightBTag_'+var+'_2017', btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
                         setattr(event, 'reweightBTag_'+var+'_2018', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
-                    elif event.year == 2018: 
+                    elif event.year == 2018:
                         setattr(event, 'reweightBTag_'+var+'_2016preVFP', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
                         setattr(event, 'reweightBTag_'+var+'_2016', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
                         setattr(event, 'reweightBTag_'+var+'_2017', btagEff.getBTagSF_1a( "SF", bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
