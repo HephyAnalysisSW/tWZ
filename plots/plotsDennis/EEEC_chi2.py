@@ -24,11 +24,12 @@ if args.nowidth:
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 # binning = [1.8, 2.0, 2.2]
 # binning = [0.0, 1.0, 1.4, 1.8, 2.2]
-binning = [0.0, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 3.0]
+# binning = [0.0, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 3.0]
+binning = [1.0, 1.4, 1.8, 2.2, 3.0]
 
 # binning = [0.0, 0.6, 1.4, 1.8, 2.4]
 # binning = []
-# Nbins = 30 
+# Nbins = 100
 # min = 0.0
 # max = 3.0
 # stepsize = (max-min)/Nbins
@@ -49,7 +50,7 @@ def getDelta(nominal, variation):
         diff = variation.GetBinContent(bin)-nominal.GetBinContent(bin)
         h_delta.SetBinContent(bin, diff)
     return h_delta
-    
+
 def averageDelta(down, up, nominal):
     h_delta = ROOT.TH1D(up.GetName()+down.GetName()+"_average", "3 zeta", len(binning)-1, array.array('d', binning))
     Nbins = len(binning)-1
@@ -65,8 +66,8 @@ def averageDelta(down, up, nominal):
         sign = diff_up/abs(diff_up) if shift_up > shift_down else diff_down/abs(diff_down)
         average = sign * (abs(diff_up)+abs(diff_down))/2
         h_delta.SetBinContent(bin, average)
-    return h_delta    
-    
+    return h_delta
+
 def getCovFromDelta(delta):
     cov = ROOT.TH2D(delta.GetName()+"_cov", "cov", len(binning)-1, array.array('d', binning), len(binning)-1, array.array('d', binning))
     Nbins = len(binning)-1
@@ -76,7 +77,7 @@ def getCovFromDelta(delta):
             binj = j+1
             SF = float(args.scaleSYS)
             entry = (SF*SF)*delta.GetBinContent(bini) * delta.GetBinContent(binj)
-            cov.SetBinContent(bini, binj, entry)    
+            cov.SetBinContent(bini, binj, entry)
     return cov
 
 def getCovFromStat(hist):
@@ -123,13 +124,13 @@ def normalizeCov(cov, nominal, width):
                         binwidth_i = 1.0
                         binwidth_j = 1.0
 
-                    if bini==bink: 
+                    if bini==bink:
                         derivation_i = (integral - nominal.GetBinContent(bini)) / (integral*integral) * (1/binwidth_i)
-                    else:          
+                    else:
                         derivation_i = - (nominal.GetBinContent(bini))          / (integral*integral) * (1/binwidth_i)
-                    if binj==binl: 
+                    if binj==binl:
                         derivation_j = (integral - nominal.GetBinContent(binj)) / (integral*integral) * (1/binwidth_j)
-                    else:     
+                    else:
                         derivation_j = - (nominal.GetBinContent(binj))          / (integral*integral) * (1/binwidth_j)
                     sum += derivation_i * derivation_j * old_entry
             cov_norm.SetBinContent(bini, binj, sum)
@@ -152,7 +153,7 @@ def drawDelta(delta, plotname, dir):
     delta.Draw("HIST")
     c.Print(dir+plotname+".pdf")
 
-        
+
 def drawCov(cov, plotname, dir):
     ROOT.gStyle.SetLegendBorderSize(0)
     ROOT.gStyle.SetPadTickX(1)
@@ -167,7 +168,7 @@ def drawCov(cov, plotname, dir):
     cov.GetXaxis().SetTitle("3 #zeta")
     cov.GetYaxis().SetTitle("3 #zeta")
     cov.Draw("COLZ")
-    cov.Draw("BOX SAME")    
+    cov.Draw("BOX SAME")
     c.Print(dir+plotname+".pdf")
 
 
@@ -177,11 +178,11 @@ def reduceCondition(mat, diag, step, condition_threshold):
     while not done:
         condition = np.linalg.cond(mat)
         if condition < condition_threshold:
-            done = True 
+            done = True
         else:
             mat += step*diag
             counter += 1
-    print "needed %i steps and added diagonal values of %.5f" %(counter, counter*step) 
+    print "needed %i steps and added diagonal values of %.5f" %(counter, counter*step)
     return mat
 
 
@@ -189,7 +190,7 @@ def svdsolve(A):
     u, s, v = np.linalg.svd(A)
     Ainv = np.dot(v.transpose(), np.dot(np.diag(s**-1), u.transpose()))
     return Ainv
-    
+
 def compute_chi2(template_hist, data_hist, cov):
     # type: (Any, Any, np.ndarray) -> float
     Nbins = len(binning)-1
@@ -205,29 +206,29 @@ def compute_chi2(template_hist, data_hist, cov):
     diag = np.zeros((Nbins, Nbins), dtype=np.float64)
     for i in range(Nbins):
         diag[i,i] = 1.0
-        
-    # remove a bin 
+
+    # remove a bin
     d_vec = np.delete(d_vec, 0)
     cov = np.delete(np.delete(cov, 0, 0), 0, 1)
     diag = np.delete(np.delete(diag, 0, 0), 0, 1)
     ###
-    
+
     print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
     # newcov = reduceCondition(cov, diag, 0.0000001, 10)
     newcov = cov
     print "condition number =", np.linalg.cond(newcov)
     print "determinant =", np.linalg.det(newcov)
     # print newcov
-    
+
     # cov_inv = svdsolve(newcov)
     cov_inv = np.linalg.inv(newcov)
     # cov_inv = np.linalg.inv(np.linalg.cholesky(newcov))
     print np.dot(cov_inv, newcov)
     # print np.dot(cov_inv2, newcov)
     chi2 = np.linalg.multi_dot([d_vec, cov_inv, d_vec])
-    
+
     return chi2
-    
+
 def compute_chi2_test(template_hist, data_hist, cov):
     Nbins = len(binning)-1
     bins = []
@@ -236,20 +237,20 @@ def compute_chi2_test(template_hist, data_hist, cov):
         if bin != 1:
             bins.append(bin)
 
-            
+
     vDiff = ROOT.TVectorD(len(bins))
-    
+
     mat = ROOT.TMatrixDSym(len(bins))
-    
+
     for i, bini in enumerate(bins):
         vDiff[i] = data_hist.GetBinContent(bini)-template_hist.GetBinContent(bini)
         for j, binj in enumerate(bins):
             mat[i][j] = cov.GetBinContent(bini, binj)
-        
+
     # mat.SetTol(1.e-20)
     # mat.Invert()
     matinv = ROOT.TDecompChol(mat).Invert()
-    
+
 
     # chi2 = vDiff * imat * vDiff
     # First do right part imat*vDiff
@@ -259,11 +260,11 @@ def compute_chi2_test(template_hist, data_hist, cov):
             vRight[i] = vRight[i] + matinv[i][j] * vDiff[j]
 
     # Now left part chi2 = vDiff * right
-    chi2 = 0 
+    chi2 = 0
     for i in range(len(bins)):
         chi2 += vDiff[i]*vRight[i]
-        
-    # print "chi2 =",  chi2 
+
+    # print "chi2 =",  chi2
 
     return chi2
 
@@ -277,19 +278,19 @@ def TH2toNP(cov):
             binj = j+1
             matrix[i,j] = cov.GetBinContent(bini,binj)
     return matrix
-    
+
 def measureMtop(graph):
     fit_func = ROOT.TF1('pol2_fit', 'pol2', 170, 175)
     graph.Fit(fit_func, 'QR')
     fit = graph.GetFunction('pol2_fit')
-    
+
     minY = fit.GetMinimum()
     mtop = fit.GetX(minY, 170, 175)
     sigmaUp = fit.GetX(minY+1, mtop, 175) - mtop
     sigmaDown = mtop - fit.GetX(minY+1, 170, mtop)
-    
+
     return (mtop, sigmaUp, sigmaDown)
-    
+
 def getBinGraphs(histdict, factors):
     (hist, _) = histdict[factors[0]]
     Nbins = hist.GetSize()-2
@@ -305,7 +306,7 @@ def getBinGraphs(histdict, factors):
             error.append(hist.GetBinError(bin))
             xerror.append(0)
         g = ROOT.TGraphErrors(len(factors), array.array('d', factors), array.array('d', content), array.array('d', xerror), array.array('d', error)  )
-        graphs[bin] = g    
+        graphs[bin] = g
     return graphs
 
 def drawBinGraph(graph, name):
@@ -332,12 +333,15 @@ def drawBinGraph(graph, name):
     plotdir = plot_directory+"/EEECplots/"
     if not os.path.exists( plotdir ): os.makedirs( plotdir )
     c.Print(plotdir+name+".pdf")
-################################################################################    
-    
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+################################################################################
 plotdir = plot_directory+"/EEECplots/"
 if not os.path.exists( plotdir ): os.makedirs( plotdir )
 
-filename = "/users/dennis.schwarz/correlator_hist_trip_28.root" 
+filename = "/users/dennis.schwarz/correlator_hist_trip_28.root"
 histdir = "Top-Quark/Gen-Level/weighted/"
 
 histname = "correlator_hist_Gen_None_450_500"
@@ -355,14 +359,17 @@ h_ptvars = {}
 for i,m in enumerate(masses):
     hname = histdir+histname.replace("None", str(m))
     h_masses[m] = (rebinhist(getObjFromFile(filename, hname)), colors[i] )
-    
+
+yfactor = 1.9
+
 p = Plotter("EEEC_masses")
 p.plot_dir = plotdir
 p.drawRatio = True
-p.ratiorange = (0.7, 1.3)
+p.ratiorange = (0.85, 1.15)
 p.xtitle = "3#zeta"
+p.ytitle = "Weighted triplets"
 # p.legshift = (0.15, 0., 0.15, 0.)
-p.yfactor = 1.3
+p.yfactor = yfactor
 p.addBackground(h_central, "172.5", 15)
 for m in masses:
     (hist, color) = h_masses[m]
@@ -381,33 +388,34 @@ p.plot_dir = plotdir
 p.drawRatio = True
 p.ratiorange = (0.7, 1.3)
 p.xtitle = "3#zeta"
-p.yfactor = 1.3
+p.ytitle = "Weighted triplets"
+p.yfactor = yfactor
 # p.legshift = (0.15, 0., 0.15, 0.)
 p.addBackground(h_central, "Nominal", 15)
 for f in ptfactors:
     (hist, color) = h_ptvars[f]
     p.addSignal(hist, str(f), color)
-p.draw()       
+p.draw()
 
 
 
-bingraphs_masses = getBinGraphs(h_masses, masses)
-for bin in bingraphs_masses.keys():
-    name = "BinHist_masses_"+str(bin)
-    drawBinGraph(bingraphs_masses[bin], name) 
-    
-bingraphs_ptvar = getBinGraphs(h_ptvars, ptfactors)
-for bin in bingraphs_ptvar.keys():
-    name = "BinHist_ptvar_"+str(bin)
-    drawBinGraph(bingraphs_ptvar[bin], name) 
+# bingraphs_masses = getBinGraphs(h_masses, masses)
+# for bin in bingraphs_masses.keys():
+#     name = "BinHist_masses_"+str(bin)
+#     drawBinGraph(bingraphs_masses[bin], name)
+#
+# bingraphs_ptvar = getBinGraphs(h_ptvars, ptfactors)
+# for bin in bingraphs_ptvar.keys():
+#     name = "BinHist_ptvar_"+str(bin)
+#     drawBinGraph(bingraphs_ptvar[bin], name)
 
 ################################################################################
-##### COV Stat 
+##### COV Stat
 cov_stat = getCovFromStat(h_central)
 drawCov(cov_stat, "COV_stat", plotdir)
 
 ################################################################################
-##### Get Deltas 
+##### Get Deltas
 h_ptvar_deltas = {}
 h_ptvar_covs = {}
 for f in ptfactors:
@@ -450,16 +458,17 @@ for m in masses:
         hnorm.Scale(1/hist.Integral(), "width")
     else:
         hnorm.Scale(1/hist.Integral())
-        
+
     h_masses_norm[m] = hnorm, color
 
 p = Plotter("EEEC_masses_norm")
 p.plot_dir = plotdir
 p.drawRatio = True
-p.ratiorange = (0.7, 1.3)
+p.ratiorange = (0.85, 1.15)
 p.xtitle = "3#zeta"
+p.ytitle = "Weighted triplets"
 # p.legshift = (0.15, 0., 0.15, 0.)
-p.yfactor = 1.3
+p.yfactor = yfactor
 p.addBackground(h_central_norm, "172.5", 15)
 for m in masses:
     (hist, color) = h_masses_norm[m]
@@ -479,29 +488,30 @@ for f in ptfactors:
     cov_norm = normalizeCov(h_ptvar_covs[f], h_central, normWidth)
     drawCov(cov_norm, "COV_jetPt_"+str(f)+"_norm", plotdir)
     h_ptvar_covs_norm[f] = cov_norm
-    
+
 p = Plotter("EEEC_jetPt_norm")
 p.plot_dir = plotdir
 p.drawRatio = True
 p.ratiorange = (0.7, 1.3)
 p.xtitle = "3#zeta"
-p.yfactor = 1.3
+p.yfactor = yfactor
+p.ytitle = "Weighted triplets"
 # p.legshift = (0.15, 0., 0.15, 0.)
 p.addBackground(h_central_norm, "Nominal", 15)
 for f in ptfactors:
     (hist, color) = h_ptvars_norm[f]
     p.addSignal(hist, str(f), color)
-p.draw() 
+p.draw()
 
-bingraphs_masses_norm = getBinGraphs(h_masses_norm, masses)
-for bin in bingraphs_masses_norm.keys():
-    name = "BinHist_masses_norm_"+str(bin)
-    drawBinGraph(bingraphs_masses_norm[bin], name) 
-
-bingraphs_ptvar_norm = getBinGraphs(h_ptvars_norm, ptfactors)
-for bin in bingraphs_ptvar_norm.keys():
-    name = "BinHist_ptvar_norm_"+str(bin)
-    drawBinGraph(bingraphs_ptvar_norm[bin], name)
+# bingraphs_masses_norm = getBinGraphs(h_masses_norm, masses)
+# for bin in bingraphs_masses_norm.keys():
+#     name = "BinHist_masses_norm_"+str(bin)
+#     drawBinGraph(bingraphs_masses_norm[bin], name)
+#
+# bingraphs_ptvar_norm = getBinGraphs(h_ptvars_norm, ptfactors)
+# for bin in bingraphs_ptvar_norm.keys():
+#     name = "BinHist_ptvar_norm_"+str(bin)
+#     drawBinGraph(bingraphs_ptvar_norm[bin], name)
 
 # Normalize Matrix
 average_covs_norm = {}
@@ -527,9 +537,9 @@ for m in masses:
     hist.Write("mtop_"+str(m))
 for f in average_covs.keys():
     average_covs_norm[f].Write("cov_jetPt"+str(f))
-outfile.Close()    
+outfile.Close()
 
-################################################################################    
+################################################################################
 #### Calculate chi2
 
 chi2_values_stat = []
@@ -541,7 +551,7 @@ for m in masses:
     chi2 = compute_chi2(template, h_central_norm, TH2toNP(cov_stat_norm))
     # chi2 = compute_chi2_test(template, h_central_norm, cov_stat_norm)
     chi2_values_stat.append(chi2)
-    
+
 for f in ptfactors:
     chi2_values_ptvars[f] = []
     cov_norm_tot = h_ptvar_covs_norm[f].Clone()
@@ -575,7 +585,7 @@ for f in average_covs_norm.keys():
     chi2_graph_ptvars_average[f] = g
 
 ################################################################################
-### DRAW CHI2 
+### DRAW CHI2
 
 ROOT.gStyle.SetLegendBorderSize(0)
 ROOT.gStyle.SetPadTickX(1)
@@ -610,9 +620,9 @@ for f in ptfactors:
     chi2_graph_ptvars[f].Fit(fit_func, 'R')
     fit = chi2_graph_ptvars[f].GetFunction('pol2_fit')
     fit.SetLineColor(color)
-    fit.Draw("SAME")    
+    fit.Draw("SAME")
     leg.AddEntry(chi2_graph_ptvars[f], str((f-1.0)*100)+"% jet p_{T} uncert", "pl")
-    
+
 leg.Draw()
 c.Print(plotdir+"Chi2.pdf")
 
@@ -650,20 +660,20 @@ for i,f in enumerate(average_covs.keys()):
     chi2_graph_ptvars_average[f].Fit(fit_func, 'R')
     fit = chi2_graph_ptvars_average[f].GetFunction('pol2_fit')
     fit.SetLineColor(color)
-    fit.Draw("SAME")    
+    fit.Draw("SAME")
     leg.AddEntry(chi2_graph_ptvars_average[f], str(f)+"% jet p_{T} uncert (average)", "pl")
-    
+
 leg.Draw()
 c.Print(plotdir+"Chi2_average.pdf")
-        
+
 mt, up, down = measureMtop(chi2_graph_stat)
 uncert = (up+down)/2
 print "m_t =", mt, "+", up, "-", down
-        
+
 print "-------------"
 measurements_ptvar = {}
-for f in ptfactors:    
-    print "f =", f    
+for f in ptfactors:
+    print "f =", f
     measurements_ptvar[f] = measureMtop(chi2_graph_ptvars[f])
     average = (measurements_ptvar[f][1]+measurements_ptvar[f][2])/2
     sysonly = sqrt(average*average - uncert*uncert)
@@ -673,8 +683,8 @@ for f in ptfactors:
 print "-------------"
 measurements_ptvar_average = {}
 
-for f in average_covs.keys():    
-    print "f =", f    
+for f in average_covs.keys():
+    print "f =", f
     measurements_ptvar_average[f] = measureMtop(chi2_graph_ptvars_average[f])
     average = (measurements_ptvar_average[f][1]+measurements_ptvar_average[f][2])/2
     sysonly = sqrt(average*average - uncert*uncert)
