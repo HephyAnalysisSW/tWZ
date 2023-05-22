@@ -71,9 +71,9 @@ for histname in histnames:
         for (bkg, legname, color) in backgrounds:
             hist = getObjFromFile(files[region], histname+"__"+bkg)
             p.addBackground(hist, legname, color)
-        if "offZ" in region:
-            p.drawRatio = True
-            p.ratiorange = (0.2, 1.8)
-            h_data = getObjFromFile(files[region], histname+"__data")
-            p.addData(h_data)
+        # if "offZ" in region:
+        #     p.drawRatio = True
+        #     p.ratiorange = (0.2, 1.8)
+        #     h_data = getObjFromFile(files[region], histname+"__data")
+        #     p.addData(h_data)
         p.draw()

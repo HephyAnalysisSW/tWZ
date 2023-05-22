@@ -28,10 +28,10 @@ if args.splitnonprompt:
 ################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
-path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v7_noData_nonpromptOnly/"
+path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v7_noData_nonpromptOnly_noLeptonSF/"
 path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v7_noData_nonpromptOnly_FakeRateSF/"
 if args.splitnonprompt:
-    path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v7_noData_nonpromptOnly_splitnonprompt/"
+    path_SR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v7_noData_nonpromptOnly_splitnonprompt_noLeptonSF/"
     path_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v7_noData_nonpromptOnly_splitnonprompt_FakeRateSF/"
 
 if args.tunePtCone:

@@ -66,6 +66,8 @@ argParser.add_argument('--splitTTX',       action='store_true', default=False)
 argParser.add_argument('--useDataSF',      action='store_true', default=False)
 argParser.add_argument('--useBRILSF',      action='store_true', default=False)
 argParser.add_argument('--tunePtCone',     action='store_true', default=False)
+argParser.add_argument('--noLeptonSF',     action='store_true', default=False)
+
 
 args = argParser.parse_args()
 
@@ -99,14 +101,18 @@ variations = [
     # "BTag_b_UP_uncorrelated_2017", "BTag_b_DOWN_uncorrelated_2017",
     # "BTag_l_UP_uncorrelated_2017", "BTag_l_DOWN_uncorrelated_2017",
     # "BTag_b_UP_uncorrelated_2018", "BTag_b_DOWN_uncorrelated_2018",
-    # "BTag_l_UP_uncorrelated_2018", "BTag_l_DOWN_uncorrelated_2018",    
+    # "BTag_l_UP_uncorrelated_2018", "BTag_l_DOWN_uncorrelated_2018",
     "PU_UP", "PU_DOWN",
     "JES_UP", "JES_DOWN",
     "JER_UP", "JER_DOWN",
     "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN",
 ]
 
-    
+for i in range(100):
+    variations.append("PDF_"+str(i+1))
+
+print variations
+
 jet_variations = {
     "JES_UP": "jesTotalUp",
     "JES_DOWN": "jesTotalDown",
@@ -135,6 +141,7 @@ if args.noData:                       args.plot_directory += "_noData"
 if args.nonpromptOnly:                args.plot_directory += "_nonpromptOnly"
 if args.splitnonprompt:               args.plot_directory += "_splitnonprompt"
 if args.splitTTX:                     args.plot_directory += "_splitTTX"
+if args.noLeptonSF:                   args.plot_directory += "_noLeptonSF"
 if args.applyFakerate:                args.plot_directory += "_FakeRateSF"
 if args.useDataSF:                    args.plot_directory += "_useDataSF"
 if args.useBRILSF:                    args.plot_directory += "_useBRILSF"
@@ -186,7 +193,7 @@ def jetSelectionModifier( sys, returntype = "func"):
             string = v+'_'+sys
             if "met_pt" in string:
                 string = string.replace("met_pt", "MET_T1_pt")
-            list.append(string)    
+            list.append(string)
         return list
 
 def metSelectionModifier( sys, returntype = 'func'):
@@ -206,7 +213,7 @@ def metSelectionModifier( sys, returntype = 'func'):
             string = v+'_'+sys
             if "met_pt" in string:
                 string = string.replace("met_pt", "MET_T1_pt")
-            list.append(string)    
+            list.append(string)
         return list
 
 ################################################################################
@@ -238,6 +245,19 @@ def getScaleWeight(event, sys):
         print "UNEXPECTED NUMBER OF SCALE WEIGHTS:", event.nScale,", not applying any weight"
         return 1.0
     return event.Scale_Weight[index]
+################################################################################
+# get PDF weight
+def getPDFWeight(event, sys):
+    index = -1
+    if "PDF_" in sys:
+        index = int(sys.split("_")[1])
+    else:
+        return 1.0
+
+    if index == -1 or index > event.nPDF-1:
+        print "PDF INDEX IS WRONG"
+    return event.PDF_Weight[index]
+
 ################################################################################
 # Add a selection selectionModifier
 
@@ -369,7 +389,7 @@ if args.twoD:
     minval2  = -4.0
     maxval2  = 4.0
     Npoints1 = 21
-    Npoints2 = 21 
+    Npoints2 = 21
     WC1  = 'cHq1Re1122'
     WC1a = 'cHq1Re11'
     WC1b = 'cHq1Re22'
@@ -413,16 +433,16 @@ for param in params:
 
 ################################################################################
 # Define the data sample
-if   args.era == "UL2016": 
+if   args.era == "UL2016":
     datastring = "Run2016"
     lumistring = "2016"
-elif args.era == "UL2016preVFP": 
+elif args.era == "UL2016preVFP":
     datastring = "Run2016_preVFP"
     lumistring = "2016_preVFP"
-elif args.era == "UL2017": 
+elif args.era == "UL2017":
     datastring = "Run2017"
     lumistring = "2017"
-elif args.era == "UL2018": 
+elif args.era == "UL2018":
     datastring = "Run2018"
     lumistring = "2018"
 elif args.era == "ULRunII":
@@ -454,7 +474,7 @@ if args.small:
         param['sample'].normalization = 1.
         param['sample'].reduceFiles( to = 1 )
         param['sample'].scale /= sample.normalization
-        
+
 ################################################################################
 # Lepton SF
 muonWP = "medium"
@@ -469,19 +489,19 @@ leptonSF = {
 
 
 ################################################################################
-# FakerateSF 
-if args.useDataSF:  
+# FakerateSF
+if args.useDataSF:
     fakeratemode = "DATA"
-    if args.useBRILSF:  
-        fakeratemode = "BRIL" 
-    if args.tunePtCone: 
-        fakeratemode = "tunePtCone" 
+    if args.useBRILSF:
+        fakeratemode = "BRIL"
+    if args.tunePtCone:
+        fakeratemode = "tunePtCone"
 else:
-    fakeratemode = "MC" 
-    if args.useBRILSF:  
+    fakeratemode = "MC"
+    if args.useBRILSF:
         raise RuntimeError( "BRIL SF is not implemented for MC")
-    if args.tunePtCone: 
-        fakeratemode = "tunePtConeMC"     
+    if args.tunePtCone:
+        fakeratemode = "tunePtConeMC"
 
 leptonFakerates = {
     "UL2016preVFP":  leptonFakerate("UL2016preVFP", fakeratemode),
@@ -491,7 +511,7 @@ leptonFakerates = {
 }
 
 ################################################################################
-# ElectronRecoSF 
+# ElectronRecoSF
 ElectronRecoSFs = {
     "UL2016preVFP":  EGammaSF("UL2016_preVFP"),
     "UL2016":  EGammaSF("UL2016"),
@@ -608,8 +628,8 @@ def getWlep( event ):
         Wlep = lepton + neu
         Wleps.append([Wlep, lepton, neu])
     return Wleps
-    
-    
+
+
 ################################################################################
 # Define sequences
 sequence       = []
@@ -630,7 +650,7 @@ def tunePtCone(sample, event):
                 event.lep_ptCone[idx1]      = f_el*event.lep_ptCone[idx1]
             elif abs(event.lep_pdgId[idx1]) == 13:
                 event.l1_ptConeGhent        = f_mu*event.l1_ptCone
-                event.l1_ptCone             = f_mu*event.l1_ptCone 
+                event.l1_ptCone             = f_mu*event.l1_ptCone
                 event.lep_ptConeGhent[idx1] = f_mu*event.lep_ptConeGhent[idx1]
                 event.lep_ptCone[idx1]      = f_mu*event.lep_ptCone[idx1]
         # Lepton 2
@@ -642,7 +662,7 @@ def tunePtCone(sample, event):
                 event.lep_ptCone[idx2]      = f_el*event.lep_ptCone[idx2]
             elif abs(event.lep_pdgId[idx2]) == 13:
                 event.l2_ptConeGhent        = f_mu*event.l2_ptCone
-                event.l2_ptCone             = f_mu*event.l2_ptCone 
+                event.l2_ptCone             = f_mu*event.l2_ptCone
                 event.lep_ptConeGhent[idx2] = f_mu*event.lep_ptConeGhent[idx2]
                 event.lep_ptCone[idx2]      = f_mu*event.lep_ptCone[idx2]
         # Lepton 3
@@ -654,10 +674,10 @@ def tunePtCone(sample, event):
                 event.lep_ptCone[idx3]      = f_el*event.lep_ptCone[idx3]
             elif abs(event.lep_pdgId[idx3]) == 13:
                 event.l3_ptConeGhent        = f_mu*event.l3_ptCone
-                event.l3_ptCone             = f_mu*event.l3_ptCone 
+                event.l3_ptCone             = f_mu*event.l3_ptCone
                 event.lep_ptConeGhent[idx3] = f_mu*event.lep_ptConeGhent[idx3]
                 event.lep_ptCone[idx3]      = f_mu*event.lep_ptCone[idx3]
-sequence.append(tunePtCone)    
+sequence.append(tunePtCone)
 
 # def readWeights(sample,event):
 #     if event.year == 2016 and not event.preVFP:
@@ -669,17 +689,17 @@ sequence.append(tunePtCone)
 #     elif event.year == 2018:
 #         yearstring = "2018"
 #     lumi_weight = lumi_year[yearstring]/1000.
-# 
+#
 #     print "-------------------------"
 #     print "Weight  =", event.weight
 #     print "Lumi    =", lumi_weight
 #     return
-# 
+#
 # sequence.append(readWeights)
 
 def getLeptonSF(sample, event):
     if sample.isData:
-        return 
+        return
     SF = 1
     # Only apply SF when also cutting on WP
     if "trilepT" in args.selection or "qualepT" in args.selection:
@@ -688,7 +708,7 @@ def getLeptonSF(sample, event):
         uncert = "syst"
         sigma = 0
         if args.sys == "LepIDsys_UP":
-            uncert = "syst" 
+            uncert = "syst"
             sigma = 1
         elif args.sys == "LepIDsys_DOWN":
             uncert = "syst"
@@ -698,25 +718,25 @@ def getLeptonSF(sample, event):
             sigma = 1
         elif args.sys == "LepIDstat_DOWN_2016preVFP" and event.year == 2016 and event.preVFP:
             uncert = "stat"
-            sigma = -1        
+            sigma = -1
         elif args.sys == "LepIDstat_UP_2016" and event.year == 2016 and not event.preVFP:
             uncert = "stat"
             sigma = 1
         elif args.sys == "LepIDstat_DOWN_2016" and event.year == 2016 and not event.preVFP:
             uncert = "stat"
-            sigma = -1          
+            sigma = -1
         elif args.sys == "LepIDstat_UP_2017" and event.year == 2017:
             uncert = "stat"
             sigma = 1
         elif args.sys == "LepIDstat_DOWN_2017" and event.year == 2017:
             uncert = "stat"
-            sigma = -1  
+            sigma = -1
         elif args.sys == "LepIDstat_UP_2018" and event.year == 2018:
             uncert = "stat"
             sigma = 1
         elif args.sys == "LepIDstat_DOWN_2018" and event.year == 2018:
             uncert = "stat"
-            sigma = -1  
+            sigma = -1
         # Go through the 3 leptons and multiply SF
         idx1 = event.l1_index
         idx2 = event.l2_index
@@ -736,12 +756,14 @@ def getLeptonSF(sample, event):
                     SF *= leptonSF["UL2017"].getSF(pdgId, pt, eta, uncert, sigma)
             elif event.year == 2018:
                     SF *= leptonSF["UL2018"].getSF(pdgId, pt, eta, uncert, sigma)
+    if args.noLeptonSF:
+        SF=1.0
     event.reweightLeptonMVA = SF
 sequence.append( getLeptonSF )
 
 def getElectronRecoSF(sample, event):
     if sample.isData:
-        return 
+        return
     SF = 1
     # decide if central or variation
     var = "sf"
@@ -779,12 +801,12 @@ def getLeptonFakeRate( sample, event ):
     if args.sys == "Fakerate_UP":
         sigma = 1.0
     if args.sys == "Fakerate_DOWN":
-        sigma = -1.0    
+        sigma = -1.0
     SF = 1.0
     Nfakes = 0
     if args.useDataSF and not sample.isData:
         event.reweightLeptonFakerate = 1.0
-        return 
+        return
     if args.applyFakerate:
         idx1 = event.l1_index
         idx2 = event.l2_index
@@ -815,18 +837,19 @@ def getLeptonFakeRate( sample, event ):
     event.reweightLeptonFakerate = sign*SF
     # print Nfakes, event.reweightLeptonFakerate
 sequence.append(getLeptonFakeRate)
-    
-# def getSYSweight(sample, event):
-#     print "-------------------"
-#     print sample.files
-#     print getScaleWeight(event, "Scale_UPUP")
-#     print getScaleWeight(event, "Scale_UPNONE")
-#     print getScaleWeight(event, "Scale_NONEUP")
-#     print getScaleWeight(event, "Scale_DOWNDOWN")
-#     print getScaleWeight(event, "Scale_DOWNNONE")
-#     print getScaleWeight(event, "Scale_NONEDOWN")
-# 
-# sequence.append( getSYSweight )
+
+def getSYSweight(sample, event):
+    if args.sys in ["Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_DOWNDOWN", "Scale_DOWNNONE", "Scale_NONEDOWN"]:
+        event.reweightScale = getScaleWeight(event, args.sys)
+    else:
+        event.reweightScale = 1.0
+
+    if "PDF_" in args.sys:
+        event.reweightPDF = getPDFWeight(event, args.sys)
+    else:
+        event.reweightPDF = 1.0
+
+sequence.append( getSYSweight )
 
 def getMlb(sample, event):
     lepton = ROOT.TLorentzVector()
@@ -868,7 +891,7 @@ def getCosThetaStar(sample, event):
             lepton.SetPtEtaPhiM(event.lep_pt[idx_l1], event.lep_eta[idx_l1], event.lep_phi[idx_l1], lepmass)
         else:
             lepton.SetPtEtaPhiM(event.lep_pt[idx_l2], event.lep_eta[idx_l2], event.lep_phi[idx_l2], lepmass)
-            
+
         event.cosThetaStar = cosThetaStarNew(lepton, Z)
     else:
         event.cosThetaStar = float('nan')
@@ -913,7 +936,7 @@ def getDiBosonAngles(sample, event):
     else:
         event.Theta = float('nan')
         event.theta = float('nan')
-        event.phi = float('nan')    
+        event.phi = float('nan')
 sequence.append( getDiBosonAngles )
 
 def getbScoresLepton(sample, event):
@@ -923,7 +946,7 @@ def getbScoresLepton(sample, event):
     if event.l2_passFO and not event.l2_passTight:
         fakelepton_btagscores.append(event.lep_jetBTag[event.l2_index])
     if event.l3_passFO and not event.l3_passTight:
-        fakelepton_btagscores.append(event.lep_jetBTag[event.l3_index])  
+        fakelepton_btagscores.append(event.lep_jetBTag[event.l3_index])
     event.fakelepton_btagscores = fakelepton_btagscores
 sequence.append(getbScoresLepton)
 
@@ -973,7 +996,7 @@ sequence.append(getbScoresLepton)
 #         else:
 #             MotherList.append(0)
 #     event.MotherIdList = MotherList
-# 
+#
 #     production = -1
 #     if sample.name != "data":
 #         ID1 = abs(event.GenPart_pdgId[0])
@@ -1003,7 +1026,7 @@ def getTTbarReco( event, sample ):
     event.mtoplep = float('nan')
     event.minimax = float('nan')
     event.chi2 = float('nan')
-    
+
     if args.doTTbarReco and event.nJetGood>=4:
         lepton = ROOT.TLorentzVector()
         met    = ROOT.TLorentzVector()
@@ -1037,11 +1060,11 @@ def Nlep( event, sample ):
     if event.l3_passTight: Nlep_tight+=1
     if event.l4_passTight: Nlep_tight+=1
     event.Nlep_tight = Nlep_tight
-    
+
     Nlep = 0
     Nlep_passFO = 0
     Nlep_passTight = 0
-    
+
     for i in range(len(event.lep_pt)):
         Nlep += 1
         if event.lep_passFO[i]:
@@ -1051,7 +1074,7 @@ def Nlep( event, sample ):
     event.Nlep = Nlep
     event.Nlep_passFO = Nlep_passFO
     event.Nlep_passTight = Nlep_passTight
-    
+
 sequence.append( Nlep )
 
 def getJetId( event, sample ):
@@ -1061,11 +1084,12 @@ def getJetId( event, sample ):
     event.jetIds = jetIds
 sequence.append(getJetId)
 
+
 ################################################################################
 # Read variables
 
 read_variables = [
-    "weight/F", "year/I", "preVFP/O", "met_pt/F", "met_phi/F", "nJetGood/I", "PV_npvsGood/I",  "nJet/I", "nBTag/I", 
+    "weight/F", "year/I", "preVFP/O", "met_pt/F", "met_phi/F", "nJetGood/I", "PV_npvsGood/I",  "nJet/I", "nBTag/I",
     "l1_pt/F", "l1_eta/F" , "l1_phi/F", "l1_mvaTOP/F", "l1_mvaTOPv2/F", "l1_mvaTOPWP/I", "l1_mvaTOPv2WP/I", "l1_index/I", "l1_passFO/O", "l1_passTight/O", "l1_ptCone/F", "l1_ptConeGhent/F",
     "l2_pt/F", "l2_eta/F" , "l2_phi/F", "l2_mvaTOP/F", "l2_mvaTOPv2/F", "l2_mvaTOPWP/I", "l2_mvaTOPv2WP/I", "l2_index/I", "l2_passFO/O", "l2_passTight/O", "l2_ptCone/F", "l2_ptConeGhent/F",
     "l3_pt/F", "l3_eta/F" , "l3_phi/F", "l3_mvaTOP/F", "l3_mvaTOPv2/F", "l3_mvaTOPWP/I", "l3_mvaTOPv2WP/I", "l3_index/I", "l3_passFO/O", "l3_passTight/O", "l3_ptCone/F", "l3_ptConeGhent/F",
@@ -1092,7 +1116,7 @@ read_variables_MC = [
     VectorTreeVariable.fromString( "GenPart[pt/F,mass/F,phi/F,eta/F,pdgId/I,genPartIdxMother/I,status/I,statusFlags/I]", nMax=1000),
     'nGenPart/I',
     'nScale/I', 'Scale[Weight/F]',
-    'nPDF/I', VectorTreeVariable.fromString('PDF[Weight/F]',nMax=150),    
+    'nPDF/I', VectorTreeVariable.fromString('PDF[Weight/F]',nMax=150),
 ]
 
 read_variables_eft = [
@@ -1109,7 +1133,7 @@ read_variables_eft = [
 #     mu_string  = lepString('mu','VL')
 # else:
 #     mu_string  = lepString('mu','L') + "&&lep_mediumId"
-# 
+#
 # ele_string = lepString('ele','L')
 
 
@@ -1154,8 +1178,9 @@ for i_mode, mode in enumerate(allModes):
         read_variables    += new_variables
 
     weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate', 'reweightLeptonMVA', 'reweightElectronRecoSF']
+    weightnames += ['reweightScale', 'reweightPDF']
     # weightnames = ['weight']
-    
+
     sys_weights = {
         "BTag_b_UP"     : ('reweightBTag_SF','reweightBTag_SF_b_Up'),
         "BTag_b_DOWN"   : ('reweightBTag_SF','reweightBTag_SF_b_Down'),
@@ -1165,22 +1190,22 @@ for i_mode, mode in enumerate(allModes):
         # "BTag_b_DOWN_correlated"              : ('reweightBTag_SF','reweightBTag_SF_b_Down_Correlated'),
         # "BTag_l_UP_correlated"                : ('reweightBTag_SF','reweightBTag_SF_l_Up_Correlated'),
         # "BTag_l_DOWN_correlated"              : ('reweightBTag_SF','reweightBTag_SF_l_Down_Correlated'),
-        # "BTag_b_UP_uncorrelated_2016preVFP"   : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016preVFP'), 
-        # "BTag_b_DOWN_uncorrelated_2016preVFP" : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016preVFP'), 
-        # "BTag_b_UP_uncorrelated_2016"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016'), 
-        # "BTag_b_DOWN_uncorrelated_2016"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016'), 
-        # "BTag_b_UP_uncorrelated_2017"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2017'), 
-        # "BTag_b_DOWN_uncorrelated_2017"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2017'), 
-        # "BTag_b_UP_uncorrelated_2018"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2018'), 
-        # "BTag_b_DOWN_uncorrelated_2018"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2018'),         
-        # "BTag_l_UP_uncorrelated_2016preVFP"   : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016preVFP'), 
-        # "BTag_l_DOWN_uncorrelated_2016preVFP" : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016preVFP'), 
-        # "BTag_l_UP_uncorrelated_2016"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016'), 
-        # "BTag_l_DOWN_uncorrelated_2016"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016'), 
-        # "BTag_l_UP_uncorrelated_2017"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2017'), 
-        # "BTag_l_DOWN_uncorrelated_2017"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2017'), 
-        # "BTag_l_UP_uncorrelated_2018"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2018'), 
-        # "BTag_l_DOWN_uncorrelated_2018"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2018'), 
+        # "BTag_b_UP_uncorrelated_2016preVFP"   : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016preVFP'),
+        # "BTag_b_DOWN_uncorrelated_2016preVFP" : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016preVFP'),
+        # "BTag_b_UP_uncorrelated_2016"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016'),
+        # "BTag_b_DOWN_uncorrelated_2016"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016'),
+        # "BTag_b_UP_uncorrelated_2017"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2017'),
+        # "BTag_b_DOWN_uncorrelated_2017"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2017'),
+        # "BTag_b_UP_uncorrelated_2018"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2018'),
+        # "BTag_b_DOWN_uncorrelated_2018"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2018'),
+        # "BTag_l_UP_uncorrelated_2016preVFP"   : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016preVFP'),
+        # "BTag_l_DOWN_uncorrelated_2016preVFP" : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016preVFP'),
+        # "BTag_l_UP_uncorrelated_2016"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016'),
+        # "BTag_l_DOWN_uncorrelated_2016"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016'),
+        # "BTag_l_UP_uncorrelated_2017"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2017'),
+        # "BTag_l_DOWN_uncorrelated_2017"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2017'),
+        # "BTag_l_UP_uncorrelated_2018"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2018'),
+        # "BTag_l_DOWN_uncorrelated_2018"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2018'),
         'Trigger_UP'    : ('reweightTrigger','reweightTriggerUp'),
         'Trigger_DOWN'  : ('reweightTrigger','reweightTriggerDown'),
         'PU_UP'         : ('reweightPU','reweightPUUp'),
@@ -1213,7 +1238,7 @@ for i_mode, mode in enumerate(allModes):
             yearstring = "2018"
         lumi_weight = lumi_year[yearstring]/1000.
         w *= lumi_weight
-        # Multiply Scale weight 
+        # Multiply Scale weight
         if "Scale_" in args.sys:
             scale_weight = getScaleWeight(event, args.sys)
             w *= scale_weight
@@ -1278,51 +1303,51 @@ for i_mode, mode in enumerate(allModes):
         attribute = lambda event, sample:event.m3l,
         binning=[25,0,500],
     ))
-    
+
     plots.append(Plot(
         name = "N_LepID",
         texX = 'Number of leptons passing the tight ID (out of first 4)', texY = 'Number of Events',
         attribute = lambda event, sample: event.Nlep_tight,
         binning=[5,-0.5,4.5],
     ))
-    
+
     plots.append(Plot(
         name = "N_Lep",
         texX = 'Number of leptons ', texY = 'Number of Events',
         attribute = lambda event, sample: event.Nlep,
         binning=[7,-0.5,6.5],
     ))
-    
+
     plots.append(Plot(
         name = "N_Lep_passFO",
         texX = 'Number of leptons passing FO', texY = 'Number of Events',
         attribute = lambda event, sample: event.Nlep_passFO,
         binning=[7,-0.5,6.5],
     ))
-    
+
     plots.append(Plot(
         name = "N_Lep_passTight",
         texX = 'Number of leptons passing Tight', texY = 'Number of Events',
         attribute = lambda event, sample: event.Nlep_passTight,
         binning=[7,-0.5,6.5],
-    ))        
-    
+    ))
+
     plots.append(Plot(
         name = "l1_pt",
         texX = 'Leading lepton p_{T} (GeV)', texY = 'Number of Events / 10 GeV',
         addOverFlowBin='both',
         attribute = TreeVariable.fromString( "l1_pt/F" ),
         binning=[40, 0, 400],
-    ))    
-    
+    ))
+
     plots.append(Plot(
         name = "l2_pt",
         texX = 'Subleading lepton p_{T} (GeV)', texY = 'Number of Events / 10 GeV',
         addOverFlowBin='both',
         attribute = TreeVariable.fromString( "l2_pt/F" ),
         binning=[40, 0, 400],
-    ))    
-        
+    ))
+
     plots.append(Plot(
         name = "l3_pt",
         texX = 'Trailing lepton p_{T} (GeV)', texY = 'Number of Events / 10 GeV',
@@ -1330,23 +1355,23 @@ for i_mode, mode in enumerate(allModes):
         attribute = TreeVariable.fromString( "l3_pt/F" ),
         binning=[40, 0, 400],
     ))
-    
+
     plots.append(Plot(
         name = "l1_conept",
         texX = 'Leading lepton p_{T}^{cone} (GeV)', texY = 'Number of Events / 10 GeV',
         addOverFlowBin='both',
         attribute = lambda event, sample: event.l1_ptConeGhent if event.l1_passFO and not event.l1_passTight else event.l1_pt,
         binning=[40, 0, 400],
-    ))    
-    
+    ))
+
     plots.append(Plot(
         name = "l2_conept",
         texX = 'Subleading lepton p_{T}^{cone} (GeV)', texY = 'Number of Events / 10 GeV',
         addOverFlowBin='both',
         attribute = lambda event, sample: event.l2_ptConeGhent if event.l2_passFO and not event.l2_passTight else event.l2_pt,
         binning=[40, 0, 400],
-    ))    
-        
+    ))
+
     plots.append(Plot(
         name = "l3_conept",
         texX = 'Trailing lepton p_{T}^{cone} (GeV)', texY = 'Number of Events / 10 GeV',
@@ -1354,15 +1379,15 @@ for i_mode, mode in enumerate(allModes):
         attribute = lambda event, sample: event.l3_ptConeGhent if event.l3_passFO and not event.l3_passTight else event.l3_pt,
         binning=[40, 0, 400],
     ))
-        
+
     plots.append(Plot(
         name = "fake_bscore_closest",
         texX = 'b tag score closest jet for fake leptons', texY = 'Number of Events',
         attribute = lambda event, sample: event.fakelepton_btagscores,
         binning=[40, 0, 1.0],
     ))
-    
-    
+
+
     if args.doTTbarReco:
         plots.append(Plot(
             name = "minimax",
@@ -1371,9 +1396,9 @@ for i_mode, mode in enumerate(allModes):
             binning=[40,0,600],
             addOverFlowBin='upper',
         ))
-        
+
     if args.nicePlots:
-            
+
         plots.append(Plot(
             name = "l1_eta",
             texX = 'Leading lepton #eta', texY = 'Number of Events',
@@ -1381,7 +1406,7 @@ for i_mode, mode in enumerate(allModes):
             attribute = TreeVariable.fromString( "l1_eta/F" ),
             binning=[30, -3, 3],
         ))
-        
+
         plots.append(Plot(
             name = "l2_eta",
             texX = 'Subleading lepton #eta', texY = 'Number of Events',
@@ -1389,7 +1414,7 @@ for i_mode, mode in enumerate(allModes):
             attribute = TreeVariable.fromString( "l2_eta/F" ),
             binning=[30, -3, 3],
         ))
-            
+
         plots.append(Plot(
             name = "l3_eta",
             texX = 'Trailing lepton #eta', texY = 'Number of Events',
@@ -1397,8 +1422,8 @@ for i_mode, mode in enumerate(allModes):
             attribute = TreeVariable.fromString( "l3_eta/F" ),
             binning=[30, -3, 3],
         ))
-            
-            
+
+
         plots.append(Plot(
             name = "Z1_pt_rebin2",
             texX = 'p_{T}(Z_{1}) (GeV)', texY = 'Number of Events / 40 GeV',
@@ -1426,21 +1451,21 @@ for i_mode, mode in enumerate(allModes):
             attribute = lambda event, sample: event.nJetGood,
             binning=[16, -0.5, 15.5],
         ))
-        
+
         plots.append(Plot(
             name = "JetIds",
             texX = 'Jet ID', texY = 'Number of Events',
             attribute = lambda event, sample: event.jetIds,
             binning=[10, -1.5, 8.5],
         ))
-        
+
         plots.append(Plot(
             name = "N_bjets",
             texX = 'Number of b-tagged jets', texY = 'Number of Events',
             attribute = lambda event, sample: event.nBTag,
             binning=[16, -0.5, 15.5],
         ))
-        
+
 
         plots.append(Plot(
             name = "CosThetaStar",
@@ -1476,7 +1501,7 @@ for i_mode, mode in enumerate(allModes):
             attribute = lambda event, sample: event.phi,
             binning=[20, -pi, pi],
         ))
-        
+
         plots.append(Plot(
             name = "SF_Lepton",
             texX = 'Lepton SF', texY = 'Number of Events',
@@ -1484,7 +1509,7 @@ for i_mode, mode in enumerate(allModes):
             addOverFlowBin='both',
             binning=[50, 0.5, 1.5],
         ))
-        
+
         plots.append(Plot(
             name = "SF_LeptonReco",
             texX = 'Lepton Reco SF', texY = 'Number of Events',
@@ -1492,7 +1517,7 @@ for i_mode, mode in enumerate(allModes):
             addOverFlowBin='both',
             binning=[50, 0.5, 1.5],
         ))
-        
+
         plots.append(Plot(
             name = "SF_Fakerate",
             texX = 'Fakerate SF', texY = 'Number of Events',
@@ -1507,15 +1532,15 @@ for i_mode, mode in enumerate(allModes):
             attribute = lambda event, sample: event.reweightBTag_SF if not sample.isData else -1,
             addOverFlowBin='both',
             binning=[50, 0.5, 1.5],
-        ))        
-        
+        ))
+
         plots.append(Plot(
             name = "SF_PU",
             texX = 'PU SF', texY = 'Number of Events',
             attribute = lambda event, sample: event.reweightPU if not sample.isData else -1,
             addOverFlowBin='both',
             binning=[50, 0.5, 1.5],
-        ))              
+        ))
 
         plots.append(Plot(
             name = "SF_L1",
@@ -1523,30 +1548,30 @@ for i_mode, mode in enumerate(allModes):
             attribute = lambda event, sample: event.reweightL1Prefire if not sample.isData else -1,
             addOverFlowBin='both',
             binning=[50, 0.5, 1.5],
-        ))      
-        
+        ))
+
         plots.append(Plot(
             name = "SF_Trigger",
             texX = 'Trigger SF', texY = 'Number of Events',
             attribute = lambda event, sample: event.reweightTrigger if not sample.isData else -1,
             addOverFlowBin='both',
             binning=[50, 0.5, 1.5],
-        ))              
-        
+        ))
+
         plots.append(Plot(
             name = "l1_mvaTOPscore",
             texX = 'Leading lepton MVA score', texY = 'Number of Events',
             attribute = lambda event, sample: event.l1_mvaTOP,
             binning=[30, -1.5, 1.5],
         ))
-    
+
         plots.append(Plot(
             name = "l1_mvaTOPscore_v2",
             texX = 'Leading lepton MVA v2 score', texY = 'Number of Events',
             attribute = lambda event, sample: event.l1_mvaTOPv2,
             binning=[30, -1.5, 1.5],
         ))
-        
+
         plots.append(Plot(
             name = "l1_passFO",
             texX = 'Leading lepton FO ID', texY = 'Number of Events',
@@ -1560,14 +1585,14 @@ for i_mode, mode in enumerate(allModes):
             attribute = lambda event, sample: event.l1_passTight,
             binning=[3, -1.5, 1.5],
         ))
-                
+
         plots.append(Plot(
             name = "l2_mvaTOPscore_v2",
             texX = 'Subleading lepton MVA v2 score', texY = 'Number of Events',
             attribute = lambda event, sample: event.l2_mvaTOPv2,
             binning=[30, -1.5, 1.5],
         ))
-        
+
         plots.append(Plot(
             name = "l2_passFO",
             texX = 'Subleading lepton FO ID', texY = 'Number of Events',
@@ -1581,14 +1606,14 @@ for i_mode, mode in enumerate(allModes):
             attribute = lambda event, sample: event.l2_passTight,
             binning=[3, -1.5, 1.5],
         ))
-                
+
         plots.append(Plot(
             name = "l3_mvaTOPscore_v2",
             texX = 'Trailing lepton MVA v2 score', texY = 'Number of Events',
             attribute = lambda event, sample: event.l3_mvaTOPv2,
             binning=[30, -1.5, 1.5],
         ))
-        
+
         plots.append(Plot(
             name = "l3_passFO",
             texX = 'Trailing lepton FO ID', texY = 'Number of Events',
@@ -1602,7 +1627,7 @@ for i_mode, mode in enumerate(allModes):
             attribute = lambda event, sample: event.l3_passTight,
             binning=[3, -1.5, 1.5],
         ))
-                
+
         if args.doTTbarReco:
             plots.append(Plot(
                 name = "m_toplep",
@@ -1611,7 +1636,7 @@ for i_mode, mode in enumerate(allModes):
                 binning=[40,0,400],
                 addOverFlowBin='upper',
             ))
-            
+
             plots.append(Plot(
                 name = "m_tophad",
                 texX = 'm_{had. top}', texY = 'Number of Events',
@@ -1619,14 +1644,14 @@ for i_mode, mode in enumerate(allModes):
                 binning=[40,0,400],
                 addOverFlowBin='upper',
             ))
-            
+
             plots.append(Plot(
                 name = "chi2",
                 texX = '#chi^{2}', texY = 'Number of Events',
                 attribute = lambda event, sample: event.chi2,
                 binning=[40,0,1000],
                 addOverFlowBin='upper',
-            ))        
+            ))
 
     plotting.fill(plots, read_variables = read_variables, sequence = sequence)
 
@@ -1680,7 +1705,7 @@ for i_mode, mode in enumerate(allModes):
     dataMCScale        = yields[mode]["data"]/yields[mode]["MC"] if yields[mode]["MC"] != 0 else float('nan')
 
 
-    if args.nicePlots and args.sys == "central": 
+    if args.nicePlots and args.sys == "central":
         drawPlots(plots, mode, dataMCScale)
 
     allPlots[mode] = plots
@@ -1723,7 +1748,7 @@ for mode in allModes+["all"]:
         except:
             print 'Could not create', plot_dir
     outfilename = plot_dir+'/Results.root'
-    if args.twoD: 
+    if args.twoD:
         outfilename = plot_dir+'/Results_twoD.root'
         if args.triplet:
             outfilename = plot_dir+'/Results_twoD_triplet.root'
