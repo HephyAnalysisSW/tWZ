@@ -50,7 +50,7 @@ if os.environ["USER"] in ["dennis.schwarz"]:
     postprocessing_output_directory = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples"
     postprocessing_tmp_directory    = "/scratch/hephy/cms/dennis.schwarz/tWZ/tmp/"
     plot_directory                  = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots"
-    cache_dir                       = "/groups/hephy/cms/dennis.schwarz/tWZ/caches"
+    cache_dir                       = "/users/dennis.schwarz/caches/"
     # Analysis result files
     analysis_results                = "/groups/hephy/cms/dennis.schwarz/tWZ/results/v1"
     mva_directory                   = "/groups/hephy/cms/dennis.schwarz/tWZ/MVA"

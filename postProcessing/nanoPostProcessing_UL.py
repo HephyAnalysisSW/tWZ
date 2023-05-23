@@ -37,6 +37,10 @@ from Analysis.Tools.puProfileDirDB           import puProfile
 from Analysis.Tools.LeptonTrackingEfficiency import LeptonTrackingEfficiency
 from Analysis.Tools.helpers                  import checkRootFile, deepCheckRootFile, deepCheckWeight, dRCleaning
 from Analysis.Tools.leptonJetArbitration     import cleanJetsAndLeptons
+
+from Analysis.Tools.DirDB import DirDB
+normalizationDB = DirDB(os.path.join( "/users/dennis.schwarz/caches", 'normalizationCache'))
+
 # central configuration
 targetLumi = 1000 #pb-1 Which lumi to normalize to
 
@@ -186,6 +190,12 @@ assert isData or len(set([s.xSection for s in samples]))==1, "Not all samples ha
 assert isMC or len(samples)==1, "Don't concatenate data samples"
 
 xSection = samples[0].xSection if isMC else None
+
+# Get normalizations of weight-based variations
+if sample.isMC:
+    scale_norm_histo = normalizationDB.get( key=(sample.DAS, "LHEScaleWeight" ) )
+    pdf_norm_histo   = normalizationDB.get( key=(sample.DAS, "LHEPdfWeight" ) )
+    ps_norm_histo    = normalizationDB.get( key=(sample.DAS, "PSWeight" ) )
 
 # apply MET filter
 skimConds.append( getFilterCut(options.year, isData=isData, ignoreJSON=True, skipWeight=True, skipECalFilter=True) )
@@ -509,6 +519,7 @@ if addReweights:
 if isMC:
     read_variables.extend( ["nLHEScaleWeight/I" ] )
     read_variables.extend( ["nLHEPdfWeight/I" ] )
+    read_variables.extend( ["nPSWeight/I" ] )
 
 new_variables += [\
     'overlapRemoval/I','nlep/I',
@@ -551,6 +562,9 @@ if isMC:
     new_variables.append( TreeVariable.fromString("Scale[Weight/F]") )
     new_variables.append( TreeVariable.fromString("nPDF/I") )
     new_variables.append( VectorTreeVariable.fromString("PDF[Weight/F]", nMax=150) ) # There are more than 100 PDF weights
+    new_variables.append( TreeVariable.fromString("nPS/I") )
+    new_variables.append( TreeVariable.fromString("PS[Weight/F]") )
+
 ## ttZ related variables
 new_variables.extend( ['Z1_l1_index/I', 'Z1_l2_index/I', 'Z2_l1_index/I', 'Z2_l2_index/I', 'nonZ1_l1_index/I', 'nonZ1_l2_index/I'] )
 for i in [1,2]:
@@ -738,13 +752,19 @@ def filler( event ):
     if isMC:
         scale_weights = [reader.sample.chain.GetLeaf("LHEScaleWeight").GetValue(i_weight) for i_weight in range(r.nLHEScaleWeight)]
         for i,w in enumerate(scale_weights):
-            event.Scale_Weight[i] = w
+            event.Scale_Weight[i] = w/scale_norm_histo.GetBinContent(i+1) # scale variation to same XS as nominal
         event.nScale = r.nLHEScaleWeight
 
         pdf_weights = [reader.sample.chain.GetLeaf("LHEPdfWeight").GetValue(i_weight) for i_weight in range(r.nLHEPdfWeight)]
         for i,w in enumerate(pdf_weights):
-            event.PDF_Weight[i] = w
+            event.PDF_Weight[i] = w/pdf_norm_histo.GetBinContent(i+1) # scale variation to same XS as nominal
         event.nPDF = r.nLHEPdfWeight
+
+        ps_weights = [reader.sample.chain.GetLeaf("PSWeight").GetValue(i_weight) for i_weight in range(r.nPSWeight)]
+        for i,w in enumerate(ps_weights):
+            event.PS_Weight[i] = w/ps_norm_histo.GetBinContent(i+1) # scale variation to same XS as nominal
+        event.nPS = r.nPSWeight
+
 
     ################################################################################
     # reweights
