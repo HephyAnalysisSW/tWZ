@@ -51,7 +51,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v7')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v8')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -105,7 +105,14 @@ variations = [
     "PU_UP", "PU_DOWN",
     "JES_UP", "JES_DOWN",
     "JER_UP", "JER_DOWN",
+    "Lumi_UP_uncorrelated_2016", "Lumi_DOWN_uncorrelated_2016",
+    "Lumi_UP_uncorrelated_2017", "Lumi_DOWN_uncorrelated_2017",
+    "Lumi_UP_uncorrelated_2018", "Lumi_DOWN_uncorrelated_2018",
+    "Lumi_UP_correlated_161718", "Lumi_DOWN_correlated_161718",
+    "Lumi_UP_correlated_1718", "Lumi_DOWN_correlated_1718",
     "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN",
+    "ISR_UP", "ISR_DOWN",
+    "FSR_UP", "FSR_DOWN",
 ]
 
 for i in range(100):
@@ -257,6 +264,59 @@ def getPDFWeight(event, sys):
     if index == -1 or index > event.nPDF-1:
         print "PDF INDEX IS WRONG"
     return event.PDF_Weight[index]
+################################################################################
+# get Parton Shower weight
+def getPSWeight(event, sys):
+    if sys not in weights.keys():
+        print "PS VARIATION NOT FOUND"
+        return 1.0
+
+    weights = {
+        "ISR_UP"  : 0,
+        "ISR_DOWN": 2,
+        "FSR_UP"  : 1,
+        "FSR_DOWN": 3,
+    }
+
+    if weights[sys] > event.nPS-1:
+        print "PS INDEX IS WRONG"
+        return 1.0
+
+    return event.PS_Weight[weights[sys]]
+################################################################################
+# get Lumi factor
+# Uncorrelated 2016      1.0%
+# Uncorrelated 2017      2.0%
+# Uncorrelated 2018      1.5%
+# Correlated 2017,2018      0.6%,0.2%
+# Correlated 2016,2017,2018   0.6%,0.9%,2.0%
+def getLumiWeight(event, sys):
+    variation = 0.0
+    if event.year == 2016:
+        if "uncorrelated_2016" in sys:
+            variation = 0.01
+        elif "correlated_161718" in sys:
+            variation = 0.006
+    elif event.year == 2017:
+        if "uncorrelated_2017" in sys:
+            variation = 0.02
+        elif "correlated_1718" in sys:
+            variation = 0.006
+        elif "correlated_161718" in sys:
+            variation = 0.009
+    elif event.year == 2018:
+        if "uncorrelated_2018" in sys:
+            variation = 0.015
+        elif "correlated_1718" in sys:
+            variation = 0.002
+        elif "correlated_161718" in sys:
+            variation = 0.02
+    LumiSF = 1.0
+    if "_UP_" in sys:
+        LumiSF+variation
+    elif "_DOWN_" in sys:
+        LumiSF-variation
+    return LumiSF
 
 ################################################################################
 # Add a selection selectionModifier
@@ -301,15 +361,17 @@ elif args.era == "UL2017":
             mc = [UL2017.nonprompt_3l]
     samples_eft = []
 elif args.era == "UL2018":
-    mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
+    # mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
+    mc = [UL2018.TWZ_NLO_DR, UL2018.TTX_rare, UL2018.TZQ, UL2018.triBoson, UL2018.nonprompt_3l]
+    samples_eft = [UL2018.TTZ_EFT, UL2018.WZ_EFT, UL2018.ZZ_EFT]
     if args.splitTTX:
         mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare_noTTW, UL2018.TTW, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
     if args.nonpromptOnly:
+        samples_eft = []
         if args.splitnonprompt:
             mc = [UL2018.WW, UL2018.Top, UL2018.DY]
         else:
             mc = [UL2018.nonprompt_3l]
-    samples_eft = []
 elif args.era == "ULRunII":
     mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
     if args.splitTTX:
@@ -320,6 +382,10 @@ elif args.era == "ULRunII":
         else:
             mc = [nonprompt_3l]
     samples_eft = []
+
+
+if args.nicePlots:
+    mc += samples_eft
 
 ################################################################################
 # EFT reweight
@@ -839,17 +905,39 @@ def getLeptonFakeRate( sample, event ):
 sequence.append(getLeptonFakeRate)
 
 def getSYSweight(sample, event):
+    # Scales
     if args.sys in ["Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_DOWNDOWN", "Scale_DOWNNONE", "Scale_NONEDOWN"]:
         event.reweightScale = getScaleWeight(event, args.sys)
     else:
         event.reweightScale = 1.0
-
+    # PDF
     if "PDF_" in args.sys:
         event.reweightPDF = getPDFWeight(event, args.sys)
     else:
         event.reweightPDF = 1.0
+    # Lumi
+    if "Lumi_" in args.sys:
+        event.reweightLumi = getLumiWeight(event, args.sys)
+    else:
+        event.reweightLumi = 1.0
+    # Parton Shower
+    if "ISR_" in args.sys or "FSR_" in args.sys:
+        event.reweightPS = getPSWeight(event, args.sys)
+    else:
+        event.reweightPS = 1.0
 
 sequence.append( getSYSweight )
+
+def getEFTnormweight(sample, event):
+    normweight = 1.0
+    if "TTZ_EFT" in sample.name:
+        normweight = 0.89
+    elif "WZ_EFT" in sample.name:
+        normweight = 0.68
+    elif "ZZ_EFT" in sample.name:
+        normweight = 0.62
+    event.EFTnormweight = normweight
+sequence.append( getEFTnormweight )
 
 def getMlb(sample, event):
     lepton = ROOT.TLorentzVector()
@@ -1117,6 +1205,7 @@ read_variables_MC = [
     'nGenPart/I',
     'nScale/I', 'Scale[Weight/F]',
     'nPDF/I', VectorTreeVariable.fromString('PDF[Weight/F]',nMax=150),
+    # 'nPS/I', 'PS[Weight/F]',
 ]
 
 read_variables_eft = [
@@ -1178,7 +1267,8 @@ for i_mode, mode in enumerate(allModes):
         read_variables    += new_variables
 
     weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate', 'reweightLeptonMVA', 'reweightElectronRecoSF']
-    weightnames += ['reweightScale', 'reweightPDF']
+    weightnames += ['reweightScale', 'reweightPDF', 'reweightLumi', 'reweightPS']
+    weightnames += ['EFTnormweight']
     # weightnames = ['weight']
 
     sys_weights = {
@@ -1212,7 +1302,7 @@ for i_mode, mode in enumerate(allModes):
         'PU_DOWN'       : ('reweightPU','reweightPUDown'),
         'Prefire_UP'    : ('reweightL1Prefire','reweightL1PrefireUp'),
         'Prefire_DOWN'  : ('reweightL1Prefire','reweightL1PrefireDown'),
-        # For leptonID and leptonReco SF this is set in the sequence
+        # For leptonID, leptonReco SF, PDF, scales, parton shower, and Lumi this is set in the sequence
     }
 
     if args.sys in sys_weights:
@@ -1737,63 +1827,67 @@ if args.nicePlots and args.sys == "central":
 
 
 # Write Result Hist in root file
-plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "N_jets", "yield"]
-logger.info( "Now write results in root files." )
-for mode in allModes+["all"]:
-    logger.info( "Write file for channel: %s", mode )
-    plot_dir = os.path.join(plot_directory, 'analysisPlots', args.plot_directory, args.era, mode, args.selection)
-    if not os.path.exists(plot_dir):
-        try:
-            os.makedirs(plot_dir)
-        except:
-            print 'Could not create', plot_dir
-    outfilename = plot_dir+'/Results.root'
-    if args.twoD:
-        outfilename = plot_dir+'/Results_twoD.root'
-        if args.triplet:
-            outfilename = plot_dir+'/Results_twoD_triplet.root'
-    print "Saving in", outfilename
-    outfile = ROOT.TFile(outfilename, 'recreate')
-    outfile.cd()
-    for plot in allPlots[mode]:
-        if plot.name in plots_root:
-            for idx, histo_list in enumerate(plot.histos):
-                for j, h in enumerate(histo_list):
-                    histname = h.GetName()
-                    if "TWZ_NLO_DR" in histname: process = "tWZ"
-                    elif "tWZToLL01j_lepWFilter" in histname: process = "tWZ"
-                    elif "ttZ01j_lepWFilter" in histname: process = "ttZ"
-                    elif "ttZ01j" in histname: process = "ttZ"
-                    elif "TTZ" in histname: process = "ttZ"
-                    elif "TTX_rare_noTTW" in histname: process = "ttX_noTTW"
-                    elif "TTX_rare" in histname: process = "ttX"
-                    elif "TTW" in histname: process = "ttW"
-                    elif "TZQ" in histname: process = "tZq"
-                    elif "WZTo3LNu" in histname: process = "WZ"
-                    elif "WZ" in histname: process = "WZ"
-                    elif "ZZ" in histname: process = "ZZ"
-                    elif "triBoson" in histname: process = "triBoson"
-                    elif "nonprompt" in histname: process = "nonprompt"
-                    elif "WW" in histname: process = "WW"
-                    elif "Top" in histname: process = "tt+ST"
-                    elif "DY" in histname: process = "DY"
-                    elif "data" in histname: process = "data"
-                    # Also add a string for the eft signal samples
-                    n_noneft = len(noneftidxs)
-                    if not args.nicePlots and idx not in noneftidxs:
-                        h.Write(plot.name+"__"+process+"__"+params[idx-n_noneft]['legendText'])
-                        if args.twoD:
-                            string = params[idx-n_noneft]['legendText']
-                            if string.count('=0.0000') == 2:
-                                h_SM = h.Clone()
-                                h_SM.Write(plot.name+"__"+process)
+if not args.nicePlots:
+    plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "N_jets", "yield"]
+    logger.info( "Now write results in root files." )
+    for mode in allModes+["all"]:
+        logger.info( "Write file for channel: %s", mode )
+        plot_dir = os.path.join(plot_directory, 'analysisPlots', args.plot_directory, args.era, mode, args.selection)
+        if not os.path.exists(plot_dir):
+            try:
+                os.makedirs(plot_dir)
+            except:
+                print 'Could not create', plot_dir
+        outfilename = plot_dir+'/Results.root'
+        if args.twoD:
+            outfilename = plot_dir+'/Results_twoD.root'
+            if args.triplet:
+                outfilename = plot_dir+'/Results_twoD_triplet.root'
+        print "Saving in", outfilename
+        outfile = ROOT.TFile(outfilename, 'recreate')
+        outfile.cd()
+        for plot in allPlots[mode]:
+            if plot.name in plots_root:
+                for idx, histo_list in enumerate(plot.histos):
+                    for j, h in enumerate(histo_list):
+                        histname = h.GetName()
+                        if "TWZ_NLO_DR" in histname: process = "tWZ"
+                        elif "tWZToLL01j_lepWFilter" in histname: process = "tWZ"
+                        elif "ttZ01j_lepWFilter" in histname: process = "ttZ"
+                        elif "ttZ01j" in histname: process = "ttZ"
+                        elif "TTZ_EFT" in histname: process = "ttZ"
+                        elif "TTZ" in histname: process = "ttZ"
+                        elif "TTX_rare_noTTW" in histname: process = "ttX_noTTW"
+                        elif "TTX_rare" in histname: process = "ttX"
+                        elif "TTW" in histname: process = "ttW"
+                        elif "TZQ" in histname: process = "tZq"
+                        elif "WZTo3LNu" in histname: process = "WZ"
+                        elif "WZ_EFT" in histname: process = "WZ"
+                        elif "WZ" in histname: process = "WZ"
+                        elif "ZZ_EFT" in histname: process = "ZZ"
+                        elif "ZZ" in histname: process = "ZZ"
+                        elif "triBoson" in histname: process = "triBoson"
+                        elif "nonprompt" in histname: process = "nonprompt"
+                        elif "WW" in histname: process = "WW"
+                        elif "Top" in histname: process = "tt+ST"
+                        elif "DY" in histname: process = "DY"
+                        elif "data" in histname: process = "data"
+                        # Also add a string for the eft signal samples
+                        n_noneft = len(noneftidxs)
+                        if not args.nicePlots and idx not in noneftidxs:
+                            h.Write(plot.name+"__"+process+"__"+params[idx-n_noneft]['legendText'])
+                            if args.twoD:
+                                string = params[idx-n_noneft]['legendText']
+                                if string.count('=0.0000') == 2:
+                                    h_SM = h.Clone()
+                                    h_SM.Write(plot.name+"__"+process)
+                            else:
+                                if "=0.0000" in params[idx-n_noneft]['legendText']:
+                                    h_SM = h.Clone()
+                                    h_SM.Write(plot.name+"__"+process)
                         else:
-                            if "=0.0000" in params[idx-n_noneft]['legendText']:
-                                h_SM = h.Clone()
-                                h_SM.Write(plot.name+"__"+process)
-                    else:
-                        h.Write(plot.name+"__"+process)
-    outfile.Close()
+                            h.Write(plot.name+"__"+process)
+        outfile.Close()
 
 
 
