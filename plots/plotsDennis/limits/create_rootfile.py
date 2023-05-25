@@ -1,11 +1,25 @@
 #!/usr/bin/env python
 
+
+################################################################################
+################################################################################
+################################################################################
+# TODO
+# - change paths to EFT_UL_v*
+# - implement nonprompot from data + uncertainties (stat+flat)
+# - get rid of "plot distribution and use plotter"
+
+################################################################################
+################################################################################
+################################################################################
+
+
 import ROOT
 from math                                import sqrt
 import array
-from plotDistribution import plotDistribution
 import Analysis.Tools.syncer
 
+from tWZ.Tools.helpers                           import getObjFromFile
 
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
@@ -13,11 +27,31 @@ argParser.add_argument('--plotOnly',         action='store_true', default=False,
 argParser.add_argument('--noPlots',          action='store_true', default=False, help='No plots?')
 argParser.add_argument('--twoD',             action='store_true', default=False, help='2D limits?')
 argParser.add_argument('--triplet',          action='store_true', default=False)
-argParser.add_argument('--noTWZ',            action='store_true', default=False, help='Keep tWZ at SM point?')
 args = argParser.parse_args()
 
 ################################################################################
 ### Functions
+def getRMS(nominal, variations):
+    up   = nominal.Clone()
+    down = nominal.Clone()
+    Nvars = len(variations)
+    nominal = hist.GetSize()-2
+    for i in range(Nbins):
+        bin = i+1
+        diff_sum2_up = 0
+        diff_sum2_down = 0
+        for var in variations:
+            diff = var.GetBinContent(bin)-nominal.GetBinContent(bin)
+            if diff > 0:
+                diff_sum2_up += diff*diff
+            else:
+                diff_sum2_down += diff*diff
+        rmsup = sqrt(diff_sum2_up/Nvars)
+        rmsdown = sqrt(diff_sum2_down/Nvars)
+        up.SetBinContent(bin, nominal.GetBinContent(bin)+rmsup)
+        down.SetBinContent(bin, nominal.GetBinContent(bin)-rmsdown)
+    return (up, down)
+
 def setPseudoDataErrors(hist):
     newhist = hist.Clone()
     Nbins = hist.GetSize()-2
@@ -65,27 +99,31 @@ def setupHist(hist, bins):
 
 ################################################################################
 ### Setup
-regions = ["WZ", "ZZ", "ttZ1", "ttZ2"]
+regions = ["WZ", "ZZ", "ttZ"]
 
 print 'Reading regions:', regions
 
-# binning 
+# binning
 bins  = [0, 60, 120, 180, 240, 300, 400, 1000]
 
 # histname
 histname = "Z1_pt"
 print 'Reading Histogram:', histname
 
+version = "v8"
+era = "Run2018"
+
 # Directories
 dirs = {
-    "ZZ":  "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_SYS_v1_noData/Run2018/all/trilepVL-minDLmass12-onZ1-onZ2-nLeptons4/",
-    "WZ":  "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_SYS_v1_noData/Run2018/all/trilepT-minDLmass12-onZ1-deepjet0-met60/",
-    "ttZ": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_SYS_v1_noData/Run2018/all/trilepT-minDLmass12-onZ1-njet3-deepjet1p/",
-    # "ttZ2": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_SYS_v1_noData/Run2018/all/trilepT-minDLmass12-onZ1-njet4p-deepjet1p/",
+    "ZZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_noData/"+era+"/all/trilepVL-minDLmass12-onZ1-onZ2-nLeptons4/",
+    "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_noData/"+era+"/all/trilepT-minDLmass12-onZ1-deepjet0-met60/",
+    "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_noData/"+era+"/all/trilepT-minDLmass12-onZ1-njet3-deepjet1p/",
+    "WZ_CR":  "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_FakeRateSF_useDataSF/"+era+"/all/trilepFOnoT-minDLmass12-onZ1-deepjet0-met60/",
+    "ttZ_CR": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_FakeRateSF_useDataSF/"+era+"/all/trilepFOnoT-minDLmass12-onZ1-njet3-deepjet1p/",
 }
-outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput/"
-if args.noTWZ:
-    outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_noTWZ"
+
+outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL/"
+
 if args.twoD:
     outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_twoD"
     if args.triplet:
@@ -93,16 +131,13 @@ if args.twoD:
 
 # Define backgrounds
 processes = ["ttZ", "WZ", "ZZ", "tWZ", "ttX", "tZq", "triBoson", "nonprompt"]
-backgrounds = ["ttX", "tZq", "triBoson", "nonprompt"]
-signals = ["ttZ", "tWZ", "WZ", "ZZ"]
-if args.noTWZ:
-    backgrounds = ["tWZ","ttX", "tZq", "triBoson", "nonprompt"]
-    signals = ["ttZ", "WZ", "ZZ"]
+backgrounds = ["ttX", "tZq", "triBoson", "tWZ", "nonprompt"]
+signals = ["ttZ", "WZ", "ZZ"]
 
 # Define Signal points
 signalnames = []
 WCs = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33"]
-Npoints = 51
+Npoints = 21
 SMpointName = ""
 goodnames = {}
 value_to_number = {}
@@ -150,19 +185,38 @@ elif args.twoD:
             goodnames[signalname]="%s_%i_%s_%i"%(WC1,i,WC2,j)
 
 # Define Systematics
-sysnames = [
-    'BTag_b',
-    'BTag_l',
-    'Trigger',
-    'PU',
-    'JES',
-    'LepID',
-]
+sysnames = {
+    "BTag_b":                 ("BTag_b_UP", "BTag_b_DOWN"),
+    "BTag_l":                 ("BTag_l_UP", "BTag_l_DOWN"),
+    "Fakerate":               ("Fakerate_UP", "Fakerate_DOWN"), # TREAT DIFFERENTLY
+    "Trigger":                ("Trigger_UP", "Trigger_DOWN"),
+    "Prefire":                ("Prefire_UP", "Prefire_DOWN"),
+    "LepReco":                ("LepReco_UP", "LepReco_DOWN"),
+    "LepIDstat_2016preVFP":   ("LepIDstat_UP_2016preVFP", "LepIDstat_DOWN_2016preVFP"),
+    "LepIDstat_2016":         ("LepIDstat_UP_2016", "LepIDstat_DOWN_2016"),
+    "LepIDstat_2017":         ("LepIDstat_UP_2017", "LepIDstat_DOWN_2017"),
+    "LepIDstat_2018":         ("LepIDstat_UP_2018", "LepIDstat_DOWN_2018"),
+    "LepIDsys":               ("LepIDsys_UP", "LepIDsys_DOWN"),
+    "PU":                     ("PU_UP", "PU_DOWN"),
+    "JES":                    ("JES_UP", "JES_DOWN"),
+    "JER":                    ("JER_UP", "JER_DOWN"),
+    "Lumi_uncorrelated_2016": ("Lumi_UP_uncorrelated_2016", "Lumi_DOWN_uncorrelated_2016"),
+    "Lumi_uncorrelated_2017": ("Lumi_UP_uncorrelated_2017", "Lumi_DOWN_uncorrelated_2017"),
+    "Lumi_uncorrelated_2018": ("Lumi_UP_uncorrelated_2018", "Lumi_DOWN_uncorrelated_2018"),
+    "Lumi_correlated_161718": ("Lumi_UP_correlated_161718", "Lumi_DOWN_correlated_161718"),
+    "Lumi_correlated_1718":   ("Lumi_UP_correlated_1718", "Lumi_DOWN_correlated_1718"),
+    "ISR":                    ("ISR_UP", "ISR_DOWN"),
+    "FSR":                    ("FSR_UP", "FSR_DOWN"),
+    "muR":                    ("Scale_UPNONE", "Scale_DOWNNONE"), # muR
+    "muF":                    ("Scale_NONEUP", "Scale_NONEDOWN"), # muF
+    "PDF":                    (), # TREAT DIFFERENTLY
+}
+
 
 
 ################################################################################
 ### Read Histograms and write to outfile
-if args.twoD: 
+if args.twoD:
     inname = 'Results_twoD.root'
     if args.triplet:
         inname = 'Results_twoD_triplet.root'
@@ -180,42 +234,81 @@ if not args.plotOnly:
         for region in regions:
             print 'Filling region', region
             # print dirs[region]+inname
-            file = ROOT.TFile(dirs[region]+inname)
             outfile.mkdir(region+"__"+histname)
             outfile.cd(region+"__"+histname)
             for process in processes:
-                if process in backgrounds:
-                    name = histname+"__"+process
-                elif process in signals:
-                    name = histname+"__"+process+"__"+signalpoint
-                # print name
-                hist = file.Get(name)
-                hist = setupHist(hist, bins)
-                hist.Write(process)
+                if process == "nonpromt":
+                    # Get prompt backgrounds in CR
+                    firstbkg = True
+                    for proc in processes:
+                        if not "nonprompt" in proc:
+                            h_bkg = getObjFromFile(dirs[region+"_CR"]+inname, histname+"__"+process)
+                            if firstbkg:
+                                h_bkg_CR = h_bkg.Clone()
+                                firstbkg = False
+                            else:
+                                h_bkg_CR.Add(h_bkg)
+                    # Get nonpromt = Data in CR * fakerate and subtract backgrounds
+                    h_nonpromt = getObjFromFile(dirs[region+"_CR"]+inname, histname+"__data")
+                    h_nonpromt.Add(h_bkg_CR, -1)
+                    h_nonpromt = setupHist(h_nonpromt, bins)
+                    h_nonpromt.Write("nonprompt")
+                else:
+                    if process in backgrounds:
+                        name = histname+"__"+process
+                    elif process in signals:
+                        name = histname+"__"+process+"__"+signalpoint
+                    # print name
+                    hist = getObjFromFile(dirs[region]+inname), name)
+                    hist = setupHist(hist, bins)
+                    hist.Write(process)
                 # Systematics
-                for sys in sysnames:
-                    # print sys
-                    sysdirUP = dirs[region]
-                    sysdirUP = sysdirUP.replace('/Run', '_'+sys+'_UP/Run')
-                    # print sysdirUP+inname
-                    sysdirDOWN = dirs[region]
-                    sysdirDOWN = sysdirDOWN.replace('/Run', '_'+sys+'_DOWN/Run')
-                    fileUP   = ROOT.TFile(sysdirUP+inname)
-                    fileDOWN = ROOT.TFile(sysdirDOWN+inname)
-                    outfile.cd(region+"__"+histname)
-                    histUP   = fileUP.Get(name)
-                    histDOWN = fileDOWN.Get(name)
-                    histUP   = setupHist(histUP, bins)
-                    histDOWN = setupHist(histDOWN, bins)
-                    histUP.Write(process+"__"+sys+"Up")
-                    histDOWN.Write(process+"__"+sys+"Down")
+                for sys in sysnames.keys():
+                    if sys == "PDF":
+                        pdfvariations = []
+                        for i in range(100):
+                            pdfdir = dirs[region].replace('/Run', '_PDF_'+str(i+1)+'/Run')
+                            h_pdf = getObjFromFile(pdfdir+inname, name)
+                            pdfvariations.append(h_pdf)
+                        pdfUP, pdfDOWN = getRMS(hist, pdfvariations)
+                        pdfUP.Write(process+"__PDFUp")
+                        pdfDOWN.Write(process+"__PDFDown")
+                    elif sys == "Fakerate"
+                        if "nonpromt" in process:
+                            h_nonpromt_up = getObjFromFile(dirs[region+"_CR"].replace('/Run', '_Fakerate_UP/Run')+inname, histname+"__data")
+                            h_nonpromt_up.Add(h_bkg_CR, -1)
+                            h_nonpromt_down = getObjFromFile(dirs[region+"_CR"].replace('/Run', '_Fakerate_DOWN/Run')+inname, histname+"__data")
+                            h_nonpromt_down.Add(h_bkg_CR, -1)
+                        else:
+                            # For all processes that are non prompt,
+                            # there is no variation, so simply copy nominal
+                            h_nonpromt_up = hist.Clone()
+                            h_nonpromt_down = hist.Clone()
+                        h_nonpromt_up.Write(process+"__"+sys+"Up")
+                        h_nonpromt_down.Write(process+"__"+sys+"Down")
+                    else:
+                        # print sys
+                        (upname, downname) = sysnames[sys]
+                        sysdirUP = dirs[region]
+                        sysdirUP = sysdirUP.replace('/Run', '_'+upname+'/Run')
+                        # print sysdirUP+inname
+                        sysdirDOWN = dirs[region]
+                        sysdirDOWN = sysdirDOWN.replace('/Run', '_'+downname+'/Run')
+
+                        histUP = getObjFromFile(sysdirUP+inname, name)
+                        histDOWN = getObjFromFile(sysdirDOWN+inname, name)
+                        histUP   = setupHist(histUP, bins)
+                        histDOWN = setupHist(histDOWN, bins)
+                        outfile.cd(region+"__"+histname)
+                        histUP.Write(process+"__"+sys+"Up")
+                        histDOWN.Write(process+"__"+sys+"Down")
 
             # Write observed
             # Add all relevant samples
             is_first = True
             observed = ROOT.TH1F()
             for bkg in backgrounds:
-                hist = file.Get(histname+"__"+bkg)
+                hist = getObjFromFile(dirs[region]+inname), histname+"__"+bkg)
                 if is_first:
                     observed = hist.Clone()
                     is_first = False
@@ -223,7 +316,8 @@ if not args.plotOnly:
                     observed.Add(hist)
             # now add all signals at SM point
             for signal in signals:
-                hist = file.Get(histname+"__"+signal+"__"+SMpointName)
+                hist = getObjFromFile(dirs[region]+inname), histname+"__"+signal+"__"+SMpointName)
+
                 observed.Add(hist)
             observed = setupHist(observed, bins)
             observed = setPseudoDataErrors(observed)
@@ -233,23 +327,5 @@ if not args.plotOnly:
         print 'Written to ', outname
 
 
-if not args.noPlots and not args.twoD:
-    signals_at_SM = signals
-    for s in signals_at_SM:
-        s = s+"__"+SMpointName
-    for region in regions:
-        for WCname in WCs:
-            SMpoint = 0
-            EFTpoints = [-2, 2]
-            if 'cHq3Re11' in WCname: EFTpoints = [-0.200, 0.200]
-            if args.noTWZ:
-                plotDistribution(outdir,"noTWZ", region, 'Z1_pt', 'Z #it{p}_{T}', backgrounds, signals, WCname, SMpoint, EFTpoints, value_to_number, sysnames)
-            else:
-                plotDistribution(outdir,None, region, 'Z1_pt', 'Z #it{p}_{T}', backgrounds, signals, WCname, SMpoint, EFTpoints, value_to_number, sysnames)
 
-        if args.noTWZ:
-            plotDistribution(outdir,"noTWZ__SM", region, 'Z1_pt', 'Z #it{p}_{T}', backgrounds+signals_at_SM, [], WCname, SMpoint, [], value_to_number, sysnames)
-        else:
-            plotDistribution(outdir,"SM", region, 'Z1_pt', 'Z #it{p}_{T}', backgrounds+signals_at_SM, [], WCname, SMpoint, [], value_to_number, sysnames)
-            
-    Analysis.Tools.syncer.sync()
+Analysis.Tools.syncer.sync()

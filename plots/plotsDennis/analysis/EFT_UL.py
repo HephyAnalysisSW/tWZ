@@ -110,7 +110,7 @@ variations = [
     "Lumi_UP_uncorrelated_2018", "Lumi_DOWN_uncorrelated_2018",
     "Lumi_UP_correlated_161718", "Lumi_DOWN_correlated_161718",
     "Lumi_UP_correlated_1718", "Lumi_DOWN_correlated_1718",
-    "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN",
+    "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN", # first is mu_r, second is mu_f
     "ISR_UP", "ISR_DOWN",
     "FSR_UP", "FSR_DOWN",
 ]
