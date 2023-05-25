@@ -192,10 +192,10 @@ assert isMC or len(samples)==1, "Don't concatenate data samples"
 xSection = samples[0].xSection if isMC else None
 
 # Get normalizations of weight-based variations
-if sample.isMC:
-    scale_norm_histo = normalizationDB.get( key=(sample.DAS, "LHEScaleWeight" ) )
-    pdf_norm_histo   = normalizationDB.get( key=(sample.DAS, "LHEPdfWeight" ) )
-    ps_norm_histo    = normalizationDB.get( key=(sample.DAS, "PSWeight" ) )
+if isMC:
+    scale_norm_histo = normalizationDB.get( key=(samples[0].DAS, "LHEScaleWeight" ) )
+    pdf_norm_histo   = normalizationDB.get( key=(samples[0].DAS, "LHEPdfWeight" ) )
+    ps_norm_histo    = normalizationDB.get( key=(samples[0].DAS, "PSWeight" ) )
 
 # apply MET filter
 skimConds.append( getFilterCut(options.year, isData=isData, ignoreJSON=True, skipWeight=True, skipECalFilter=True) )
