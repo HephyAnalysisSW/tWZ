@@ -108,9 +108,11 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# Data cards
+# Data cards and impact dir
 plots/plotsDennis/DataCards/data/*
 plots/plotsDennis/DataCards/data_statonly/*
+plots/plotsDennis/combine/DataCards/*
+plots/plotsDennis/combine/impacts/*
 
 # Missing files files
 postProcessing/missingFiles*.sh
