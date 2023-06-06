@@ -12,7 +12,7 @@ if args.year == "UL2016_preVFP" or args.year == "UL2016preVFP":
     shortyear = "UL16preVFP"
     args.year = "UL2016_preVFP"
 
-version = "tWZ_UL_nAODv9_v3"
+version = "tWZ_UL_nAODv9_v4"
 
 fileDir = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/"+version+"/"+args.year+"/trilep/"
 submitFileName = "/users/dennis.schwarz/CMSSW_10_6_28/src/tWZ/postProcessing/nanoPostProcessing_"+shortyear+"_nanoAODv9.sh"

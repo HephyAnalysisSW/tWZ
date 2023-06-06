@@ -13,7 +13,7 @@ args = argParser.parse_args()
 
 eosdir = "/eos/vbc/experiments/cms/store/user/deschwar/topNanoAOD/v9-1-1/"
 
-if args.year not in ["UL2016_preVFP", "UL2016", "UL2018"]:
+if args.year not in ["UL2016_preVFP", "UL2016", "UL2017", "UL2018"]:
     raise Exception("Year %s not known"%args.year)
 
 if args.process not in ["TTZ_EFT", "WZ_EFT", "ZZ_EFT"]:
@@ -29,6 +29,11 @@ directories = {
         "TTZ_EFT": ["2016ULpostVFP/TTZToLL_5f_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv9-1-1_2016ULpostVFP/230511_132730/0000//"],
         "WZ_EFT" : ["2016ULpostVFP/WZTo3LNu_5f_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv9-1-1_2016ULpostVFP/230511_142548/0000/"],
         "ZZ_EFT" : ["2016ULpostVFP/ZZTo4L_5f_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv9-1-1_2016ULpostVFP/230511_133542/0000/"],
+    },
+    "UL2017": {
+        "TTZ_EFT": ["2017UL/TTZToLL_5f_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv9-1-1_2017UL/230524_101554/0000/","2017UL/TTZToLL_5f_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv9-1-1_2017UL/230524_101554/0001/"],
+        "WZ_EFT" : ["2017UL/WZTo3LNu_5f_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv9-1-1_2017UL/230524_101841/0000/"],
+        "ZZ_EFT" : ["2017UL/ZZTo4L_5f_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv9-1-1_2017UL/230524_102114/0000/"],
     },
     "UL2018": {
         "TTZ_EFT": ["2018UL/TTZToLL_5f_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv9-1-1_2018UL/230406_130018/0000/","2018UL/TTZToLL_5f_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv9-1-1_2018UL/230406_130018/0001/"],

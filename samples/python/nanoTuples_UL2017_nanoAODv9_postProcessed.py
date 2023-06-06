@@ -47,7 +47,7 @@ dirs['TWZ_NLO_DS']             = ['tWll_thad_Wlept_DS', 'tWll_tlept_Wlept_DS', '
 TWZ_NLO_DS  = Sample.fromDirectory(name="TWZ_NLO_DS", treeName="Events", isData=False, color=color.TWZ, texName="tWZ(NLO)", directory=make_dirs( dirs['TWZ_NLO_DS']))
 
 # TTZ
-dirs['TTZToLLNuNu']     = ['TTZToLLNuNu', 'TTZToLLNuNu_m1to10'] 
+dirs['TTZToLLNuNu']     = ['TTZToLLNuNu', 'TTZToLLNuNu_m1to10']
 dirs['TTZToQQ']         = ['TTZToQQ']
 dirs['TTZ']             = ['TTZToLLNuNu', 'TTZToLLNuNu_m1to10', "TTZToQQ"]
 TTZToLLNuNu = Sample.fromDirectory(name="ToLLNuNu", treeName="Events", isData=False, color=color.TTZ, texName="t#bar{t}Z #rightarrow ll#nu#nu", directory=make_dirs( dirs['TTZToLLNuNu']))
@@ -65,7 +65,7 @@ dirs['TTVV']            = ['TTWW', 'TTWZ','TTZZ']
 dirs['TTX_rare']        = ["TTTT", "TTHTobb", "TTHnobb"] + dirs['TTW'] + dirs['TTVV'] # same as TTX_rare but without tZq_ll
 TTX_rare = Sample.fromDirectory(name="TTX_rare", treeName="Events", isData=False, color=color.TTX_rare, texName="t/t#bar{t}+(t#bar{t}/H/W/VV)", directory=make_dirs( dirs['TTX_rare']))
 
-dirs['TTX_rare_noTTW']        = ["TTTT", "TTHTobb", "TTHnobb"] + dirs['TTVV'] 
+dirs['TTX_rare_noTTW']        = ["TTTT", "TTHTobb", "TTHnobb"] + dirs['TTVV']
 TTX_rare_noTTW = Sample.fromDirectory(name="TTX_rare_noTTW", treeName="Events", isData=False, color=color.TTX_rare, texName="t/t#bar{t}+(t#bar{t}/H/VV)", directory=make_dirs( dirs['TTX_rare_noTTW']))
 
 TTH      = Sample.fromDirectory(name="TTH", treeName="Events", isData=False, color=color.TTX_rare, texName="t#bar{t}H", directory=make_dirs( dirs['TTH']))
@@ -87,6 +87,17 @@ DY  = Sample.fromDirectory(name="DY", treeName="Events", isData=False, color=col
 
 # ADD VVTo2L2Nu TO NONPROMPT ONCE AVAILABLE
 dirs['nonprompt_3l']    = dirs['WW'] + dirs['singleTop'] + dirs['DY_LO'] + dirs['TTLep']
-dirs['nonprompt_4l']    = dirs['WW'] + dirs['singleTop'] + dirs['TZQ'] + dirs["WZ"] + dirs['DY_LO'] + dirs['TTLep'] 
+dirs['nonprompt_4l']    = dirs['WW'] + dirs['singleTop'] + dirs['TZQ'] + dirs["WZ"] + dirs['DY_LO'] + dirs['TTLep']
 nonprompt_3l = Sample.fromDirectory(name="nonprompt_3l", treeName="Events", isData=False, color=color.nonprompt, texName="nonprompt_3l", directory=make_dirs( dirs['nonprompt_3l']))
 nonprompt_4l = Sample.fromDirectory(name="nonprompt_4l", treeName="Events", isData=False, color=color.nonprompt, texName="nonprompt_4l", directory=make_dirs( dirs['nonprompt_4l']))
+
+# EFT samples
+dirs['ZZ_EFT'] = ['ZZ_EFT']
+ZZ_EFT  = Sample.fromDirectory(name="ZZ_EFT", treeName="Events", isData=False, color=color.ZZ, texName="ZZ", directory=make_dirs(dirs['ZZ_EFT']))
+ZZ_EFT.reweight_pkl = "/groups/hephy/cms/dennis.schwarz/www/gridpacks/ZZ-vec_reweight_card.pkl"
+dirs['WZ_EFT'] = ['WZ_EFT']
+WZ_EFT  = Sample.fromDirectory(name="WZ_EFT", treeName="Events", isData=False, color=color.WZ, texName="WZ", directory=make_dirs(dirs['WZ_EFT']))
+WZ_EFT.reweight_pkl = "/groups/hephy/cms/dennis.schwarz/www/gridpacks/WZ-vec_reweight_card.pkl"
+dirs['TTZ_EFT'] = ['TTZ_EFT']
+TTZ_EFT  = Sample.fromDirectory(name="TTZ_EFT", treeName="Events", isData=False, color=color.TTZ, texName="t#bar{t}Z", directory=make_dirs(dirs['TTZ_EFT']))
+TTZ_EFT.reweight_pkl = "/groups/hephy/cms/dennis.schwarz/www/gridpacks/ttZ01j-vec_reweight_card.pkl"

@@ -175,6 +175,19 @@ def writeObjToFile(fname, obj, writename, update=False):
     ROOT.gDirectory.cd(gDir+':/')
     return
 
+def writeObjToDirInFile(fname, dname, obj, writename, update=False):
+    gDir = ROOT.gDirectory.GetName()
+    if update:
+        f = ROOT.TFile(fname, 'UPDATE')
+    else:
+        f = ROOT.TFile(fname, 'recreate')
+    f.cd(dname)
+    objw = obj.Clone()
+    objw.Write(writename)
+    f.Close()
+    ROOT.gDirectory.cd(gDir+':/')
+    return
+
 def getVarValue(c, var, n=-1):
     try:
         att = getattr(c, var)
