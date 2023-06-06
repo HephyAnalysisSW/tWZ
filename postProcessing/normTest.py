@@ -14,7 +14,7 @@ def printBins(hist):
 
 from Samples.nanoAOD.UL16_privateDennis_nanoAODAPVv9  import allSamples as eftSamples16pre
 from Samples.nanoAOD.UL16_privateDennis_nanoAODv9  import allSamples as eftSamples16
-# from Samples.nanoAOD.UL17_privateDennis_nanoAODv9  import allSamples as eftSamples17
+from Samples.nanoAOD.UL17_privateDennis_nanoAODv9  import allSamples as eftSamples17
 from Samples.nanoAOD.UL18_privateDennis_nanoAODv9  import allSamples as eftSamples18
 
 from Samples.nanoAOD.UL16_nanoAODAPVv9  import allSamples as mcSamples16pre
@@ -25,7 +25,7 @@ from Samples.nanoAOD.UL18_nanoAODv9  import allSamples as mcSamples18
 samples = {
     "2016preVFP": eftSamples16pre+mcSamples16pre,
     "2016": eftSamples16+mcSamples16,
-    "2017": mcSamples17,
+    "2017": eftSamples17+mcSamples17,
     "2018": eftSamples18+mcSamples18,
 }
 
@@ -56,6 +56,10 @@ for year in ["2016preVFP", "2016", "2017", "2018"]:
 
         if len(stuffmissing) > 0:
             missing.append( (year, sample, stuffmissing) )
+
+
+        # print "-----------------"
+        # printBins(ps_norm_histo)
 
         # if "TTHTobb" in sample.name:
         #     print "-----------------"

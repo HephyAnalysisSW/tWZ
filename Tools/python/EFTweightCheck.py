@@ -21,9 +21,9 @@ def removeDamagedFiles( year, samples, filelist ):
             "ZZ_EFT" : [], # done
         },
         "UL2017" : {
-            "TTZ_EFT": [],
-            "WZ_EFT" : [],
-            "ZZ_EFT" : [],
+            "TTZ_EFT": ["tree_474.root","tree_494.root","tree_500.root","tree_501.root","tree_506.root","tree_510.root"], # done
+            "WZ_EFT" : ["tree_386.root","tree_394.root","tree_399.root","tree_400.root"], # done
+            "ZZ_EFT" : ["tree_11.root","tree_19.root","tree_21.root","tree_23.root","tree_3.root","tree_8.root","tree_9.root"], # done
         },
         "UL2018" : {
             "TTZ_EFT": ["tree_302.root", "tree_304.root", "tree_309.root", "tree_310.root", "tree_313.root", "tree_314.root", "tree_316.root", "tree_317.root", "tree_93.root", "tree_95.root"], # done

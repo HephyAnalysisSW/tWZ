@@ -51,7 +51,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='CompareEFTsamples_v4')
+argParser.add_argument('--plot_directory', action='store', default='CompareEFTsamples_v5')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -285,8 +285,24 @@ elif args.era == "UL2016preVFP":
             mc = [UL2016preVFP.WZTo3LNu, UL2016preVFP.WZ_EFT]
             samples_eft = []
 elif args.era == "UL2017":
-    mc = []
-    samples_eft = []
+    if "qualepT" in args.selection:
+        mc = [UL2017.ZZ]
+        samples_eft = [UL2017.ZZ_EFT]
+        if args.nicePlots:
+            mc = [UL2017.ZZ, UL2017.ZZ_EFT]
+            samples_eft = []
+    elif "njet3p-btag1p" in args.selection:
+        mc = [UL2017.TTZ]
+        samples_eft = [UL2017.TTZ_EFT]
+        if args.nicePlots:
+            mc = [UL2017.TTZ, UL2017.TTZ_EFT]
+            samples_eft = []
+    elif "btag0-met60" in args.selection:
+        mc = [UL2017.WZTo3LNu]
+        samples_eft = [UL2017.WZ_EFT]
+        if args.nicePlots:
+            mc = [UL2017.WZTo3LNu, UL2017.WZ_EFT]
+            samples_eft = []
 elif args.era == "UL2018":
     if "qualepT" in args.selection:
         mc = [UL2018.ZZ]
@@ -307,9 +323,33 @@ elif args.era == "UL2018":
             mc = [UL2018.WZTo3LNu, UL2018.WZ_EFT]
             samples_eft = []
 elif args.era == "ULRunII":
-    mc = []
-    samples_eft = []
+    if "qualepT" in args.selection:
+        mc = [ZZ]
+        samples_eft = [ZZ_EFT]
+        if args.nicePlots:
+            mc = [ZZ, ZZ_EFT]
+            samples_eft = []
+    elif "njet3p-btag1p" in args.selection:
+        mc = [TTZ]
+        samples_eft = [TTZ_EFT]
+        if args.nicePlots:
+            mc = [TTZ, TTZ_EFT]
+            samples_eft = []
+    elif "btag0-met60" in args.selection:
+        mc = [WZTo3LNu]
+        samples_eft = [WZ_EFT]
+        if args.nicePlots:
+            mc = [WZTo3LNu, WZ_EFT]
+            samples_eft = []
 
+################################################################################
+for sample in mc+samples_eft:
+    sample.scale  = 1
+    if args.reduceEFT:
+            if "_EFT" in sample.name:
+                sample.normalization = 1.
+                sample.reduceFiles( factor = 10 )
+                sample.scale /= sample.normalization
 ################################################################################
 # EFT reweight
 
@@ -447,13 +487,6 @@ except Exception as e:
 lumi_scale                 = lumi_year[lumistring]/1000.
 data_sample.scale          = 1.
 
-# Set up MC sample
-for sample in mc:
-    sample.scale           = 1
-
-for param in params:
-    param['sample'].scale = 1
-
 if args.small:
     for sample in mc + [data_sample]:
         sample.normalization = 1.
@@ -464,11 +497,6 @@ if args.small:
         param['sample'].reduceFiles( to = 1 )
         param['sample'].scale /= param['sample'].normalization
 
-if args.reduceEFT:
-    for param in params:
-        param['sample'].normalization = 1.
-        param['sample'].reduceFiles( factor = 2 )
-        param['sample'].scale /= param['sample'].normalization
 ################################################################################
 # Lepton SF
 muonWP = "medium"

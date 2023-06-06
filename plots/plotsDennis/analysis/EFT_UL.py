@@ -51,7 +51,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v8')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v9')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -67,6 +67,8 @@ argParser.add_argument('--useDataSF',      action='store_true', default=False)
 argParser.add_argument('--useBRILSF',      action='store_true', default=False)
 argParser.add_argument('--tunePtCone',     action='store_true', default=False)
 argParser.add_argument('--noLeptonSF',     action='store_true', default=False)
+argParser.add_argument('--reduceEFT',      action='store_true', default=False)
+argParser.add_argument('--SMpoint',        action='store_true', default=False)
 
 
 args = argParser.parse_args()
@@ -85,31 +87,31 @@ variations = [
     "Trigger_UP", "Trigger_DOWN",
     "Prefire_UP", "Prefire_DOWN",
     "LepReco_UP", "LepReco_DOWN",
-    "LepIDstat_UP_2016preVFP", "LepIDstat_DOWN_2016preVFP",
-    "LepIDstat_UP_2016", "LepIDstat_DOWN_2016",
-    "LepIDstat_UP_2017", "LepIDstat_DOWN_2017",
-    "LepIDstat_UP_2018", "LepIDstat_DOWN_2018",
+    "LepIDstat_2016preVFP_UP", "LepIDstat_2016preVFP_DOWN",
+    "LepIDstat_2016_UP", "LepIDstat_2016_DOWN",
+    "LepIDstat_2017_UP", "LepIDstat_2017_DOWN",
+    "LepIDstat_2018_UP", "LepIDstat_2018_DOWN",
     "LepIDsys_UP", "LepIDsys_DOWN",
-    "BTag_b_UP", "BTag_b_DOWN",
-    "BTag_l_UP", "BTag_l_DOWN",
-    # "BTag_b_UP_correlated", "BTag_b_DOWN_correlated",
-    # "BTag_l_UP_correlated", "BTag_l_DOWN_correlated",
-    # "BTag_b_UP_uncorrelated_2016preVFP", "BTag_b_DOWN_uncorrelated_2016preVFP",
-    # "BTag_l_UP_uncorrelated_2016preVFP", "BTag_l_DOWN_uncorrelated_2016preVFP",
-    # "BTag_b_UP_uncorrelated_2016", "BTag_b_DOWN_uncorrelated_2016",
-    # "BTag_l_UP_uncorrelated_2016", "BTag_l_DOWN_uncorrelated_2016",
-    # "BTag_b_UP_uncorrelated_2017", "BTag_b_DOWN_uncorrelated_2017",
-    # "BTag_l_UP_uncorrelated_2017", "BTag_l_DOWN_uncorrelated_2017",
-    # "BTag_b_UP_uncorrelated_2018", "BTag_b_DOWN_uncorrelated_2018",
-    # "BTag_l_UP_uncorrelated_2018", "BTag_l_DOWN_uncorrelated_2018",
+    "BTag_b_UP", "BTag_b_DOWN", # not needed when running single sources
+    "BTag_l_UP", "BTag_l_DOWN", # not needed when running single sources
+    "BTag_b_correlated_UP", "BTag_b_correlated_DOWN",
+    "BTag_l_correlated_UP", "BTag_l_correlated_DOWN",
+    "BTag_b_uncorrelated_2016preVFP_UP", "BTag_b_uncorrelated_2016preVFP_DOWN",
+    "BTag_l_uncorrelated_2016preVFP_UP", "BTag_l_uncorrelated_2016preVFP_DOWN",
+    "BTag_b_uncorrelated_2016_UP", "BTag_b_uncorrelated_2016_DOWN",
+    "BTag_l_uncorrelated_2016_UP", "BTag_l_uncorrelated_2016_DOWN",
+    "BTag_b_uncorrelated_2017_UP", "BTag_b_uncorrelated_2017_DOWN",
+    "BTag_l_uncorrelated_2017_UP", "BTag_l_uncorrelated_2017_DOWN",
+    "BTag_b_uncorrelated_2018_UP", "BTag_b_uncorrelated_2018_DOWN",
+    "BTag_l_uncorrelated_2018_UP", "BTag_l_uncorrelated_2018_DOWN",
     "PU_UP", "PU_DOWN",
     "JES_UP", "JES_DOWN",
     "JER_UP", "JER_DOWN",
-    "Lumi_UP_uncorrelated_2016", "Lumi_DOWN_uncorrelated_2016",
-    "Lumi_UP_uncorrelated_2017", "Lumi_DOWN_uncorrelated_2017",
-    "Lumi_UP_uncorrelated_2018", "Lumi_DOWN_uncorrelated_2018",
-    "Lumi_UP_correlated_161718", "Lumi_DOWN_correlated_161718",
-    "Lumi_UP_correlated_1718", "Lumi_DOWN_correlated_1718",
+    "Lumi_uncorrelated_2016_UP", "Lumi_uncorrelated_2016_DOWN",
+    "Lumi_uncorrelated_2017_UP", "Lumi_uncorrelated_2017_DOWN",
+    "Lumi_uncorrelated_2018_UP", "Lumi_uncorrelated_2018_DOWN",
+    "Lumi_correlated_161718_UP", "Lumi_correlated_161718_DOWN",
+    "Lumi_correlated_1718_UP", "Lumi_correlated_1718_DOWN",
     "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN", # first is mu_r, second is mu_f
     "ISR_UP", "ISR_DOWN",
     "FSR_UP", "FSR_DOWN",
@@ -144,6 +146,8 @@ else:
 ################################################################################
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
+if args.reduceEFT:                    args.plot_directory += "_reduceEFT"
+if args.SMpoint:                      args.plot_directory += "_SMpoint"
 if args.noData:                       args.plot_directory += "_noData"
 if args.nonpromptOnly:                args.plot_directory += "_nonpromptOnly"
 if args.splitnonprompt:               args.plot_directory += "_splitnonprompt"
@@ -180,7 +184,7 @@ else:
 if args.applyFakerate:
     logger.info( "Apply Fake rate")
 else:
-    logger.info( "Apply Fake Rate")
+    logger.info( "Do not apply Fake Rate")
 ################################################################################
 # Selection modifier
 def jetSelectionModifier( sys, returntype = "func"):
@@ -267,22 +271,23 @@ def getPDFWeight(event, sys):
 ################################################################################
 # get Parton Shower weight
 def getPSWeight(event, sys):
-    if sys not in weights.keys():
-        print "PS VARIATION NOT FOUND"
-        return 1.0
-
-    weights = {
+    PSweights = {
         "ISR_UP"  : 0,
         "ISR_DOWN": 2,
         "FSR_UP"  : 1,
         "FSR_DOWN": 3,
     }
 
-    if weights[sys] > event.nPS-1:
+    if sys not in PSweights.keys():
+        print "PS VARIATION NOT FOUND"
+        return 1.0
+
+
+    if PSweights[sys] > event.nPS-1:
         print "PS INDEX IS WRONG"
         return 1.0
 
-    return event.PS_Weight[weights[sys]]
+    return event.PS_Weight[PSweights[sys]]
 ################################################################################
 # get Lumi factor
 # Uncorrelated 2016      1.0%
@@ -312,10 +317,10 @@ def getLumiWeight(event, sys):
         elif "correlated_161718" in sys:
             variation = 0.02
     LumiSF = 1.0
-    if "_UP_" in sys:
-        LumiSF+variation
-    elif "_DOWN_" in sys:
-        LumiSF-variation
+    if "_UP" in sys:
+        LumiSF += variation
+    elif "_DOWN" in sys:
+        LumiSF -= variation
     return LumiSF
 
 ################################################################################
@@ -331,62 +336,90 @@ else:
 from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
 
 if args.era == "UL2016":
-    mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
-    if args.splitTTX:
-        mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare_noTTW, UL2016.TTW, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
-    if args.nonpromptOnly:
-        if args.splitnonprompt:
-            mc = [UL2016.WW, UL2016.Top, UL2016.DY]
-        else:
-            mc = [UL2016.nonprompt_3l]
-    samples_eft = []
+    # mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
+    mc = [UL2016.TWZ_NLO_DR, UL2016.TTX_rare, UL2016.TZQ, UL2016.triBoson, UL2016.nonprompt_3l]
+    samples_eft = [UL2016.TTZ_EFT, UL2016.WZ_EFT, UL2016.ZZ_EFT]
+    if args.applyFakerate:
+        mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
+        samples_eft = []
+        if args.splitTTX:
+            mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare_noTTW, UL2016.TTW, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
+        if args.nonpromptOnly:
+            if args.splitnonprompt:
+                mc = [UL2016.WW, UL2016.Top, UL2016.DY]
+            else:
+                mc = [UL2016.nonprompt_3l]
 elif args.era == "UL2016preVFP":
-    mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
-    if args.splitTTX:
-        mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare_noTTW, UL2016preVFP.TTW, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
-    if args.nonpromptOnly:
-        if args.splitnonprompt:
-            mc = [UL2016preVFP.WW, UL2016preVFP.Top, UL2016preVFP.DY]
-        else:
-            mc = [UL2016preVFP.nonprompt_3l]
-    samples_eft = []
+    # mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
+    mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.triBoson, UL2016preVFP.nonprompt_3l]
+    samples_eft = [UL2016preVFP.TTZ_EFT, UL2016preVFP.WZ_EFT, UL2016preVFP.ZZ_EFT]
+    if args.applyFakerate:
+        mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
+        samples_eft = []
+        if args.splitTTX:
+            mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare_noTTW, UL2016preVFP.TTW, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
+        if args.nonpromptOnly:
+            if args.splitnonprompt:
+                mc = [UL2016preVFP.WW, UL2016preVFP.Top, UL2016preVFP.DY]
+            else:
+                mc = [UL2016preVFP.nonprompt_3l]
 elif args.era == "UL2017":
-    mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
-    if args.splitTTX:
-        mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare_noTTW, UL2017.TTW, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
-    if args.nonpromptOnly:
-        if args.splitnonprompt:
-            mc = [UL2017.WW, UL2017.Top, UL2017.DY]
-        else:
-            mc = [UL2017.nonprompt_3l]
-    samples_eft = []
+    # mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
+    mc = [UL2017.TWZ_NLO_DR, UL2017.TTX_rare, UL2017.TZQ, UL2017.triBoson, UL2017.nonprompt_3l]
+    samples_eft = [UL2017.TTZ_EFT, UL2017.WZ_EFT, UL2017.ZZ_EFT]
+    if args.applyFakerate:
+        mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
+        samples_eft = []
+        if args.splitTTX:
+            mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare_noTTW, UL2017.TTW, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
+        if args.nonpromptOnly:
+            if args.splitnonprompt:
+                mc = [UL2017.WW, UL2017.Top, UL2017.DY]
+            else:
+                mc = [UL2017.nonprompt_3l]
 elif args.era == "UL2018":
     # mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
     mc = [UL2018.TWZ_NLO_DR, UL2018.TTX_rare, UL2018.TZQ, UL2018.triBoson, UL2018.nonprompt_3l]
     samples_eft = [UL2018.TTZ_EFT, UL2018.WZ_EFT, UL2018.ZZ_EFT]
-    if args.splitTTX:
-        mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare_noTTW, UL2018.TTW, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
-    if args.nonpromptOnly:
+    if args.applyFakerate:
+        mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
         samples_eft = []
-        if args.splitnonprompt:
-            mc = [UL2018.WW, UL2018.Top, UL2018.DY]
-        else:
-            mc = [UL2018.nonprompt_3l]
+        if args.splitTTX:
+            mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare_noTTW, UL2018.TTW, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
+        if args.nonpromptOnly:
+            samples_eft = []
+            if args.splitnonprompt:
+                mc = [UL2018.WW, UL2018.Top, UL2018.DY]
+            else:
+                mc = [UL2018.nonprompt_3l]
 elif args.era == "ULRunII":
-    mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
-    if args.splitTTX:
-        mc = [TWZ_NLO_DR, TTZ, TTX_rare_noTTW, TTW, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
-    if args.nonpromptOnly:
-        if args.splitnonprompt:
-            mc = [WW, Top, DY]
-        else:
-            mc = [nonprompt_3l]
-    samples_eft = []
+    # mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
+    mc = [TWZ_NLO_DR, TTX_rare, TZQ, triBoson, nonprompt_3l]
+    samples_eft = [TTZ_EFT, WZ_EFT, ZZ_EFT]
+    if args.applyFakerate:
+        mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
+        samples_eft = []
+        if args.splitTTX:
+            mc = [TWZ_NLO_DR, TTZ, TTX_rare_noTTW, TTW, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
+        if args.nonpromptOnly:
+            if args.splitnonprompt:
+                mc = [WW, Top, DY]
+            else:
+                mc = [nonprompt_3l]
 
 
+
+
+################################################################################
+for sample in mc+samples_eft:
+    sample.scale  = 1
+    if args.reduceEFT:
+        if "_EFT" in sample.name:
+            sample.normalization = 1.
+            sample.reduceFiles( factor = 10 )
+            sample.scale /= sample.normalization
 if args.nicePlots:
     mc += samples_eft
-
 ################################################################################
 # EFT reweight
 
@@ -401,25 +434,7 @@ for sample in samples_eft:
 # define which Wilson coefficients to plot
 #cHq1Re11 cHq1Re22 cHq1Re33 cHq3Re11 cHq3Re22 cHq3Re33 cHuRe11 cHuRe22 cHuRe33 cHdRe11 cHdRe22 cHdRe33 cHudRe11 cHudRe22 cHudRe33
 
-# WCs = [
-#    # ('cHq3Re11', 1.0, ROOT.kCyan),
-#    # ('cHq3Re22', 1.0, ROOT.kMagenta),
-#    # ('cHq3Re33', 1.0, ROOT.kBlue),
-#    ('cHq1Re11', -2.0, ROOT.kRed),
-#     ('cHq1Re11', 2.0, ROOT.kRed),
-#     ('cHq1Re22', -2.0, ROOT.kGreen+2),
-#     ('cHq1Re22', 2.0, ROOT.kGreen+2),
-#     ('cHq1Re33', -2.0, ROOT.kOrange-3),
-#     ('cHq1Re33', 2.0, ROOT.kOrange-3),
-#     # ('cHuRe11',  2.0, ROOT.kCyan),
-#     # ('cHuRe22',  2.0, ROOT.kMagenta),
-#     # ('cHuRe33',  2.0, ROOT.kBlue),
-#     # ('cHdRe11',  2.0, ROOT.kViolet-9),
-#     # ('cHdRe22',  2.0, ROOT.kGray),
-#     # ('cHdRe33',  2.0, ROOT.kAzure+10),
-# ]
-
-Npoints = 51
+Npoints = 21
 
 if args.nicePlots:
     Npoints = 0
@@ -523,13 +538,6 @@ except Exception as e:
 
 lumi_scale                 = lumi_year[lumistring]/1000.
 data_sample.scale          = 1.
-
-# Set up MC sample
-for sample in mc:
-    sample.scale           = 1
-
-for param in params:
-    param['sample'].scale = 1
 
 if args.small:
     for sample in mc + [data_sample]:
@@ -779,28 +787,28 @@ def getLeptonSF(sample, event):
         elif args.sys == "LepIDsys_DOWN":
             uncert = "syst"
             sigma = -1
-        elif args.sys == "LepIDstat_UP_2016preVFP" and event.year == 2016 and event.preVFP:
+        elif args.sys == "LepIDstat_2016preVFP_UP" and event.year == 2016 and event.preVFP:
             uncert = "stat"
             sigma = 1
-        elif args.sys == "LepIDstat_DOWN_2016preVFP" and event.year == 2016 and event.preVFP:
+        elif args.sys == "LepIDstat_2016preVFP_DOWN" and event.year == 2016 and event.preVFP:
             uncert = "stat"
             sigma = -1
-        elif args.sys == "LepIDstat_UP_2016" and event.year == 2016 and not event.preVFP:
+        elif args.sys == "LepIDstat_2016_UP" and event.year == 2016 and not event.preVFP:
             uncert = "stat"
             sigma = 1
-        elif args.sys == "LepIDstat_DOWN_2016" and event.year == 2016 and not event.preVFP:
+        elif args.sys == "LepIDstat_2016_DOWN" and event.year == 2016 and not event.preVFP:
             uncert = "stat"
             sigma = -1
-        elif args.sys == "LepIDstat_UP_2017" and event.year == 2017:
+        elif args.sys == "LepIDstat_2017_UP" and event.year == 2017:
             uncert = "stat"
             sigma = 1
-        elif args.sys == "LepIDstat_DOWN_2017" and event.year == 2017:
+        elif args.sys == "LepIDstat_2017_DOWN" and event.year == 2017:
             uncert = "stat"
             sigma = -1
-        elif args.sys == "LepIDstat_UP_2018" and event.year == 2018:
+        elif args.sys == "LepIDstat_2018_UP" and event.year == 2018:
             uncert = "stat"
             sigma = 1
-        elif args.sys == "LepIDstat_DOWN_2018" and event.year == 2018:
+        elif args.sys == "LepIDstat_2018_DOWN" and event.year == 2018:
             uncert = "stat"
             sigma = -1
         # Go through the 3 leptons and multiply SF
@@ -931,11 +939,11 @@ sequence.append( getSYSweight )
 def getEFTnormweight(sample, event):
     normweight = 1.0
     if "TTZ_EFT" in sample.name:
-        normweight = 0.89
+        normweight = 0.84
     elif "WZ_EFT" in sample.name:
-        normweight = 0.68
+        normweight = 0.64
     elif "ZZ_EFT" in sample.name:
-        normweight = 0.62
+        normweight = 0.60
     event.EFTnormweight = normweight
 sequence.append( getEFTnormweight )
 
@@ -1205,7 +1213,7 @@ read_variables_MC = [
     'nGenPart/I',
     'nScale/I', 'Scale[Weight/F]',
     'nPDF/I', VectorTreeVariable.fromString('PDF[Weight/F]',nMax=150),
-    # 'nPS/I', 'PS[Weight/F]',
+    'nPS/I', 'PS[Weight/F]',
 ]
 
 read_variables_eft = [
@@ -1276,26 +1284,26 @@ for i_mode, mode in enumerate(allModes):
         "BTag_b_DOWN"   : ('reweightBTag_SF','reweightBTag_SF_b_Down'),
         "BTag_l_UP"     : ('reweightBTag_SF','reweightBTag_SF_l_Up'),
         "BTag_l_DOWN"   : ('reweightBTag_SF','reweightBTag_SF_l_Down'),
-        # "BTag_b_UP_correlated"                : ('reweightBTag_SF','reweightBTag_SF_b_Up_Correlated'),
-        # "BTag_b_DOWN_correlated"              : ('reweightBTag_SF','reweightBTag_SF_b_Down_Correlated'),
-        # "BTag_l_UP_correlated"                : ('reweightBTag_SF','reweightBTag_SF_l_Up_Correlated'),
-        # "BTag_l_DOWN_correlated"              : ('reweightBTag_SF','reweightBTag_SF_l_Down_Correlated'),
-        # "BTag_b_UP_uncorrelated_2016preVFP"   : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016preVFP'),
-        # "BTag_b_DOWN_uncorrelated_2016preVFP" : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016preVFP'),
-        # "BTag_b_UP_uncorrelated_2016"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016'),
-        # "BTag_b_DOWN_uncorrelated_2016"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016'),
-        # "BTag_b_UP_uncorrelated_2017"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2017'),
-        # "BTag_b_DOWN_uncorrelated_2017"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2017'),
-        # "BTag_b_UP_uncorrelated_2018"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2018'),
-        # "BTag_b_DOWN_uncorrelated_2018"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2018'),
-        # "BTag_l_UP_uncorrelated_2016preVFP"   : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016preVFP'),
-        # "BTag_l_DOWN_uncorrelated_2016preVFP" : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016preVFP'),
-        # "BTag_l_UP_uncorrelated_2016"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016'),
-        # "BTag_l_DOWN_uncorrelated_2016"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016'),
-        # "BTag_l_UP_uncorrelated_2017"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2017'),
-        # "BTag_l_DOWN_uncorrelated_2017"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2017'),
-        # "BTag_l_UP_uncorrelated_2018"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2018'),
-        # "BTag_l_DOWN_uncorrelated_2018"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2018'),
+        "BTag_b_correlated_UP"                : ('reweightBTag_SF','reweightBTag_SF_b_Up_Correlated'),
+        "BTag_b_correlated_DOWN"              : ('reweightBTag_SF','reweightBTag_SF_b_Down_Correlated'),
+        "BTag_l_correlated_UP"                : ('reweightBTag_SF','reweightBTag_SF_l_Up_Correlated'),
+        "BTag_l_correlated_DOWN"              : ('reweightBTag_SF','reweightBTag_SF_l_Down_Correlated'),
+        "BTag_b_uncorrelated_2016preVFP_UP"   : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016preVFP'),
+        "BTag_b_uncorrelated_2016preVFP_DOWN" : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016preVFP'),
+        "BTag_b_uncorrelated_2016_UP"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2016'),
+        "BTag_b_uncorrelated_2016_DOWN"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2016'),
+        "BTag_b_uncorrelated_2017_UP"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2017'),
+        "BTag_b_uncorrelated_2017_DOWN"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2017'),
+        "BTag_b_uncorrelated_2018_UP"         : ('reweightBTag_SF','reweightBTag_SF_b_Up_Uncorrelated_2018'),
+        "BTag_b_uncorrelated_2018_DOWN"       : ('reweightBTag_SF','reweightBTag_SF_b_Down_Uncorrelated_2018'),
+        "BTag_l_uncorrelated_2016preVFP_UP"   : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016preVFP'),
+        "BTag_l_uncorrelated_2016preVFP_DOWN" : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016preVFP'),
+        "BTag_l_uncorrelated_2016_UP"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2016'),
+        "BTag_l_uncorrelated_2016_DOWN"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2016'),
+        "BTag_l_uncorrelated_2017_UP"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2017'),
+        "BTag_l_uncorrelated_2017_DOWN"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2017'),
+        "BTag_l_uncorrelated_2018_UP"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2018'),
+        "BTag_l_uncorrelated_2018_DOWN"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2018'),
         'Trigger_UP'    : ('reweightTrigger','reweightTriggerUp'),
         'Trigger_DOWN'  : ('reweightTrigger','reweightTriggerDown'),
         'PU_UP'         : ('reweightPU','reweightPUUp'),

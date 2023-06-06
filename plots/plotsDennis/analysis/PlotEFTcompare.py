@@ -10,10 +10,13 @@ from MyRootTools.plotter.Plotter                 import Plotter
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 files = {
-    "ttZ": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/CompareEFTsamples_v4_reduceEFT_noData/YEAR/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/Results.root",
-    "WZ": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/CompareEFTsamples_v4_reduceEFT_noData/YEAR/all/trilepT-minDLmass12-onZ1-btag0-met60/Results.root",
-    "ZZ": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/CompareEFTsamples_v4_reduceEFT_noData/YEAR/all/qualepT-minDLmass12-onZ1-onZ2/Results.root",
+    "ttZ": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/CompareEFTsamples_v5_reduceEFT_noData/YEAR/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/Results.root",
+    "WZ": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/CompareEFTsamples_v5_reduceEFT_noData/YEAR/all/trilepT-minDLmass12-onZ1-btag0-met60/Results.root",
+    "ZZ": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/CompareEFTsamples_v5_reduceEFT_noData/YEAR/all/qualepT-minDLmass12-onZ1-onZ2/Results.root",
 }
+
+processes = ["ttZ", "WZ", "ZZ"]
+# processes = ["ttZ", "WZ"]
 
 colors = {
     "ttZ": color.TTZ,
@@ -21,11 +24,14 @@ colors = {
     "ZZ": color.ZZ,
 }
 
+years = ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]
+
 lumi = {
     "UL2016preVFP": "19.5",
     "UL2016":       "16.5",
     "UL2017":       "41.5",
     "UL2018":       "60",
+    "ULRunII":      "138",
 }
 
 
@@ -48,13 +54,13 @@ eftpoints = [
 histname = "Z1_pt"
 xtitle = "Z p_{T} [GeV]"
 
-for year in ["UL2016preVFP", "UL2016", "UL2018"]:
-    for region in ["ttZ", "WZ", "ZZ"]:
+for year in years:
+    for region in processes:
         h_SM = getObjFromFile(files[region].replace("YEAR", year), histname+"__"+region)
         h_EFT = getObjFromFile(files[region].replace("YEAR", year), histname+"__"+region+"_EFT")
         SF = h_SM.Integral()/h_EFT.Integral()
         h_EFT.Scale(SF)
-        print "Factor =", SF
+        print "Factor =", SF, "("+region+", "+year+")"
         p = Plotter(year+"__"+region+"__"+histname)
         p.plot_dir = plot_directory+"/EFTcompare/"
         p.lumi = lumi[year]
@@ -66,15 +72,16 @@ for year in ["UL2016preVFP", "UL2016", "UL2018"]:
         p.addSignal(h_EFT, region+" EFT sample", ROOT.kRed)
         p.draw()
 
-for year in ["UL2016preVFP", "UL2016", "UL2018"]:
-    for region in ["ttZ", "WZ", "ZZ"]:
+print "Now do EFT..."
+for year in years:
+    for region in processes:
         h_EFT = getObjFromFile(files[region].replace("YEAR", year), histname+"__"+region+"_EFT")
         p = Plotter(year+"__EFT__"+region+"__"+histname)
         p.plot_dir = plot_directory+"/EFTcompare/"
         p.lumi = lumi[year]
         p.xtitle = xtitle
         p.drawRatio = True
-        p.rebin = 4
+        p.rebin = 5
         p.setCustomXRange(0,600)
         p.addBackground(h_EFT, region+" SM", 15)
         for (legname, suffix, color, linestyle) in eftpoints:

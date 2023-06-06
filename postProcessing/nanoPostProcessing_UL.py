@@ -923,8 +923,8 @@ def filler( event ):
             if not var.startswith('unclust'):
                 corrFactor = 'corr_JER' if var == 'jer' else None
                 jets_sys[var]       = filter(lambda j:j['pt_'+var]>30, clean_jets_acc)
-                bjets_sys[var]      = filter(lambda j: isBJet(j) and abs(j['eta'])<2.4, jets_sys[var])
-                nonBjets_sys[var]   = filter(lambda j: not ( isBJet(j) and abs(j['eta'])<2.4), jets_sys[var])
+                bjets_sys[var]      = filter(lambda j: isBJet(j, tagger=b_tagger, year=options.year) and abs(j['eta'])<2.4, jets_sys[var])
+                nonBjets_sys[var]   = filter(lambda j: not ( isBJet(j, tagger=b_tagger, year=options.year) and abs(j['eta'])<2.4), jets_sys[var])
 
                 setattr(event, "nJetGood_"+var, len(jets_sys[var]))
                 setattr(event, "nBTag_"+var,    len(bjets_sys[var]))

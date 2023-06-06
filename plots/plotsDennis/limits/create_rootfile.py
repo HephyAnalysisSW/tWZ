@@ -5,9 +5,6 @@
 ################################################################################
 ################################################################################
 # TODO
-# - change paths to EFT_UL_v*
-# - implement nonprompot from data + uncertainties (stat+flat)
-# - get rid of "plot distribution and use plotter"
 
 ################################################################################
 ################################################################################
@@ -20,13 +17,15 @@ import array
 import Analysis.Tools.syncer
 
 from tWZ.Tools.helpers                           import getObjFromFile
+from tWZ.samples.color                           import color
+from MyRootTools.plotter.Plotter                 import Plotter
+ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
-argParser.add_argument('--plotOnly',         action='store_true', default=False, help='only plot without re-creating root file?')
-argParser.add_argument('--noPlots',          action='store_true', default=False, help='No plots?')
 argParser.add_argument('--twoD',             action='store_true', default=False, help='2D limits?')
 argParser.add_argument('--triplet',          action='store_true', default=False)
+argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 args = argParser.parse_args()
 
 ################################################################################
@@ -111,7 +110,7 @@ histname = "Z1_pt"
 print 'Reading Histogram:', histname
 
 version = "v8"
-era = "Run2018"
+era = "ULRunII"
 
 # Directories
 dirs = {
@@ -133,6 +132,16 @@ if args.twoD:
 processes = ["ttZ", "WZ", "ZZ", "tWZ", "ttX", "tZq", "triBoson", "nonprompt"]
 backgrounds = ["ttX", "tZq", "triBoson", "tWZ", "nonprompt"]
 signals = ["ttZ", "WZ", "ZZ"]
+processinfo = {
+    "tWZ":       ("tWZ", color.TWZ),
+    "ttZ":       ("ttZ", color.TTZ),
+    "ttX":       ("ttX", color.TTX_rare),
+    "tZq":       ("tZq", color.TZQ),
+    "WZ":        ("WZ",  color.WZ),
+    "triBoson":  ("Triboson", color.triBoson),
+    "ZZ":        ("ZZ", color.ZZ),
+    "nonprompt": ("Nonprompt", color.nonprompt),
+}
 
 # Define Signal points
 signalnames = []
@@ -186,30 +195,40 @@ elif args.twoD:
 
 # Define Systematics
 sysnames = {
-    "BTag_b":                 ("BTag_b_UP", "BTag_b_DOWN"),
-    "BTag_l":                 ("BTag_l_UP", "BTag_l_DOWN"),
-    "Fakerate":               ("Fakerate_UP", "Fakerate_DOWN"), # TREAT DIFFERENTLY
-    "Trigger":                ("Trigger_UP", "Trigger_DOWN"),
-    "Prefire":                ("Prefire_UP", "Prefire_DOWN"),
-    "LepReco":                ("LepReco_UP", "LepReco_DOWN"),
-    "LepIDstat_2016preVFP":   ("LepIDstat_UP_2016preVFP", "LepIDstat_DOWN_2016preVFP"),
-    "LepIDstat_2016":         ("LepIDstat_UP_2016", "LepIDstat_DOWN_2016"),
-    "LepIDstat_2017":         ("LepIDstat_UP_2017", "LepIDstat_DOWN_2017"),
-    "LepIDstat_2018":         ("LepIDstat_UP_2018", "LepIDstat_DOWN_2018"),
-    "LepIDsys":               ("LepIDsys_UP", "LepIDsys_DOWN"),
-    "PU":                     ("PU_UP", "PU_DOWN"),
-    "JES":                    ("JES_UP", "JES_DOWN"),
-    "JER":                    ("JER_UP", "JER_DOWN"),
-    "Lumi_uncorrelated_2016": ("Lumi_UP_uncorrelated_2016", "Lumi_DOWN_uncorrelated_2016"),
-    "Lumi_uncorrelated_2017": ("Lumi_UP_uncorrelated_2017", "Lumi_DOWN_uncorrelated_2017"),
-    "Lumi_uncorrelated_2018": ("Lumi_UP_uncorrelated_2018", "Lumi_DOWN_uncorrelated_2018"),
-    "Lumi_correlated_161718": ("Lumi_UP_correlated_161718", "Lumi_DOWN_correlated_161718"),
-    "Lumi_correlated_1718":   ("Lumi_UP_correlated_1718", "Lumi_DOWN_correlated_1718"),
-    "ISR":                    ("ISR_UP", "ISR_DOWN"),
-    "FSR":                    ("FSR_UP", "FSR_DOWN"),
-    "muR":                    ("Scale_UPNONE", "Scale_DOWNNONE"), # muR
-    "muF":                    ("Scale_NONEUP", "Scale_NONEDOWN"), # muF
-    "PDF":                    (), # TREAT DIFFERENTLY
+    "BTag_b":                         ("BTag_b_UP", "BTag_b_DOWN"),
+    "BTag_l":                         ("BTag_l_UP", "BTag_l_DOWN"),
+    "BTag_b_correlated":              ("BTag_b_correlated_UP", "BTag_b_correlated_DOWN"),
+    "BTag_l_correlated":              ("BTag_l_correlated_UP", "BTag_l_correlated_DOWN"),
+    "BTag_b_uncorrelated_2016preVFP": ("BTag_b_uncorrelated_2016preVFP_UP", "BTag_b_uncorrelated_2016preVFP_DOWN"),
+    "BTag_l_uncorrelated_2016preVFP": ("BTag_l_uncorrelated_2016preVFP_UP", "BTag_l_uncorrelated_2016preVFP_DOWN"),
+    "BTag_b_uncorrelated_2016":       ("BTag_b_uncorrelated_2016_UP", "BTag_b_uncorrelated_2016_DOWN"),
+    "BTag_l_uncorrelated_2016":       ("BTag_l_uncorrelated_2016_UP", "BTag_l_uncorrelated_2016_DOWN"),
+    "BTag_b_uncorrelated_2017":       ("BTag_b_uncorrelated_2017_UP", "BTag_b_uncorrelated_2017_DOWN"),
+    "BTag_l_uncorrelated_2017":       ("BTag_l_uncorrelated_2017_UP", "BTag_l_uncorrelated_2017_DOWN"),
+    "BTag_b_uncorrelated_2018":       ("BTag_b_uncorrelated_2018_UP", "BTag_b_uncorrelated_2018_DOWN"),
+    "BTag_l_uncorrelated_2018":       ("BTag_l_uncorrelated_2018_UP", "BTag_l_uncorrelated_2018_DOWN"),
+    "Fakerate":                       ("Fakerate_UP", "Fakerate_DOWN"), # TREAT DIFFERENTLY
+    "Trigger":                        ("Trigger_UP", "Trigger_DOWN"),
+    "Prefire":                        ("Prefire_UP", "Prefire_DOWN"),
+    "LepReco":                        ("LepReco_UP", "LepReco_DOWN"),
+    "LepIDstat_2016preVFP":           ("LepIDstat_2016preVFP_UP", "LepIDstat_2016preVFP_DOWN"),
+    "LepIDstat_2016":                 ("LepIDstat_2016_UP", "LepIDstat_2016_DOWN"),
+    "LepIDstat_2017":                 ("LepIDstat_2017_UP", "LepIDstat_2017_DOWN"),
+    "LepIDstat_2018":                 ("LepIDstat_2018_UP", "LepIDstat_2018_DOWN"),
+    "LepIDsys":                       ("LepIDsys_UP", "LepIDsys_DOWN"),
+    "PU":                             ("PU_UP", "PU_DOWN"),
+    "JES":                            ("JES_UP", "JES_DOWN"),
+    "JER":                            ("JER_UP", "JER_DOWN"),
+    "Lumi_uncorrelated_2016":         ("Lumi_uncorrelated_2016_UP", "Lumi_uncorrelated_2016_DOWN"),
+    "Lumi_uncorrelated_2017":         ("Lumi_uncorrelated_2017_UP", "Lumi_uncorrelated_2017_DOWN"),
+    "Lumi_uncorrelated_2018":         ("Lumi_uncorrelated_2018_UP", "Lumi_uncorrelated_2018_DOWN"),
+    "Lumi_correlated_161718":         ("Lumi_correlated_161718_UP", "Lumi_correlated_161718_DOWN"),
+    "Lumi_correlated_1718":           ("Lumi_correlated_1718_UP", "Lumi_correlated_1718_DOWN"),
+    "ISR":                            ("ISR_UP", "ISR_DOWN"),
+    "FSR":                            ("FSR_UP", "FSR_DOWN"),
+    "muR":                            ("Scale_UPNONE", "Scale_DOWNNONE"), # muR
+    "muF":                            ("Scale_NONEUP", "Scale_NONEDOWN"), # muF
+    "PDF":                            (), # TREAT DIFFERENTLY
 }
 
 
@@ -226,6 +245,10 @@ if not args.plotOnly:
     for signalpoint in signalnames:
         print '--------------------------------------------------------'
         print 'Working on', signalpoint
+        if signalpoint == SMpointName:
+            p = Plotter(region+"__"+histname)
+            p.plot_dir = plot_directory+"/PreFit/"
+            p.lumi = "138"
         outname = outdir+'/CombineInput_'+goodnames[signalpoint]+'.root'
         if args.twoD:
             outname = outdir+'/CombineInput_2D_'+goodnames[signalpoint]+'.root'
@@ -253,6 +276,8 @@ if not args.plotOnly:
                     h_nonpromt.Add(h_bkg_CR, -1)
                     h_nonpromt = setupHist(h_nonpromt, bins)
                     h_nonpromt.Write("nonprompt")
+                    if signalpoint == SMpointName:
+                        p.addBackground(h_nonpromt, processinfo[process][0], processinfo[process][1])
                 else:
                     if process in backgrounds:
                         name = histname+"__"+process
@@ -262,6 +287,8 @@ if not args.plotOnly:
                     hist = getObjFromFile(dirs[region]+inname), name)
                     hist = setupHist(hist, bins)
                     hist.Write(process)
+                    if signalpoint == SMpointName:
+                        p.addBackground(hist, processinfo[process][0], processinfo[process][1])
                 # Systematics
                 for sys in sysnames.keys():
                     if sys == "PDF":
@@ -273,7 +300,9 @@ if not args.plotOnly:
                         pdfUP, pdfDOWN = getRMS(hist, pdfvariations)
                         pdfUP.Write(process+"__PDFUp")
                         pdfDOWN.Write(process+"__PDFDown")
-                    elif sys == "Fakerate"
+                        if signalpoint == SMpointName:
+                            p.addSystematic(pdfUP, pdfDOWN, sys, processinfo[process][0])
+                    elif sys == "Fakerate":
                         if "nonpromt" in process:
                             h_nonpromt_up = getObjFromFile(dirs[region+"_CR"].replace('/Run', '_Fakerate_UP/Run')+inname, histname+"__data")
                             h_nonpromt_up.Add(h_bkg_CR, -1)
@@ -286,6 +315,8 @@ if not args.plotOnly:
                             h_nonpromt_down = hist.Clone()
                         h_nonpromt_up.Write(process+"__"+sys+"Up")
                         h_nonpromt_down.Write(process+"__"+sys+"Down")
+                        if signalpoint == SMpointName:
+                            p.addSystematic(h_nonpromt_up, h_nonpromt_down, sys, processinfo[process][0])
                     else:
                         # print sys
                         (upname, downname) = sysnames[sys]
@@ -302,6 +333,8 @@ if not args.plotOnly:
                         outfile.cd(region+"__"+histname)
                         histUP.Write(process+"__"+sys+"Up")
                         histDOWN.Write(process+"__"+sys+"Down")
+                        if signalpoint == SMpointName:
+                            p.addSystematic(histUP, histDOWN, sys, processinfo[process][0])
 
             # Write observed
             # Add all relevant samples
@@ -322,10 +355,13 @@ if not args.plotOnly:
             observed = setupHist(observed, bins)
             observed = setPseudoDataErrors(observed)
             observed.Write("data_obs")
+            if signalpoint == SMpointName:
+                p.addData(observed, "Asimov data")
         outfile.cd()
         outfile.Close()
         print 'Written to ', outname
+        p.draw()
 
 
 
-Analysis.Tools.syncer.sync()
+# Analysis.Tools.syncer.sync()
