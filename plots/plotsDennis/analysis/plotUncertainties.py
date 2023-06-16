@@ -7,7 +7,6 @@ import Analysis.Tools.syncer
 from math                                        import sqrt
 from tWZ.Tools.helpers                           import getObjFromFile, writeObjToFile, writeObjToDirInFile
 from tWZ.Tools.user                              import plot_directory
-from tWZ.samples.color                           import color
 from MyRootTools.plotter.Plotter                 import Plotter
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
@@ -65,9 +64,19 @@ dirs = {
 }
 
 regions = ["ttZ", "WZ", "ZZ"]
+lumi = {
+    "UL2016preVFP": "19.5",
+    "UL2016":       "16.5",
+    "UL2017":       "41.5",
+    "UL2018":       "60",
+    "ULRunII":      "138",
+}
 
-# processes = ["ttZ", "WZ", "ZZ", "tWZ", "ttX", "tZq", "triBoson", "nonprompt"]
-processes = ["ttZ", "WZ", "ZZ"]
+colors = {
+    "ttZ": ROOT.kAzure+4,
+    "WZ": ROOT.kAzure+6,
+    "ZZ": ROOT.kGreen+3,
+}
 
 sysnames = {
     "BTag_b_correlated":              ("BTag_b_correlated_UP", "BTag_b_correlated_DOWN"),
@@ -105,29 +114,41 @@ sysnames = {
 }
 
 for region in regions:
-    for process in processes:
-        for sys in sysnames.keys():
-            p = Plotter(region+"__"+process+"__"+sys)
-            p.plot_dir = plot_directory+"/Uncertainties/"+args.year+"/"
-            p.lumi = ""
-            p.xtitle = "Z p_{T} [GeV]"
-            p.drawRatio = True
-            p.ratiorange = (0.85, 1.15)
-            hist = getObjFromFile(dirs[region]+"Results.root", histname+"__"+process)
-            p.addBackground(hist, process, 15)
-            if sys == "PDF":
-                pdfvariations = []
-                for i in range(100):
-                    pdfdir = dirs[region].replace('/Run', '_PDF_'+str(i+1)+'/Run').replace('/UL', '_PDF_'+str(i+1)+'/UL')
-                    h_pdf = getObjFromFile(pdfdir+"Results.root", histname+"__"+process)
-                    pdfvariations.append(h_pdf)
-                histUP, histDOWN = getRMS(hist, pdfvariations)
-            else:
-                upname, downname = sysnames[sys]
-                sysdirUP = dirs[region].replace('/Run', '_'+upname+'/Run').replace('/UL', '_'+upname+'/UL')
-                sysdirDOWN = dirs[region].replace('/Run', '_'+downname+'/Run').replace('/UL', '_'+downname+'/UL')
-                histUP   = getObjFromFile(sysdirUP+"Results.root", histname+"__"+process)
-                histDOWN = getObjFromFile(sysdirDOWN+"Results.root", histname+"__"+process)
-            p.addSignal(histUP, "up", ROOT.kAzure+7)
-            p.addSignal(histDOWN, "down", ROOT.kRed-4)
-            p.draw()
+    process = region # only plot ttZ in ttZ region, WZ in WZ region and ZZ in ZZ region
+    for sys in sysnames.keys():
+        p = Plotter(region+"__"+process+"__"+sys)
+        p.plot_dir = plot_directory+"/Uncertainties/"+args.year+"/"
+        p.lumi = lumi[args.year]
+        p.addText(0.4, 0.55, args.year, size=16)
+        p.addText(0.4, 0.5, sys, size=16)
+        p.xtitle = "Z p_{T} [GeV]"
+        p.drawRatio = True
+        p.ratiorange = (0.85, 1.15)
+        hist = getObjFromFile(dirs[region]+"Results.root", histname+"__"+process)
+        p.addBackground(hist, process, colors[process])
+        if sys == "PDF":
+            pdfvariations = []
+            for i in range(100):
+                pdfdir = dirs[region].replace('/Run', '_PDF_'+str(i+1)+'/Run').replace('/UL', '_PDF_'+str(i+1)+'/UL')
+                h_pdf = getObjFromFile(pdfdir+"Results.root", histname+"__"+process)
+                pdfvariations.append(h_pdf)
+            histUP, histDOWN = getRMS(hist, pdfvariations)
+            p_pdf = Plotter(region+"__"+process+"__"+sys+"__allVariations")
+            p_pdf.plot_dir = plot_directory+"/Uncertainties/"+args.year+"/"
+            p_pdf.lumi = lumi[args.year]
+            p_pdf.xtitle = "Z p_{T} [GeV]"
+            p_pdf.drawRatio = True
+            p_pdf.ratiorange = (0.85, 1.15)
+            p_pdf.addBackground(hist, process, colors[process])
+            for i, h in enumerate(pdfvariations):
+                p_pdf.addSignal(h, "pdf"+str(i), 29+i)
+            p_pdf.draw()
+        else:
+            upname, downname = sysnames[sys]
+            sysdirUP = dirs[region].replace('/Run', '_'+upname+'/Run').replace('/UL', '_'+upname+'/UL')
+            sysdirDOWN = dirs[region].replace('/Run', '_'+downname+'/Run').replace('/UL', '_'+downname+'/UL')
+            histUP   = getObjFromFile(sysdirUP+"Results.root", histname+"__"+process)
+            histDOWN = getObjFromFile(sysdirDOWN+"Results.root", histname+"__"+process)
+        p.addSignal(histUP, "up", ROOT.kAzure+7)
+        p.addSignal(histDOWN, "down", ROOT.kRed-4)
+        p.draw()
