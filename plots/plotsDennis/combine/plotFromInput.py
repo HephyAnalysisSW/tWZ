@@ -19,6 +19,9 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--file',               action='store', type=str, default="nodef")
 args = argParser.parse_args()
 
+if "nodef" in args.file:
+    raise RuntimeError( "No file specified")
+
 if not os.path.exists(args.file):
     raise RuntimeError( "File %s does not exist", args.file)
 

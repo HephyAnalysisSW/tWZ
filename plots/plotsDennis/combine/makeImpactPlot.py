@@ -7,8 +7,8 @@ args = argParser.parse_args()
 
 
 
-cmd1 = "combineTool.py -M Impacts -d DATACARD.root -m 125 --doInitialFit --robustFit 1 --rMax 1 --rMin -1"
-cmd2 = "combineTool.py -M Impacts -d DATACARD.root -m 125 --robustFit 1 --doFits --rMax 1 --rMin -1"
+cmd1 = "combineTool.py -M Impacts -d DATACARD.root -m 125 --doInitialFit --robustFit 1 --rMax 2 --rMin 0"
+cmd2 = "combineTool.py -M Impacts -d DATACARD.root -m 125 --robustFit 1 --doFits --rMax 2 --rMin 0"
 cmd3 = "combineTool.py -M Impacts -d DATACARD.root -m 125 -o impacts_datacard.json"
 cmd4 = "plotImpacts.py -i impacts_datacard.json -o impacts_datacard"
 
