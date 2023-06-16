@@ -3,6 +3,7 @@
 import ROOT
 import array
 import Analysis.Tools.syncer
+import os
 
 from math                                        import sqrt
 from tWZ.Tools.helpers                           import getObjFromFile, writeObjToFile, writeObjToDirInFile
@@ -18,6 +19,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--twoD',             action='store_true', default=False, help='2D limits?')
 argParser.add_argument('--triplet',          action='store_true', default=False)
+argParser.add_argument('--noData',           action='store_true', default=False)
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 argParser.add_argument('--wc',               action='store', type=str, default="cHq1Re11")
 args = argParser.parse_args()
@@ -66,7 +68,10 @@ def removeNegative(hist):
             hist.SetBinContent(bin, 0.0)
     return hist
 
-def getHist(fname, hname):
+def getHist(fname, hname, altbinning=False):
+    bins  = [0, 60, 120, 180, 240, 300, 400, 1000]
+    if altbinning:
+        bins  = [0, 60, 120, 180, 1000]
     hist = getObjFromFile(fname, hname)
     hist = hist.Rebin(len(bins)-1, hist.GetName()+"_rebin", array.array('d',bins))
     hist = removeNegative(hist)
@@ -87,30 +92,37 @@ logger.info( "WC = %s", args.wc )
 # regions
 regions = ["WZ", "ZZ", "ttZ"]
 
-# binning
-bins  = [0, 60, 120, 180, 240, 300, 400, 1000]
-
 # histname
 histname = "Z1_pt"
 
 version = "v9"
 logger.info( "Version = %s", version )
 
+if args.noData:
+    logger.info( "Use Asimov data (blind)" )
+else:
+    logger.info( "Use data (unblinded)" )
+
+dataTag = "_noData" if args.noData else ""
+
 # Directories
 dirs = {
-    "ZZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_noData/"+args.year+"/all/qualepT-minDLmass12-onZ1-onZ2/",
-    "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_noData/"+args.year+"/all/trilepT-minDLmass12-onZ1-btag0-met60/",
-    "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_noData/"+args.year+"/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/",
+    "ZZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT"+dataTag+"/"+args.year+"/all/qualepT-minDLmass12-onZ1-onZ2/",
+    "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT"+dataTag+"/"+args.year+"/all/trilepT-minDLmass12-onZ1-btag0-met60/",
+    "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT"+dataTag+"/"+args.year+"/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/",
     "WZ_CR":  "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-btag0-met60/",
     "ttZ_CR": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p/",
 }
 
-outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL/"+args.year+"/"
+outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL"+dataTag+"/"+args.year+"/"
 
 if args.twoD:
-    outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_twoD"
+    outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_twoD"+dataTag+"/"+args.year+"/"
     if args.triplet:
-        outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_twoD_triplet"
+        outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_twoD_triplet"+dataTag+"/"+args.year+"/"
+
+if not os.path.exists( outdir ): os.makedirs( outdir )
+
 
 # Define backgrounds
 processes = ["ttZ", "WZ", "ZZ", "tWZ", "ttX", "tZq", "triBoson", "nonprompt"]
@@ -198,7 +210,7 @@ sysnames = {
     "BTag_l_uncorrelated_2017":       ("BTag_l_uncorrelated_2017_UP", "BTag_l_uncorrelated_2017_DOWN"),
     "BTag_b_uncorrelated_2018":       ("BTag_b_uncorrelated_2018_UP", "BTag_b_uncorrelated_2018_DOWN"),
     "BTag_l_uncorrelated_2018":       ("BTag_l_uncorrelated_2018_UP", "BTag_l_uncorrelated_2018_DOWN"),
-    "Fakerate":                       ("Fakerate_UP", "Fakerate_DOWN"), # TREAT DIFFERENTLY
+    "Fakerate":                       ("Fakerate_UP", "Fakerate_DOWN"), # THIS IS ONLY IN NONPROMPT
     "Trigger":                        ("Trigger_UP", "Trigger_DOWN"),
     "Prefire":                        ("Prefire_UP", "Prefire_DOWN"),
     "LepReco":                        ("LepReco_UP", "LepReco_DOWN"),
@@ -208,8 +220,8 @@ sysnames = {
     "LepIDstat_2018":                 ("LepIDstat_2018_UP", "LepIDstat_2018_DOWN"),
     "LepIDsys":                       ("LepIDsys_UP", "LepIDsys_DOWN"),
     "PU":                             ("PU_UP", "PU_DOWN"),
-    # "JES":                            ("JES_UP", "JES_DOWN"),
-    # "JER":                            ("JER_UP", "JER_DOWN"),
+    "JES":                            ("JES_UP", "JES_DOWN"),
+    "JER":                            ("JER_UP", "JER_DOWN"),
     "Lumi_uncorrelated_2016":         ("Lumi_uncorrelated_2016_UP", "Lumi_uncorrelated_2016_DOWN"),
     "Lumi_uncorrelated_2017":         ("Lumi_uncorrelated_2017_UP", "Lumi_uncorrelated_2017_DOWN"),
     "Lumi_uncorrelated_2018":         ("Lumi_uncorrelated_2018_UP", "Lumi_uncorrelated_2018_DOWN"),
@@ -217,9 +229,9 @@ sysnames = {
     "Lumi_correlated_1718":           ("Lumi_correlated_1718_UP", "Lumi_correlated_1718_DOWN"),
     "ISR":                            ("ISR_UP", "ISR_DOWN"),
     "FSR":                            ("FSR_UP", "FSR_DOWN"),
-    "muR":                            ("Scale_UPNONE", "Scale_DOWNNONE"), # muR
-    "muF":                            ("Scale_NONEUP", "Scale_NONEDOWN"), # muF
-    "PDF":                            (), # TREAT DIFFERENTLY
+    "muR":                            ("Scale_UPNONE", "Scale_DOWNNONE"),
+    "muF":                            ("Scale_NONEUP", "Scale_NONEDOWN"),
+    "PDF":                            (), # HAS 100 VARIATIONS, TREAT DIFFERENTLY
 }
 
 
@@ -246,6 +258,7 @@ for signalpoint in signalnames:
         outfile.mkdir(region+"__"+histname)
     outfile.Close()
     for region in regions:
+        altbinning = True if "ZZ" in region else False
         logger.info( 'Filling region %s', region )
         if signalpoint == SMpointName:
             p = Plotter(args.year+"__"+region+"__"+histname)
@@ -255,30 +268,34 @@ for signalpoint in signalnames:
         # print dirs[region]+inname
         for process in processes:
             logger.info( '  %s', process )
-            if process == "nonpromt":
+            if process == "nonprompt" and region in ["ttZ", "WZ"]:
                 # Get prompt backgrounds in CR
+                logger.info( '    (estimate from CR)')
                 firstbkg = True
                 for proc in processes:
                     if not "nonprompt" in proc:
-                        h_bkg = getHist(dirs[region+"_CR"]+inname, histname+"__"+process)
+                        h_bkg = getHist(dirs[region+"_CR"]+inname, histname+"__"+proc, altbinning)
                         if firstbkg:
                             h_bkg_CR = h_bkg.Clone()
                             firstbkg = False
                         else:
                             h_bkg_CR.Add(h_bkg)
-                # Get nonpromt = Data in CR * fakerate and subtract backgrounds
-                hist = getHist(dirs[region+"_CR"]+inname, histname+"__data")
+                # Get nonprompt = Data in CR * fakerate and subtract backgrounds
+                hist = getHist(dirs[region+"_CR"]+inname, histname+"__data", altbinning)
                 hist.Add(h_bkg_CR, -1)
-                writeObjToDirInFile(outname, region+"__"+histname, hist, "nonpromt", update=True)
+                hist = removeNegative(hist) # make sure there are no negative bins
+
+                writeObjToDirInFile(outname, region+"__"+histname, hist, "nonprompt", update=True)
                 if signalpoint == SMpointName:
                     p.addBackground(hist, processinfo[process][0], processinfo[process][1])
             else:
+                logger.info( '    read nominal')
                 if process in backgrounds:
                     name = histname+"__"+process
                 elif process in signals:
                     name = histname+"__"+process+"__"+signalpoint
                 # print dirs[region]+inname, name
-                hist = getHist(dirs[region]+inname, name)
+                hist = getHist(dirs[region]+inname, name, altbinning)
                 writeObjToDirInFile(outname, region+"__"+histname, hist, process, update=True)
                 if signalpoint == SMpointName:
                     p.addBackground(hist, processinfo[process][0], processinfo[process][1])
@@ -288,13 +305,13 @@ for signalpoint in signalnames:
                 # logger.info( '    sys = %s', sys )
                 if sys == "PDF":
                     pdfvariations = []
-                    if process == "nonpromt":
-                        pdfUP = hist.Clone("nonpromt_PDFUp")
-                        pdfDOWN = hist.Clone("nonpromt_PDFDown")
+                    if process == "nonprompt" and region in ["ttZ", "WZ"]:
+                        pdfUP = hist.Clone()
+                        pdfDOWN = hist.Clone()
                     else:
                         for i in range(100):
                             pdfdir = dirs[region].replace('/Run', '_PDF_'+str(i+1)+'/Run').replace('/UL', '_PDF_'+str(i+1)+'/UL')
-                            h_pdf = getHist(pdfdir+inname, name)
+                            h_pdf = getHist(pdfdir+inname, name, altbinning)
                             pdfvariations.append(h_pdf)
                         pdfUP, pdfDOWN = getRMS(hist, pdfvariations)
                     writeObjToDirInFile(outname, region+"__"+histname, pdfUP, process+"__PDFUp", update=True)
@@ -303,32 +320,38 @@ for signalpoint in signalnames:
                     if signalpoint == SMpointName:
                         p.addSystematic(pdfUP, pdfDOWN, sys, processinfo[process][0])
                 elif sys == "Fakerate":
-                    if "nonpromt" in process:
-                        h_nonpromt_up = getHist(dirs[region+"_CR"].replace('/Run', '_Fakerate_UP/Run').replace('/UL', '_Fakerate_UP/UL')+inname, histname+"__data")
-                        h_nonpromt_up.Add(h_bkg_CR, -1)
-                        h_nonpromt_down = getHist(dirs[region+"_CR"].replace('/Run', '_Fakerate_DOWN/Run').replace('/UL', '_Fakerate_DOWN/UL')+inname, histname+"__data")
-                        h_nonpromt_down.Add(h_bkg_CR, -1)
+                    if "nonprompt" in process and region in ["ttZ", "WZ"]:
+                        h_nonprompt_up = getHist(dirs[region+"_CR"].replace('/Run', '_Fakerate_UP/Run').replace('/UL', '_Fakerate_UP/UL')+inname, histname+"__data", altbinning)
+                        h_nonprompt_up.Add(h_bkg_CR, -1)
+                        h_nonprompt_up = removeNegative(h_nonprompt_up) # make sure there are no negative bins
+
+                        h_nonprompt_down = getHist(dirs[region+"_CR"].replace('/Run', '_Fakerate_DOWN/Run').replace('/UL', '_Fakerate_DOWN/UL')+inname, histname+"__data", altbinning)
+                        h_nonprompt_down.Add(h_bkg_CR, -1)
+                        h_nonprompt_down = removeNegative(h_nonprompt_down) # make sure there are no negative bins
+
                     else:
                         # For all processes that are non prompt,
                         # there is no variation, so simply copy nominal
-                        h_nonpromt_up = hist.Clone()
-                        h_nonpromt_down = hist.Clone()
-                    writeObjToDirInFile(outname, region+"__"+histname, h_nonpromt_up, process+"__"+sys+"Up", update=True)
-                    writeObjToDirInFile(outname, region+"__"+histname, h_nonpromt_down, process+"__"+sys+"Down", update=True)
+                        h_nonprompt_up = hist.Clone()
+                        h_nonprompt_down = hist.Clone()
+                    writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_up, process+"__"+sys+"Up", update=True)
+                    writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_down, process+"__"+sys+"Down", update=True)
                     if signalpoint == SMpointName:
-                        p.addSystematic(h_nonpromt_up, h_nonpromt_down, sys, processinfo[process][0])
+                        p.addSystematic(h_nonprompt_up, h_nonprompt_down, sys, processinfo[process][0])
                 else:
                     (upname, downname) = sysnames[sys]
-                    if process == "nonpromt":
-                        histUP = hist.Clone("nonpromt_"+sys+"Up")
-                        histDOWN = hist.Clone("nonpromt_"+sys+"Down")
+                    if process == "nonprompt" and region in ["ttZ", "WZ"]:
+                        # Nonprompt has no variations since it is estimated from data
+                        # So, just copy the nominal
+                        histUP = hist.Clone()
+                        histDOWN = hist.Clone()
                     else:
                         sysdirUP = dirs[region]
                         sysdirUP = sysdirUP.replace('/Run', '_'+upname+'/Run').replace('/UL', '_'+upname+'/UL')
                         sysdirDOWN = dirs[region]
                         sysdirDOWN = sysdirDOWN.replace('/Run', '_'+downname+'/Run').replace('/UL', '_'+downname+'/UL')
-                        histUP   = getHist(sysdirUP+inname, name)
-                        histDOWN = getHist(sysdirDOWN+inname, name)
+                        histUP   = getHist(sysdirUP+inname, name, altbinning)
+                        histDOWN = getHist(sysdirDOWN+inname, name, altbinning)
                     writeObjToDirInFile(outname, region+"__"+histname, histUP, process+"__"+sys+"Up", update=True)
                     writeObjToDirInFile(outname, region+"__"+histname, histDOWN, process+"__"+sys+"Down", update=True)
                     if signalpoint == SMpointName:
@@ -336,25 +359,51 @@ for signalpoint in signalnames:
 
         # Write observed
         # Add all relevant samples
-        logger.info( '  - DATA' )
-        is_first = True
-        observed = ROOT.TH1F()
-        for bkg in backgrounds:
-            hist = getHist(dirs[region]+inname, histname+"__"+bkg)
-            if is_first:
-                observed = hist.Clone()
-                is_first = False
-            else:
+        logger.info( '  DATA' )
+        if args.noData:
+            logger.info( '  (compose Asimov data from MC estimated)' )
+            is_first = True
+            observed = ROOT.TH1F()
+            for bkg in backgrounds:
+                logger.info( '    adding up process %s', bkg)
+                if bkg == "nonprompt" and region in ["ttZ", "WZ"]:
+                    # Get prompt backgrounds in CR
+                    logger.info( '    (estimate from CR)')
+                    firstbkg = True
+                    for proc in processes:
+                        if not "nonprompt" in proc:
+                            h_bkg = getHist(dirs[region+"_CR"]+inname, histname+"__"+proc, altbinning)
+                            if firstbkg:
+                                h_bkg_CR = h_bkg.Clone()
+                                firstbkg = False
+                            else:
+                                h_bkg_CR.Add(h_bkg)
+                    # Get nonprompt = Data in CR * fakerate and subtract backgrounds
+                    hist = getHist(dirs[region+"_CR"]+inname, histname+"__data", altbinning)
+                    hist.Add(h_bkg_CR, -1)
+                    hist = removeNegative(hist)
+                else:
+                    hist = getHist(dirs[region]+inname, histname+"__"+bkg, altbinning)
+
+                if is_first:
+                    observed = hist.Clone()
+                    is_first = False
+                else:
+                    observed.Add(hist)
+            # now add all signals at SM point
+            for signal in signals:
+                logger.info( '    adding up process %s at SM point', signal)
+                hist = getHist(dirs[region]+inname, histname+"__"+signal+"__"+SMpointName, altbinning)
                 observed.Add(hist)
-        # now add all signals at SM point
-        for signal in signals:
-            hist = getHist(dirs[region]+inname, histname+"__"+signal+"__"+SMpointName)
-            observed.Add(hist)
-        observed = setPseudoDataErrors(observed)
+            observed = setPseudoDataErrors(observed)
+        else:
+            observed = getHist(dirs[region]+inname, histname+"__data", altbinning)
         writeObjToDirInFile(outname, region+"__"+histname, observed, "data_obs", update=True)
         if signalpoint == SMpointName:
-            p.addData(observed, "Asimov data")
-        if signalpoint == SMpointName:
+            if args.noData:
+                p.addData(observed, "Asimov data")
+            else:
+                p.addData(observed, "Data")
             p.draw()
     # Write one file per EFT point
     logger.info( 'Written file: %s' , outname)

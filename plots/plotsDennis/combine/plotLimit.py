@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 import ROOT, os
+ROOT.gROOT.SetBatch(ROOT.kTRUE)
 import array
 import Analysis.Tools.syncer
 from tWZ.Tools.user                      import plot_directory
+import tWZ.Tools.logger as logger
+logger    = logger.get_logger(   "INFO", logFile = None)
 
 def CreateBands(graph, lower, upper):
     # If only one boundary exists, set other limit to end of the graph
@@ -63,6 +66,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 argParser.add_argument('--wc',               action='store', type=str, default="cHq1Re11")
+argParser.add_argument('--mode',             action='store', type=str, default="default")
 args = argParser.parse_args()
 
 if args.year not in ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]:
@@ -73,12 +77,20 @@ if args.wc not in ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "
     raise RuntimeError( "WC %s is not knwon", args.wc)
 logger.info( "WC = %s", args.wc )
 
+if args.mode not in ["default", "statOnly", "noScales", "noRates", "noBtag", "noJEC", "noLepton", "noLumi", "noPS", "noFakerate"]:
+    raise RuntimeError( "Mode %s is not known ", args.mode)
+logger.info( "Mode = %s", args.mode )
+
 this_dir = os.getcwd()
 dir = this_dir+"/DataCards/"+args.year+"/"
+if "default" not in args.mode: dir = this_dir+"/DataCards_"+args.mode+"/"+args.year+"/"
+
 prefix = "higgsCombine.part3E_"
 suffix = ".MultiDimFit.mH120.root"
-outdir = plot_directory+"/Limits_UL/"
+outdir = plot_directory+"/Limits_UL/"+args.year+"/"
+if "default" not in args.mode: outdir = plot_directory+"/Limits_UL_"+args.mode+"/"+args.year+"/"
 
+if not os.path.exists( outdir ): os.makedirs( outdir )
 
 channels = {
     "1": "ZZ",
@@ -87,8 +99,8 @@ channels = {
     "combined": "combined"
 }
 
-txtfile = open(outdir+"Limits.txt","w")
-outfile = ROOT.TFile(outdir+"Likelihoods.root", "RECREATE")
+txtfile = open(outdir+"Limits_"+args.wc+".txt","w")
+outfile = ROOT.TFile(outdir+"Likelihoods_"+args.wc+".root", "RECREATE")
 WCname = args.wc
 likelihoods = {}
 for ch in channels:
