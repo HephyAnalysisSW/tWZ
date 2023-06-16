@@ -13,7 +13,7 @@ data_UL2017           = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL
 mc_singlelep_UL2017   = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v3/UL2017/singlelep"
 data_singlelep_UL2017 = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v3/UL2017/singlelep"
 
-mc_UL2018             = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v3/UL2018/trilep"
-data_UL2018           = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v3/UL2018/trilep"
+mc_UL2018             = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v4/UL2018/trilep"
+data_UL2018           = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v4/UL2018/trilep"
 mc_singlelep_UL2018   = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v3/UL2018/singlelep"
 data_singlelep_UL2018 = "/scratch-cbe/users/dennis.schwarz/tWZ/nanoTuples/tWZ_UL_nAODv9_v3/UL2018/singlelep"
