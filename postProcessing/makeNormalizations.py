@@ -21,6 +21,7 @@ def get_parser():
     argParser.add_argument('--sample',      action='store',        nargs='?',  type=str, default=None,   help="Which sample?" )
     argParser.add_argument('--len',         action='store',        nargs='?',  type=int, default=-1,     help="What is the length?" )
     argParser.add_argument('--overwrite',   action='store_true',   help="Overwrite?" )
+    argParser.add_argument('--TopNanoAOD',action='store_true',     help="Is the sample a TopNanoAOD?")
     return argParser
 
 args = get_parser().parse_args()
@@ -39,7 +40,10 @@ if args.DAS is None:
             if not hasattr(sample, "DAS") or (not sample.DAS):
                 continue
             f.write("python makeNormalizations.py --sampleFile %s --sample %s --DAS %s %s --vector LHEPdfWeight --len 103\n"%(args.sampleFile, sample.name, sample.DAS, '--overwrite' if args.overwrite else ''))
-            f.write("python makeNormalizations.py --sampleFile %s --sample %s --DAS %s %s --vector PSWeight --len 4\n"      %(args.sampleFile, sample.name, sample.DAS, '--overwrite' if args.overwrite else ''))
+            if args.TopNanoAOD:
+                f.write("python makeNormalizations.py --sampleFile %s --sample %s --DAS %s %s --vector PSWeight --len 44\n"      %(args.sampleFile, sample.name, sample.DAS, '--overwrite' if args.overwrite else ''))
+            else:
+                f.write("python makeNormalizations.py --sampleFile %s --sample %s --DAS %s %s --vector PSWeight --len 4\n"      %(args.sampleFile, sample.name, sample.DAS, '--overwrite' if args.overwrite else ''))
             f.write("python makeNormalizations.py --sampleFile %s --sample %s --DAS %s %s --vector LHEScaleWeight --len 9\n"%(args.sampleFile, sample.name, sample.DAS, '--overwrite' if args.overwrite else ''))
         f.write("\n")
 

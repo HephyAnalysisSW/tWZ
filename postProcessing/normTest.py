@@ -58,8 +58,8 @@ for year in ["2016preVFP", "2016", "2017", "2018"]:
             missing.append( (year, sample, stuffmissing) )
 
 
-        # print "-----------------"
-        # printBins(ps_norm_histo)
+        print "-----------------"
+        printBins(ps_norm_histo)
 
         # if "TTHTobb" in sample.name:
         #     print "-----------------"
