@@ -112,6 +112,7 @@ venv.bak/
 plots/plotsDennis/DataCards/data/*
 plots/plotsDennis/DataCards/data_statonly/*
 plots/plotsDennis/combine/DataCards/*
+plots/plotsDennis/combine/DataCards*/*
 plots/plotsDennis/combine/impacts/*
 
 # Missing files files
