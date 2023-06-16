@@ -69,6 +69,7 @@ argParser.add_argument('--tunePtCone',     action='store_true', default=False)
 argParser.add_argument('--noLeptonSF',     action='store_true', default=False)
 argParser.add_argument('--reduceEFT',      action='store_true', default=False)
 argParser.add_argument('--SMpoint',        action='store_true', default=False)
+argParser.add_argument('--threePoint',     action='store_true', default=False)
 
 
 args = argParser.parse_args()
@@ -147,6 +148,7 @@ else:
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
 if args.reduceEFT:                    args.plot_directory += "_reduceEFT"
+if args.threePoint:                   args.plot_directory += "_threePoint"
 if args.SMpoint:                      args.plot_directory += "_SMpoint"
 if args.noData:                       args.plot_directory += "_noData"
 if args.nonpromptOnly:                args.plot_directory += "_nonpromptOnly"
@@ -231,6 +233,7 @@ def metSelectionModifier( sys, returntype = 'func'):
 # get scale weight
 def getScaleWeight(event, sys):
     # Sometimes the nominal entry [4] is missing, so be careful
+    # 'DOWNNONE' translates to muR=Down, muF=none
     weights_9point = {
         "Scale_DOWNDOWN": 0,
         "Scale_DOWNNONE": 1,
@@ -247,6 +250,7 @@ def getScaleWeight(event, sys):
         "Scale_UPNONE"  : 6,
         "Scale_UPUP"    : 7,
     }
+
     index = -1
     if event.nScale == 9:
         index = weights_9point[sys]
@@ -271,12 +275,29 @@ def getPDFWeight(event, sys):
 ################################################################################
 # get Parton Shower weight
 def getPSWeight(event, sys):
+    # General: For ISR and FSR "up" and "down" refer to the value of alpha_s.
+    # Thus, up is the scales multiplied by 0.5 (alpha_s goes up) and
+    # 'down' is the variation with a factor of 2 (alpha_s goes down).
+
+    # In nanoAODv9 the weights are stored like this:
     PSweights = {
-        "ISR_UP"  : 0,
-        "ISR_DOWN": 2,
-        "FSR_UP"  : 1,
-        "FSR_DOWN": 3,
+        "ISR_DOWN": 0,
+        "ISR_UP"  : 2,
+        "FSR_DOWN": 1,
+        "FSR_UP"  : 3,
     }
+
+    # If this is a TopNanoAOD sample, all PS weights are stored and scheme is different
+    # Description of all weights is here:
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/HowToPDF#Parton_shower_weights
+    # (first two weights of the are not in TopNanoAOD and indices move by 2)
+    if event.nPS == 44:
+        PSweights = {
+            "ISR_DOWN" : 25,
+            "ISR_UP"   : 24,
+            "FSR_DOWN" : 3,
+            "FSR_UP"   : 2,
+        }
 
     if sys not in PSweights.keys():
         print "PS VARIATION NOT FOUND"
@@ -435,18 +456,23 @@ for sample in samples_eft:
 #cHq1Re11 cHq1Re22 cHq1Re33 cHq3Re11 cHq3Re22 cHq3Re33 cHuRe11 cHuRe22 cHuRe33 cHdRe11 cHdRe22 cHdRe33 cHudRe11 cHudRe22 cHudRe33
 
 Npoints = 21
+if args.threePoint:
+    Npoints = 3
+
 
 if args.nicePlots:
     Npoints = 0
 
 WCs = []
 WC_setup = [
-    ('cHq1Re11', ROOT.kRed),
-    ('cHq1Re22', ROOT.kGreen+2),
-    ('cHq1Re33', ROOT.kOrange-3),
-    ('cHq3Re11', ROOT.kCyan),
-    ('cHq3Re22', ROOT.kMagenta),
-    ('cHq3Re33', ROOT.kBlue),
+    ('cHq1Re1122', ROOT.kRed),
+    ('cHq1Re11',   ROOT.kRed),
+    ('cHq1Re22',   ROOT.kGreen+2),
+    ('cHq1Re33',   ROOT.kOrange-3),
+    ('cHq3Re1122', ROOT.kCyan),
+    ('cHq3Re11',   ROOT.kCyan),
+    ('cHq3Re22',   ROOT.kMagenta),
+    ('cHq3Re33',   ROOT.kBlue),
 ]
 for i_wc, (WCname, color) in enumerate(WC_setup):
     for i in range(Npoints):
@@ -455,13 +481,22 @@ for i_wc, (WCname, color) in enumerate(WC_setup):
         if 'cHq3Re11' in WCname:
             minval = -0.2
             maxval = 0.2
+        if args.threePoint:
+            minval = -1.0
+            maxval = 1.0
+
         value = minval + ((maxval-minval)/(Npoints-1))*i
         WCs.append( (WCname, value, color) )
 
 params =  []
 for i_sample, sample in enumerate(samples_eft):
     for i_wc, (WC, WCval, color) in enumerate(WCs):
-        params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{WC:WCval} , 'sample': sample, 'i_sample': i_sample})
+        if WC=="cHq1Re1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re22':WCval} , 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3Re1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re22':WCval} , 'sample': sample, 'i_sample': i_sample})
+        else:
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{WC:WCval} , 'sample': sample, 'i_sample': i_sample})
 
 #### 2D scan
 if args.twoD:
