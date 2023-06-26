@@ -1106,7 +1106,7 @@ def filler( event ):
             btagEff.addBTagEffToJet(j)
         for var in btagEff.btagWeightNames:
             if var!='MC':
-                # For the uncerrelated uncertainties, fill only the current year
+                # For the uncorrelated uncertainties, fill only the current year
                 # The values for other years are set to the central "SF"
                 if "Uncorrelated" in var:
                     if event.year == 2016 and event.preVFP:
@@ -1131,7 +1131,6 @@ def filler( event ):
                         setattr(event, 'reweightBTag_'+var+'_2018', btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
                 else:
                     setattr(event, 'reweightBTag_'+var, btagEff.getBTagSF_1a( var, bJets, filter( lambda j: abs(j['eta'])<2.4, nonBJets ) ) )
-
 
 # Create a maker. Maker class will be compiled. This instance will be used as a parent in the loop
 treeMaker_parent = TreeMaker(
