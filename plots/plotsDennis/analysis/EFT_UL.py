@@ -51,7 +51,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v9')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v11')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -70,6 +70,7 @@ argParser.add_argument('--noLeptonSF',     action='store_true', default=False)
 argParser.add_argument('--reduceEFT',      action='store_true', default=False)
 argParser.add_argument('--SMpoint',        action='store_true', default=False)
 argParser.add_argument('--threePoint',     action='store_true', default=False)
+argParser.add_argument('--WZreweight',     action='store_true', default=False)
 
 
 args = argParser.parse_args()
@@ -151,6 +152,7 @@ if args.reduceEFT:                    args.plot_directory += "_reduceEFT"
 if args.threePoint:                   args.plot_directory += "_threePoint"
 if args.SMpoint:                      args.plot_directory += "_SMpoint"
 if args.noData:                       args.plot_directory += "_noData"
+if args.WZreweight:                   args.plot_directory += "_WZreweight"
 if args.nonpromptOnly:                args.plot_directory += "_nonpromptOnly"
 if args.splitnonprompt:               args.plot_directory += "_splitnonprompt"
 if args.splitTTX:                     args.plot_directory += "_splitTTX"
@@ -465,14 +467,20 @@ if args.nicePlots:
 
 WCs = []
 WC_setup = [
-    ('cHq1Re1122', ROOT.kRed),
-    ('cHq1Re11',   ROOT.kRed),
-    ('cHq1Re22',   ROOT.kGreen+2),
-    ('cHq1Re33',   ROOT.kOrange-3),
-    ('cHq3Re1122', ROOT.kCyan),
-    ('cHq3Re11',   ROOT.kCyan),
-    ('cHq3Re22',   ROOT.kMagenta),
-    ('cHq3Re33',   ROOT.kBlue),
+    ('cHq1Re11',     ROOT.kRed),
+    ('cHq1Re22',     ROOT.kRed),
+    ('cHq1Re33',     ROOT.kRed),
+    ('cHq1Re1122',   ROOT.kRed),
+    ('cHq1Re1133',   ROOT.kRed),
+    ('cHq1Re2233',   ROOT.kRed),
+    ('cHq1Re112233', ROOT.kRed),
+    ('cHq3Re11',     ROOT.kBlue),
+    ('cHq3Re22',     ROOT.kBlue),
+    ('cHq3Re33',     ROOT.kBlue),
+    ('cHq3Re1122',   ROOT.kBlue),
+    ('cHq3Re1133',   ROOT.kBlue),
+    ('cHq3Re2233',   ROOT.kBlue),
+    ('cHq3Re112233', ROOT.kBlue),
 ]
 for i_wc, (WCname, color) in enumerate(WC_setup):
     for i in range(Npoints):
@@ -492,9 +500,21 @@ params =  []
 for i_sample, sample in enumerate(samples_eft):
     for i_wc, (WC, WCval, color) in enumerate(WCs):
         if WC=="cHq1Re1122":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re22':WCval} , 'sample': sample, 'i_sample': i_sample})
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq1Re1133":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq1Re2233":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re22':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq1Re112233":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re22':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
         elif WC=="cHq3Re1122":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re22':WCval} , 'sample': sample, 'i_sample': i_sample})
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3Re1133":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3Re2233":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re22':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3Re112233":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re22':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
         else:
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{WC:WCval} , 'sample': sample, 'i_sample': i_sample})
 
@@ -971,6 +991,28 @@ def getSYSweight(sample, event):
 
 sequence.append( getSYSweight )
 
+def getNjetWZreweight(sample, event):
+    # numbers from 4 top analysis AN v12
+    # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/182
+    event.reweightNjetWZ = 1
+    if args.WZreweight:
+        if "WZ_EFT" in sample.name:
+            if event.nJetGood == 0:
+                event.reweightNjetWZ = 1.07
+            elif event.nJetGood == 1:
+                event.reweightNjetWZ = 0.85
+            elif event.nJetGood == 2:
+                event.reweightNjetWZ = 0.93
+            elif event.nJetGood == 3:
+                event.reweightNjetWZ = 1.08
+            elif event.nJetGood == 4:
+                event.reweightNjetWZ = 1.33
+            elif event.nJetGood == 5:
+                event.reweightNjetWZ = 1.89
+            elif event.nJetGood > 5:
+                event.reweightNjetWZ = 2.69
+sequence.append( getNjetWZreweight )
+
 def getEFTnormweight(sample, event):
     normweight = 1.0
     if "TTZ_EFT" in sample.name:
@@ -1312,6 +1354,8 @@ for i_mode, mode in enumerate(allModes):
     weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate', 'reweightLeptonMVA', 'reweightElectronRecoSF']
     weightnames += ['reweightScale', 'reweightPDF', 'reweightLumi', 'reweightPS']
     weightnames += ['EFTnormweight']
+    weightnames += ['reweightNjetWZ']
+
     # weightnames = ['weight']
 
     sys_weights = {
