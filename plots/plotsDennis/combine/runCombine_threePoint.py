@@ -2,6 +2,16 @@ import os
 import tWZ.Tools.logger as logger
 logger    = logger.get_logger(   "INFO", logFile = None)
 
+def getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname):
+    cmd = "combine INROOTFILE -M FitDiagnostics --saveShapes --saveWithUnc --numToysForShape 2000   --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST --preFitValue 0 --plots -n OUTNAME"
+    cmd = cmd.replace("INROOTFILE", dataCard_dir+infile)
+    cmd = cmd.replace("POILIST", poi_list)
+    cmd = cmd.replace("FREEZELIST", freeze_list)
+    cmd = cmd.replace("SETLIST", set_list)
+    cmd = cmd.replace("RANGELIST", range_list)
+    cmd = cmd.replace("OUTNAME", outname+"_SHAPES")
+    return cmd
+
 def getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname):
     base_cmd =  "combineTool.py -M Impacts -d INROOTFILE -m 125 -t -1 --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST"
     base_cmd = base_cmd.replace("INROOTFILE", dataCard_dir+infile)
@@ -20,6 +30,9 @@ def getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, ran
     cmds.append("plotImpacts.py -i "+json_name+" -o "+pdf_name)
     return cmds
 
+################################################################################
+################################################################################
+################################################################################
 
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
@@ -31,6 +44,7 @@ argParser.add_argument('--float',            action='store_true', default=False)
 argParser.add_argument('--statOnly',         action='store_true', default=False)
 argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--impacts',          action='store_true', default=False)
+argParser.add_argument('--postFit',          action='store_true', default=False)
 args = argParser.parse_args()
 
 nRegions = 3
@@ -41,6 +55,8 @@ if args.light:
 WCsInFit = []
 WCsFloat = []
 WCsMargin = []
+
+uncertaintyGroups = ["btag","jet","lepton","lumi","nonprompt","other_exp","rate_bkg","rate_sig","theory"]
 
 logger.info( "Run combine")
 
@@ -69,14 +85,17 @@ if args.twoD is not None:
     WCsInFit.append(wc2)
     logger.info( "Fit WCs (2D) = %s-%s", wc1, wc2 )
 
-uncertaintyGroups = ["btag","jet","lepton","lumi","nonprompt","other_exp","rate_bkg","rate_sig","theory"]
 freezeGroups = []
 if args.freeze is not None:
+    if args.statOnly:
+        raise RuntimeError( "Cannot run statOnly AND freeze nuisance groups" )
     for group in args.freeze.split("-"):
         if group not in uncertaintyGroups:
             raise RuntimeError( "Uncertainty group %s not known. You also might have used a wrong format: --freeze=btag-jec", group )
         else:
             freezeGroups.append(group)
+
+
 
 if args.float:
     logger.info( "Float, let all other WCs float")
@@ -112,6 +131,8 @@ for r in range(nRegions)+["combined"]:
     outname += "_float" if args.float else "_margin"
     if args.freeze is not None:
         outname += "_freeze-"+args.freeze
+    if args.statOnly:
+        outname += "_statOnly"
     # create a list of POIs
     poi_list = ""
     for i, wcname in enumerate(WCsInFit):
@@ -122,6 +143,8 @@ for r in range(nRegions)+["combined"]:
     freeze_list = "r"
     for i, wcname in enumerate(WCsMargin):
         freeze_list += ",k_"+wcname
+    if args.statOnly:
+        freeze_list += ",allConstrainedNuisances"
     # create a list and set r=1 and marginalized WCs to 0
     set_list = "r=1"
     for i, wcname in enumerate(WCsMargin):
@@ -129,11 +152,17 @@ for r in range(nRegions)+["combined"]:
     # create a list of parameter ranges
     range_list = ""
     for i, wcname in enumerate(WCsInFit):
+        if wcname in ["cHq3Re11", "cHq3Re1122"]:
+            range = "-1,1"
+        else:
+            range = "-5,5"
+            # range = "-3,3" if args.twoD is not None else "-5,5"
         if i > 0:
             range_list += ":"
-        range_list += "k_"+wcname+"=-5,5"
+        range_list += "k_"+wcname+"="+range
     # Number of scaned EFT point
-    Npoints = "10000" if args.twoD is not None else "200"
+    Npoints = "10201" if args.twoD is not None else "200"
+    # Npoints = "40401" if args.twoD is not None else "200"
     # Now put together combine command
     cmd_combine =  "combine -M MultiDimFit INROOTFILE --algo=grid --points NPOINTS -m 125 -t -1 -n OUTNAME --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST --verbose -1 --saveToys --saveWorkspace"
     cmd_combine = cmd_combine.replace("INROOTFILE", infile)
@@ -164,6 +193,12 @@ for r in range(nRegions)+["combined"]:
                 logger.info( "Command = %s", cmd )
                 os.system(cmd)
             os.chdir(dataCard_dir)
+    if args.postFit:
+        logger.info( "Also run FitDiagnostics and save shapes" )
+        cmd_shapes = getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname)
+        logger.info( "Command = %s", cmd_shapes )
+        os.system(cmd_shapes)
+
 
 logger.info( "-----------------------------------------------------------" )
 os.chdir(this_dir)

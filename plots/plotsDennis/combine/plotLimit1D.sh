@@ -1,32 +1,64 @@
-python plotLimit1D.py --year=UL2018 --wc=cHq1Re11
-python plotLimit1D.py --year=UL2018 --wc=cHq1Re22
-python plotLimit1D.py --year=UL2018 --wc=cHq1Re33
-python plotLimit1D.py --year=UL2018 --wc=cHq3Re11
-python plotLimit1D.py --year=UL2018 --wc=cHq3Re22
-python plotLimit1D.py --year=UL2018 --wc=cHq3Re33
+################################################################################
+## Combined light generations
 
-python plotLimit1D.py --year=UL2018 --wc=cHq1Re11 --float
-python plotLimit1D.py --year=UL2018 --wc=cHq1Re22 --float
-python plotLimit1D.py --year=UL2018 --wc=cHq1Re33 --float
-python plotLimit1D.py --year=UL2018 --wc=cHq3Re11 --float
-python plotLimit1D.py --year=UL2018 --wc=cHq3Re22 --float
-python plotLimit1D.py --year=UL2018 --wc=cHq3Re33 --float
+python plotLimit1D.py --year=ULRunII --wc=cHq1Re1122 --addStatOnly --light
+python plotLimit1D.py --year=ULRunII --wc=cHq1Re33   --addStatOnly --light
+python plotLimit1D.py --year=ULRunII --wc=cHq3Re1122 --addStatOnly --light
+python plotLimit1D.py --year=ULRunII --wc=cHq3Re33   --addStatOnly --light
 
+python plotLimit1D.py --year=UL2018 --wc=cHq1Re1122 --addStatOnly --light
+python plotLimit1D.py --year=UL2018 --wc=cHq1Re33   --addStatOnly --light
+python plotLimit1D.py --year=UL2018 --wc=cHq3Re1122 --addStatOnly --light
+python plotLimit1D.py --year=UL2018 --wc=cHq3Re33   --addStatOnly --light
 
-python plotLimit1D.py --year=UL2017 --wc=cHq1Re11
-python plotLimit1D.py --year=UL2017 --wc=cHq1Re22
-python plotLimit1D.py --year=UL2017 --wc=cHq1Re33
-python plotLimit1D.py --year=UL2017 --wc=cHq3Re11
-python plotLimit1D.py --year=UL2017 --wc=cHq3Re22
-python plotLimit1D.py --year=UL2017 --wc=cHq3Re33
+python plotLimit1D.py --year=UL2017 --wc=cHq1Re1122 --addStatOnly --light
+python plotLimit1D.py --year=UL2017 --wc=cHq1Re33   --addStatOnly --light
+python plotLimit1D.py --year=UL2017 --wc=cHq3Re1122 --addStatOnly --light
+python plotLimit1D.py --year=UL2017 --wc=cHq3Re33   --addStatOnly --light
 
-python plotLimit1D.py --year=UL2017 --wc=cHq1Re11 --float
-python plotLimit1D.py --year=UL2017 --wc=cHq1Re22 --float
-python plotLimit1D.py --year=UL2017 --wc=cHq1Re33 --float
-python plotLimit1D.py --year=UL2017 --wc=cHq3Re11 --float
-python plotLimit1D.py --year=UL2017 --wc=cHq3Re22 --float
-python plotLimit1D.py --year=UL2017 --wc=cHq3Re33 --float
+python plotLimit1D.py --year=UL2016 --wc=cHq1Re1122 --addStatOnly --light
+python plotLimit1D.py --year=UL2016 --wc=cHq1Re33   --addStatOnly --light
+python plotLimit1D.py --year=UL2016 --wc=cHq3Re1122 --addStatOnly --light
+python plotLimit1D.py --year=UL2016 --wc=cHq3Re33   --addStatOnly --light
 
-python plotLimit1D.py --year=UL2018 --wc=cHq1Re11 --freeze=rate_bkg-rate_sig
-python plotLimit1D.py --year=UL2018 --wc=cHq1Re22 --freeze=rate_bkg-rate_sig
-python plotLimit1D.py --year=UL2018 --wc=cHq1Re33 --freeze=rate_bkg-rate_sig
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq1Re1122 --addStatOnly --light
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq1Re33   --addStatOnly --light
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq3Re1122 --addStatOnly --light
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq3Re33   --addStatOnly --light
+
+################################################################################
+## All three generations
+python plotLimit1D.py --year=ULRunII --wc=cHq1Re11 --addStatOnly
+python plotLimit1D.py --year=ULRunII --wc=cHq1Re22 --addStatOnly
+python plotLimit1D.py --year=ULRunII --wc=cHq1Re33 --addStatOnly
+python plotLimit1D.py --year=ULRunII --wc=cHq3Re11 --addStatOnly
+python plotLimit1D.py --year=ULRunII --wc=cHq3Re22 --addStatOnly
+python plotLimit1D.py --year=ULRunII --wc=cHq3Re33 --addStatOnly
+
+python plotLimit1D.py --year=UL2018 --wc=cHq1Re11 --addStatOnly
+python plotLimit1D.py --year=UL2018 --wc=cHq1Re22 --addStatOnly
+python plotLimit1D.py --year=UL2018 --wc=cHq1Re33 --addStatOnly
+python plotLimit1D.py --year=UL2018 --wc=cHq3Re11 --addStatOnly
+python plotLimit1D.py --year=UL2018 --wc=cHq3Re22 --addStatOnly
+python plotLimit1D.py --year=UL2018 --wc=cHq3Re33 --addStatOnly
+
+python plotLimit1D.py --year=UL2017 --wc=cHq1Re11 --addStatOnly
+python plotLimit1D.py --year=UL2017 --wc=cHq1Re22 --addStatOnly
+python plotLimit1D.py --year=UL2017 --wc=cHq1Re33 --addStatOnly
+python plotLimit1D.py --year=UL2017 --wc=cHq3Re11 --addStatOnly
+python plotLimit1D.py --year=UL2017 --wc=cHq3Re22 --addStatOnly
+python plotLimit1D.py --year=UL2017 --wc=cHq3Re33 --addStatOnly
+
+python plotLimit1D.py --year=UL2016 --wc=cHq1Re11 --addStatOnly
+python plotLimit1D.py --year=UL2016 --wc=cHq1Re22 --addStatOnly
+python plotLimit1D.py --year=UL2016 --wc=cHq1Re33 --addStatOnly
+python plotLimit1D.py --year=UL2016 --wc=cHq3Re11 --addStatOnly
+python plotLimit1D.py --year=UL2016 --wc=cHq3Re22 --addStatOnly
+python plotLimit1D.py --year=UL2016 --wc=cHq3Re33 --addStatOnly
+
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq1Re11 --addStatOnly
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq1Re22 --addStatOnly
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq1Re33 --addStatOnly
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq3Re11 --addStatOnly
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq3Re22 --addStatOnly
+python plotLimit1D.py --year=UL2016preVFP --wc=cHq3Re33 --addStatOnly
