@@ -33,13 +33,12 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 argParser.add_argument('--wc',               action='store', type=str, default="cHq1Re11")
-argParser.add_argument('--statOnly',         action='store_true', default=False)
 args = argParser.parse_args()
 
+processes = ["sm", "tWZ", "ttX", "tZq", "triBoson", "nonprompt"]
+
 processinfo = {
-    "ttZ":       ("ttZ", color.TTZ),
-    "WZ":        ("WZ",  color.WZ),
-    "ZZ":        ("ZZ", color.ZZ),
+    "sm":        ("ttZ+WZ+ZZ", ROOT.kAzure+7),
     "tWZ":       ("tWZ", color.TWZ),
     "ttX":       ("ttX", color.TTX_rare),
     "tZq":       ("tZq", color.TZQ),
@@ -55,10 +54,10 @@ lumi = {
     "ULRunII":      "138",
 }
 
-SMpoint = "11"
-fname = "DataCards/"+args.year+"/fitDiagnosticstopEFT_"+args.wc+"_combined_13TeV_"+SMpoint+".root"
+fname = "DataCards_threePoint_light/"+args.year+"/fitDiagnostics.topEFT_ULRunII_REGION_13TeV_"+args.year+"_1D-"+args.wc+"_margin_SHAPES.root"
 
-plotdir = plot_directory+"/PostFit/"+args.year+"/"
+
+plotdir = plot_directory+"/PostFit_threePoint/"+args.year+"/"
 if not os.path.exists( plotdir ): os.makedirs( plotdir )
 
 for region in ["ttZ", "WZ", "ZZ"]:
@@ -84,7 +83,3 @@ for region in ["ttZ", "WZ", "ZZ"]:
         p.addBackground(hist, processinfo[process][0], processinfo[process][1])
     p.draw()
     histtot = getHist(fname, "shapes_fit_s/"+dir+"/total", ZZbinning)
-    histtot2 = p.getTotalSystematic().GetHistogram()
-    print "---"
-    for i in range(histtot.GetSize()-2):
-        print i, histtot.GetBinContent(i+1), histtot.GetBinError(i+1)

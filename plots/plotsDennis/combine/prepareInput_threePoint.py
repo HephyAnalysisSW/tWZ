@@ -19,6 +19,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--noData',           action='store_true', default=False)
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
+argParser.add_argument('--light',            action='store_true', default=False)
 args = argParser.parse_args()
 
 ################################################################################
@@ -95,22 +96,39 @@ def getHist(fname, hname, altbinning=False):
     bins  = [0, 60, 120, 180, 240, 300, 400, 1000]
     if altbinning:
         bins  = [0, 60, 120, 180, 1000]
-    hist = getObjFromFile(fname, hname)
+    if "ULRunII" in fname:
+        # Get histograms from each era
+        hist_18 = getObjFromFile(fname.replace("/ULRunII/", "/UL2018/"), hname)
+        hist_17 = getObjFromFile(fname.replace("/ULRunII/", "/UL2017/"), hname)
+        hist_16 = getObjFromFile(fname.replace("/ULRunII/", "/UL2016/"), hname)
+        hist_16preVFP = getObjFromFile(fname.replace("/ULRunII/", "/UL2016preVFP/"), hname)
+        # add them
+        hist = hist_18.Clone(hist_18.GetName()+"_RunIIcombination")
+        hist.Add(hist_17)
+        hist.Add(hist_16)
+        hist.Add(hist_16preVFP)
+    else:
+        hist = getObjFromFile(fname, hname)
     hist = hist.Rebin(len(bins)-1, hist.GetName()+"_rebin", array.array('d',bins))
     hist = removeNegative(hist)
     if hist.Integral() < 0.01:
         hist = removeZeros(hist)
     return hist
 
-def getCombinedSignal(fname, hname, altbinning, rate=None, rate_process=None):
+def getCombinedSignal(fname, hname, altbinning, rate=None, rate_process=None, sys_process=None, fname_sys=None):
     signals = ["ttZ", "WZ", "ZZ"]
     for i_sig, sig in enumerate(signals):
+        # If one of the signals should be varied, use alternative file
+        filename = fname
+        if sig == sys_process:
+            filename = fname_sys
+        # If this is the first in the loop clone, otherwise Add to cloned
         if i_sig==0:
-            hist = getHist(fname, hname.replace("sm", sig), altbinning)
+            hist = getHist(filename, hname.replace("sm", sig), altbinning)
             if sig == rate_process:
                 hist.Scale(rate)
         else:
-            tmp = getHist(fname, hname.replace("sm", sig), altbinning)
+            tmp = getHist(filename, hname.replace("sm", sig), altbinning)
             if sig == rate_process:
                 tmp.Scale(rate)
             hist.Add(tmp)
@@ -139,6 +157,8 @@ logger.info( "Prepare input file for combine.")
 if args.year not in ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]:
     raise RuntimeError( "Year %s is not knwon", args.year)
 logger.info( "Year = %s", args.year )
+if args.year == "ULRunII":
+    logger.info( "For the RunII combination, histograms of the eras are added" )
 
 # regions
 regions = ["WZ", "ZZ", "ttZ"]
@@ -146,7 +166,7 @@ regions = ["WZ", "ZZ", "ttZ"]
 # histname
 histname = "Z1_pt"
 
-version = "v9"
+version = "v10"
 logger.info( "Version = %s", version )
 
 if args.noData:
@@ -166,6 +186,9 @@ dirs = {
 }
 
 outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dataTag+"/"+args.year+"/"
+if args.light:
+    outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_light"+dataTag+"/"+args.year+"/"
+
 
 if not os.path.exists( outdir ): os.makedirs( outdir )
 
@@ -175,7 +198,14 @@ processes = ["sm", "tWZ", "ttX", "tZq", "triBoson", "nonprompt"]
 signals = ["WZ", "ZZ", "ttZ"]
 
 WCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33"]
-WCnames += ["cHq1Re1122", "cHq3Re1122"]
+WCnames_mixed = {}
+
+if args.light:
+    WCnames = ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]
+    WCnames_mixed = {
+        "cHq1Re112233": ("cHq1Re1122", "cHq1Re33"),
+        "cHq3Re112233": ("cHq3Re1122", "cHq3Re33"),
+    }
 
 processinfo = {
     "sm":        ("ttZ+WZ+ZZ", ROOT.kAzure+7),
@@ -228,8 +258,20 @@ sysnames = {
     "Lumi_correlated_1718":           ("Lumi_correlated_1718_UP", "Lumi_correlated_1718_DOWN"),
     "ISR":                            ("ISR_UP", "ISR_DOWN"),
     "FSR":                            ("FSR_UP", "FSR_DOWN"),
-    "muR":                            ("Scale_UPNONE", "Scale_DOWNNONE"),
-    "muF":                            ("Scale_NONEUP", "Scale_NONEDOWN"),
+    "muR_ttZ":                        ("Scale_UPNONE", "Scale_DOWNNONE"),
+    "muR_WZ":                         ("Scale_UPNONE", "Scale_DOWNNONE"),
+    "muR_ZZ":                         ("Scale_UPNONE", "Scale_DOWNNONE"),
+    "muR_tZq":                        ("Scale_UPNONE", "Scale_DOWNNONE"),
+    "muR_tWZ":                        ("Scale_UPNONE", "Scale_DOWNNONE"),
+    "muR_ttX":                        ("Scale_UPNONE", "Scale_DOWNNONE"),
+    "muR_triBoson":                   ("Scale_UPNONE", "Scale_DOWNNONE"),
+    "muF_ttZ":                        ("Scale_NONEUP", "Scale_NONEDOWN"),
+    "muF_WZ":                         ("Scale_NONEUP", "Scale_NONEDOWN"),
+    "muF_ZZ":                         ("Scale_NONEUP", "Scale_NONEDOWN"),
+    "muF_tZq":                        ("Scale_NONEUP", "Scale_NONEDOWN"),
+    "muF_tWZ":                        ("Scale_NONEUP", "Scale_NONEDOWN"),
+    "muF_ttX":                        ("Scale_NONEUP", "Scale_NONEDOWN"),
+    "muF_triBoson":                   ("Scale_NONEUP", "Scale_NONEDOWN"),
     "PDF":                            (), # HAS 100 VARIATIONS, TREAT DIFFERENTLY
     "rate_ttZ":                       (),
     "rate_WZ":                        (),
@@ -260,6 +302,10 @@ for region in regions:
     nominalHists = {}
     for process in processes:
         logger.info( '  %s', process )
+        ########################################################################
+        ## First get the nominal processes.
+        ## Nonprompt needs special treatment because it is constructed from
+        ## a control region
         if process == "nonprompt" and region in ["ttZ", "WZ"]:
             # Get prompt backgrounds in CR
             logger.info( '    (estimate from CR)')
@@ -268,6 +314,8 @@ for region in regions:
             p.addBackground(nominalHists[process], processinfo[process][0], processinfo[process][1])
         else:
             logger.info( '    read nominal')
+            # The SM also needs special treatment because we need to sum ttZ, WZ and ZZ
+            # Also, we construct the lin and quad histograms for the EFT fit
             if process == "sm":
                 nominalHists[process] = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning)
                 p.addBackground(nominalHists[process], processinfo[process][0], processinfo[process][1])
@@ -280,15 +328,24 @@ for region in regions:
                     nominalHists["sm_quad_"+WCname] = hist_quad.Clone()
                     writeObjToDirInFile(outname, region+"__"+histname, nominalHists["sm_lin_quad_"+WCname], "sm_lin_quad_"+WCname, update=True)
                     writeObjToDirInFile(outname, region+"__"+histname, nominalHists["sm_quad_"+WCname], "sm_quad_"+WCname, update=True)
+                for WCmix in WCnames_mixed.keys():
+                    wc1 = WCnames_mixed[WCmix][0]
+                    wc2 = WCnames_mixed[WCmix][1]
+                    nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2] = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
+                    writeObjToDirInFile(outname, region+"__"+histname, nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2], "sm_lin_quad_mixed_"+wc1+"_"+wc2, update=True)
             else:
                 name = histname+"__"+process
                 nominalHists[process] = getHist(dirs[region]+inname, name, altbinning)
                 p.addBackground(nominalHists[process], processinfo[process][0], processinfo[process][1])
                 writeObjToDirInFile(outname, region+"__"+histname, nominalHists[process], process, update=True)
-        # Systematics
+        ########################################################################
+        ## Now we run systematics. There are many things to take care of
         logger.info( '    Get systematic variations' )
         for sys in sysnames.keys():
             if sys == "PDF":
+                # For PDF we do the RMS of the 100 variations
+                # As for the nominal histograms, nonprompt and SM need to be
+                # treated differently
                 if process == "nonprompt" and region in ["ttZ", "WZ"]:
                     pdfUP = nominalHists[process].Clone()
                     pdfDOWN = nominalHists[process].Clone()
@@ -316,6 +373,18 @@ for region in regions:
                         writeObjToDirInFile(outname, region+"__"+histname, pdfDOWN_lin_quad, "sm_lin_quad_"+WCname+"__PDFDown", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, pdfUP_quad, "sm_quad_"+WCname+"__PDFUp", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, pdfDOWN_quad, "sm_quad_"+WCname+"__PDFDown", update=True)
+                    for WCmix in WCnames_mixed.keys():
+                        wc1 = WCnames_mixed[WCmix][0]
+                        wc2 = WCnames_mixed[WCmix][1]
+                        pdfvariations_lin_quad_mix = []
+                        for i in range(100):
+                            pdfdir = dirs[region].replace('/Run', '_PDF_'+str(i+1)+'/Run').replace('/UL', '_PDF_'+str(i+1)+'/UL')
+                            h_pdf_mix = getCombinedSignal(pdfdir+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
+                            pdfvariations_lin_quad_mix.append(h_pdf_mix)
+                        pdfUP_lin_quad_mix, pdfDOWN_lin_quad_mix = getRMS(nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2], pdfvariations_lin_quad_mix)
+                        writeObjToDirInFile(outname, region+"__"+histname, pdfUP_lin_quad_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__PDFUp", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, pdfDOWN_lin_quad_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__PDFDown", update=True)
+
                 else:
                     pdfvariations = []
                     for i in range(100):
@@ -327,6 +396,8 @@ for region in regions:
                 writeObjToDirInFile(outname, region+"__"+histname, pdfDOWN, process+"__PDFDown", update=True)
                 p.addSystematic(pdfUP, pdfDOWN, sys, processinfo[process][0])
             elif sys == "Fakerate":
+                # The Fake rate uncertainty only exists for nonprompt, for all
+                # other processes just Clone the nominal
                 if "nonprompt" in process and region in ["ttZ", "WZ"]:
                     h_nonprompt_up = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', '_Fakerate_UP/Run').replace('/UL', '_Fakerate_UP/UL')+inname, histname, altbinning)
                     h_nonprompt_down = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', '_Fakerate_DOWN/Run').replace('/UL', '_Fakerate_DOWN/UL')+inname, histname, altbinning)
@@ -345,6 +416,13 @@ for region in regions:
                         writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_down_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_up_quad, "sm_quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_down_quad, "sm_quad_"+WCname+"__"+sys+"Down", update=True)
+                    for WCmix in WCnames_mixed.keys():
+                        wc1 = WCnames_mixed[WCmix][0]
+                        wc2 = WCnames_mixed[WCmix][1]
+                        h_nonprompt_up_lin_quad_mix = nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Clone()
+                        h_nonprompt_down_lin_quad_mix = nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Clone()
+                        writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_up_lin_quad_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_down_lin_quad_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
 
                 else:
                     # For all processes that are non prompt,
@@ -354,6 +432,10 @@ for region in regions:
                 writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_up, process+"__"+sys+"Up", update=True)
                 writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_down, process+"__"+sys+"Down", update=True)
             elif sys in ["rate_ttZ", "rate_WZ", "rate_ZZ"]:
+                # The rate uncerts of ttZ, WZ, and ZZ have to be done here because
+                # We sum those to a combined "sm" histogram for the EFT fit
+                # There are special functions that only vary one of the processes when
+                # summing over the three signals
                 uncert = None
                 rate_process = None
                 if sys == "rate_ttZ":
@@ -380,13 +462,74 @@ for region in regions:
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_plus, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_quad, "sm_quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_quad, "sm_quad_"+WCname+"__"+sys+"Down", update=True)
-
+                    for WCmix in WCnames_mixed.keys():
+                        wc1 = WCnames_mixed[WCmix][0]
+                        wc2 = WCnames_mixed[WCmix][1]
+                        histUP_mix = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=(1+uncert), rate_process=rate_process)
+                        histDOWN_mix = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=(1-uncert), rate_process=rate_process)
+                        writeObjToDirInFile(outname, region+"__"+histname, histUP_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
                 else:
                     histUP = nominalHists[process].Clone()
                     histDOWN = nominalHists[process].Clone()
                 writeObjToDirInFile(outname, region+"__"+histname, histUP, process+"__"+sys+"Up", update=True)
                 writeObjToDirInFile(outname, region+"__"+histname, histDOWN, process+"__"+sys+"Down", update=True)
+            elif "muR_" in sys or "muF" in sys:
+                # muR and muF are divided by process, thus we have to do the variations
+                # manually. For the "sm" histogram, the combination of signals is
+                # built such that single processes can be read from a file that
+                # contains the muR/muF variations while for other processes we use
+                # the nominal.
+                (upname, downname) = sysnames[sys]
+                sysdirUP = dirs[region]
+                sysdirUP = sysdirUP.replace('/Run', '_'+upname+'/Run').replace('/UL', '_'+upname+'/UL')
+                sysdirDOWN = dirs[region]
+                sysdirDOWN = sysdirDOWN.replace('/Run', '_'+downname+'/Run').replace('/UL', '_'+downname+'/UL')
+                if process == "nonprompt" and region in ["ttZ", "WZ"]:
+                    # Nonprompt has no variations since it is estimated from data
+                    # So, just copy the nominal
+                    histUP = nominalHists[process].Clone()
+                    histDOWN = nominalHists[process].Clone()
+                elif process == "sm":
+                    processToVary = None
+                    upFile = None
+                    downFile = None
+                    for p_vary in signals:
+                        if p_vary == sys.split("_")[1]:
+                            processToVary = p_vary
+                            upFile = sysdirUP+inname
+                            downFile = sysdirDOWN+inname
+                            logger.info('      - only vary '+p_vary+" for "+sys)
+                    histUP = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=upFile)
+                    histDOWN = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=downFile)
+                    for WCname in WCnames:
+                        histUP_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=upFile)
+                        histUP_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=upFile)
+                        histUP_quad = getQuadratic(histUP, histUP_plus, histUP_minus)
+                        histDOWN_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=downFile)
+                        histDOWN_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=downFile)
+                        histDOWN_quad = getQuadratic(histDOWN, histDOWN_plus, histDOWN_minus)
+                        writeObjToDirInFile(outname, region+"__"+histname, histUP_plus, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_plus, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, histUP_quad, "sm_quad_"+WCname+"__"+sys+"Up", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_quad, "sm_quad_"+WCname+"__"+sys+"Down", update=True)
+                    for WCmix in WCnames_mixed.keys():
+                        wc1 = WCnames_mixed[WCmix][0]
+                        wc2 = WCnames_mixed[WCmix][1]
+                        histUP_mix = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=None, rate_process=None)
+                        histDOWN_mix = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=None, rate_process=None)
+                        writeObjToDirInFile(outname, region+"__"+histname, histUP_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
+
+                else:
+                    histUP   = getHist(sysdirUP+inname, name, altbinning)
+                    histDOWN = getHist(sysdirDOWN+inname, name, altbinning)
+                writeObjToDirInFile(outname, region+"__"+histname, histUP, process+"__"+sys+"Up", update=True)
+                writeObjToDirInFile(outname, region+"__"+histname, histDOWN, process+"__"+sys+"Down", update=True)
+                p.addSystematic(histUP, histDOWN, sys, processinfo[process][0])
             else:
+                # These are now all other uncertainties that do not need special
+                # treatment.
                 (upname, downname) = sysnames[sys]
                 sysdirUP = dirs[region]
                 sysdirUP = sysdirUP.replace('/Run', '_'+upname+'/Run').replace('/UL', '_'+upname+'/UL')
@@ -411,7 +554,13 @@ for region in regions:
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_plus, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_quad, "sm_quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_quad, "sm_quad_"+WCname+"__"+sys+"Down", update=True)
-
+                    for WCmix in WCnames_mixed.keys():
+                        wc1 = WCnames_mixed[WCmix][0]
+                        wc2 = WCnames_mixed[WCmix][1]
+                        histUP_mix = getCombinedSignal(sysdirUP+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
+                        histDOWN_mix = getCombinedSignal(sysdirDOWN+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
+                        writeObjToDirInFile(outname, region+"__"+histname, histUP_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
                 else:
                     histUP   = getHist(sysdirUP+inname, name, altbinning)
                     histDOWN = getHist(sysdirDOWN+inname, name, altbinning)
