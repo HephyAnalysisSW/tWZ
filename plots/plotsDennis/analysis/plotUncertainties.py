@@ -51,14 +51,14 @@ def getRMS(nominal, variations):
 # histname
 histname = "Z1_pt"
 
-version = "v9"
+version = "v10"
 logger.info( "Version = %s", version )
 
 # Directories
 dirs = {
-    "ZZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_noData/"+args.year+"/all/qualepT-minDLmass12-onZ1-onZ2/",
-    "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_noData/"+args.year+"/all/trilepT-minDLmass12-onZ1-btag0-met60/",
-    "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_noData/"+args.year+"/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/",
+    "ZZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint_noData/"+args.year+"/all/qualepT-minDLmass12-onZ1-onZ2/",
+    "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint_noData/"+args.year+"/all/trilepT-minDLmass12-onZ1-btag0-met60/",
+    "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint_noData/"+args.year+"/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/",
     "WZ_CR":  "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-btag0-met60/",
     "ttZ_CR": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p/",
 }
