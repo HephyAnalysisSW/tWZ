@@ -38,6 +38,7 @@ TTH            = Sample.combine( "TTH", [UL2016preVFP.TTH, UL2016.TTH, UL2017.TT
 TZQ            = Sample.combine( "TZQ", [UL2016preVFP.TZQ, UL2016.TZQ, UL2017.TZQ, UL2018.TZQ] )
 WZ             = Sample.combine( "WZ", [UL2016preVFP.WZ, UL2016.WZ, UL2017.WZ, UL2018.WZ] )
 WZTo3LNu       = Sample.combine( "WZTo3LNu", [UL2016preVFP.WZTo3LNu, UL2016.WZTo3LNu, UL2017.WZTo3LNu, UL2018.WZTo3LNu] )
+WZTo3LNu_powheg= Sample.combine( "WZTo3LNu_powheg", [UL2016preVFP.WZTo3LNu_powheg, UL2016.WZTo3LNu_powheg, UL2017.WZTo3LNu_powheg, UL2018.WZTo3LNu_powheg] )
 triBoson       = Sample.combine( "triBoson", [UL2016preVFP.triBoson, UL2016.triBoson, UL2017.triBoson, UL2018.triBoson] )
 ZZ             = Sample.combine( "ZZ", [UL2016preVFP.ZZ, UL2016.ZZ, UL2017.ZZ, UL2018.ZZ] )
 nonprompt_3l   = Sample.combine( "nonprompt_3l", [UL2016preVFP.nonprompt_3l, UL2016.nonprompt_3l, UL2017.nonprompt_3l, UL2018.nonprompt_3l] )

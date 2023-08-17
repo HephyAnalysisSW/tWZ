@@ -71,6 +71,7 @@ argParser.add_argument('--reduceEFT',      action='store_true', default=False)
 argParser.add_argument('--SMpoint',        action='store_true', default=False)
 argParser.add_argument('--threePoint',     action='store_true', default=False)
 argParser.add_argument('--WZreweight',     action='store_true', default=False)
+argParser.add_argument('--ttWonly',        action='store_true', default=False)
 
 
 args = argParser.parse_args()
@@ -86,6 +87,21 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 # Possible SYS variations
 variations = [
     "Fakerate_UP", "Fakerate_DOWN",
+    "FakerateClosure_correlated_elec_UP", "FakerateClosure_correlated_elec_DOWN",
+    "FakerateClosure_uncorrelated_elec_2016preVFP_UP", "FakerateClosure_uncorrelated_elec_2016preVFP_DOWN",
+    "FakerateClosure_uncorrelated_elec_2016_UP", "FakerateClosure_uncorrelated_elec_2016_DOWN",
+    "FakerateClosure_uncorrelated_elec_2017_UP", "FakerateClosure_uncorrelated_elec_2017_DOWN",
+    "FakerateClosure_uncorrelated_elec_2018_UP", "FakerateClosure_uncorrelated_elec_2018_DOWN",
+    "FakerateClosure_correlated_muon_UP", "FakerateClosure_correlated_muon_DOWN",
+    "FakerateClosure_uncorrelated_muon_2016preVFP_UP", "FakerateClosure_uncorrelated_muon_2016preVFP_DOWN",
+    "FakerateClosure_uncorrelated_muon_2016_UP", "FakerateClosure_uncorrelated_muon_2016_DOWN",
+    "FakerateClosure_uncorrelated_muon_2017_UP", "FakerateClosure_uncorrelated_muon_2017_DOWN",
+    "FakerateClosure_uncorrelated_muon_2018_UP", "FakerateClosure_uncorrelated_muon_2018_DOWN",
+    "FakerateClosure_correlated_both_UP", "FakerateClosure_correlated_both_DOWN",
+    "FakerateClosure_uncorrelated_both_2016preVFP_UP", "FakerateClosure_uncorrelated_both_2016preVFP_DOWN",
+    "FakerateClosure_uncorrelated_both_2016_UP", "FakerateClosure_uncorrelated_both_2016_DOWN",
+    "FakerateClosure_uncorrelated_both_2017_UP", "FakerateClosure_uncorrelated_both_2017_DOWN",
+    "FakerateClosure_uncorrelated_both_2018_UP", "FakerateClosure_uncorrelated_both_2018_DOWN",
     "Trigger_UP", "Trigger_DOWN",
     "Prefire_UP", "Prefire_DOWN",
     "LepReco_UP", "LepReco_DOWN",
@@ -161,6 +177,7 @@ if args.applyFakerate:                args.plot_directory += "_FakeRateSF"
 if args.useDataSF:                    args.plot_directory += "_useDataSF"
 if args.useBRILSF:                    args.plot_directory += "_useBRILSF"
 if args.tunePtCone:                   args.plot_directory += "_tunePtCone"
+if args.ttWonly:                      args.plot_directory += "_ttWonly"
 if args.sys is not 'central':         args.plot_directory += "_%s" %(args.sys)
 
 
@@ -418,9 +435,14 @@ elif args.era == "UL2018":
 elif args.era == "ULRunII":
     # mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
     mc = [TWZ_NLO_DR, TTX_rare, TZQ, triBoson, nonprompt_3l]
-    samples_eft = [TTZ_EFT, WZ_EFT, ZZ_EFT]
+    mc += [WZTo3LNu, WZTo3LNu_powheg]
+    samples_eft = [TTZ_EFT, WZ_EFT, ZZ_EFT] ## add other WZ samples for cross check
+    if args.ttWonly:
+        mc = [TTX_rare_noTTW, TTW]
+        samples_eft = []
     if args.applyFakerate:
         mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
+        mc += [WZTo3LNu_powheg, WZ_EFT] ## add other WZ samples for cross check
         samples_eft = []
         if args.splitTTX:
             mc = [TWZ_NLO_DR, TTZ, TTX_rare_noTTW, TTW, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
@@ -439,7 +461,7 @@ for sample in mc+samples_eft:
     if args.reduceEFT:
         if "_EFT" in sample.name:
             sample.normalization = 1.
-            sample.reduceFiles( factor = 10 )
+            sample.reduceFiles( factor = 5 )
             sample.scale /= sample.normalization
 if args.nicePlots:
     mc += samples_eft
@@ -713,6 +735,30 @@ def getClosestBJetindex( event, object, minBtagValue ):
                 minDR = object.DeltaR(jet)
                 closestjet = jet
     return closestjet
+
+def getFakeCategory(event):
+    category = -1
+    Nfake_elec = 0
+    Nfake_muon = 0
+    idx1 = event.l1_index
+    idx2 = event.l2_index
+    idx3 = event.l3_index
+    for i in [idx1, idx2, idx3]:
+        if event.lep_passFO[i] and not event.lep_passTight[i]:
+            pdgId = event.lep_pdgId[i]
+            if abs(pdgId) == 11:
+                Nfake_elec+=1
+            elif abs(pdgId) == 13:
+                Nfake_muon+=1
+    if Nfake_elec == 0 and Nfake_muon == 0:
+        category = 0
+    elif Nfake_elec == 0 and Nfake_muon > 0:
+        category = 1
+    elif Nfake_elec > 0 and Nfake_muon == 0:
+        category = 2
+    elif Nfake_elec > 0 and Nfake_muon > 0:
+        category = 3
+    return category
 
 def getWlep( event ):
     Wlep = ROOT.TLorentzVector()
@@ -1012,6 +1058,62 @@ def getNjetWZreweight(sample, event):
             elif event.nJetGood > 5:
                 event.reweightNjetWZ = 2.69
 sequence.append( getNjetWZreweight )
+
+def getFakeLeptonFlavor(sample, event):
+    event.fake_cat = getFakeCategory(event)
+    # -1: not found
+    #  0: No fakes
+    #  1: Only muon fakes
+    #  2: Only elec fakes
+    #  3: Both muon and elec fakes
+
+    # Also apply non-closure uncertainty
+    reweightFakerate = 1
+    if "FakerateClosure_" in args.sys:
+        if "_UP" in  args.sys:
+            uncert = 0.2
+        elif "_DOWN" in  args.sys:
+            uncert = -0.2
+
+        if event.fake_cat == 1 and "_muon_" in args.sys:
+            if "_correlated_" in args.sys:
+                reweightFakerate = 1+uncert
+            elif "_uncorrelated_" in args.sys:
+                if "_2016preVFP_" in args.sys and event.year == 2016 and event.preVFP:
+                    reweightFakerate = 1+uncert
+                elif "_2016_" in args.sys and event.year == 2016 and not event.preVFP:
+                    reweightFakerate = 1+uncert
+                elif "_2017_" in args.sys and event.year == 2017:
+                    reweightFakerate = 1+uncert
+                elif "_2017_" in args.sys and event.year == 2017:
+                    reweightFakerate = 1+uncert
+        elif event.fake_cat == 2 and "_elec_" in args.sys:
+            if "_correlated_" in args.sys:
+                reweightFakerate = 1+uncert
+            elif "_uncorrelated_" in args.sys:
+                if "_2016preVFP_" in args.sys and event.year == 2016 and event.preVFP:
+                    reweightFakerate = 1+uncert
+                elif "_2016_" in args.sys and event.year == 2016 and not event.preVFP:
+                    reweightFakerate = 1+uncert
+                elif "_2017_" in args.sys and event.year == 2017:
+                    reweightFakerate = 1+uncert
+                elif "_2017_" in args.sys and event.year == 2017:
+                    reweightFakerate = 1+uncert
+        elif event.fake_cat == 3 and "_both_" in args.sys:
+            if "_correlated_" in args.sys:
+                reweightFakerate = 1+uncert
+            elif "_uncorrelated_" in args.sys:
+                if "_2016preVFP_" in args.sys and event.year == 2016 and event.preVFP:
+                    reweightFakerate = 1+uncert
+                elif "_2016_" in args.sys and event.year == 2016 and not event.preVFP:
+                    reweightFakerate = 1+uncert
+                elif "_2017_" in args.sys and event.year == 2017:
+                    reweightFakerate = 1+uncert
+                elif "_2017_" in args.sys and event.year == 2017:
+                    reweightFakerate = 1+uncert
+
+    event.reweightFakerateClosure = reweightFakerate
+sequence.append( getFakeLeptonFlavor )
 
 def getEFTnormweight(sample, event):
     normweight = 1.0
@@ -1353,6 +1455,7 @@ for i_mode, mode in enumerate(allModes):
 
     weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate', 'reweightLeptonMVA', 'reweightElectronRecoSF']
     weightnames += ['reweightScale', 'reweightPDF', 'reweightLumi', 'reweightPS']
+    weightnames += ['reweightFakerateClosure']
     weightnames += ['EFTnormweight']
     weightnames += ['reweightNjetWZ']
 
@@ -1465,6 +1568,13 @@ for i_mode, mode in enumerate(allModes):
       name = 'yield', texX = '', texY = 'Number of Events',
       attribute = lambda event, sample: 0.5 + i_mode,
       binning=[4, 0, 4],
+    ))
+
+    plots.append(Plot(
+        name = "FakeCategory",
+        texX = 'Fake lepton category', texY = 'Number of Events',
+        attribute = lambda event, sample: event.fake_cat,
+        binning=[6, -1.5, 4.5],
     ))
 
     plots.append(Plot(
@@ -1948,7 +2058,8 @@ if not args.nicePlots:
                         elif "TTX_rare" in histname: process = "ttX"
                         elif "TTW" in histname: process = "ttW"
                         elif "TZQ" in histname: process = "tZq"
-                        elif "WZTo3LNu" in histname: process = "WZ"
+                        elif "WZTo3LNu_powheg" in histname: process = "WZTo3LNu_powheg"
+                        elif "WZTo3LNu" in histname: process = "WZTo3LNu"
                         elif "WZ_EFT" in histname: process = "WZ"
                         elif "WZ" in histname: process = "WZ"
                         elif "ZZ_EFT" in histname: process = "ZZ"

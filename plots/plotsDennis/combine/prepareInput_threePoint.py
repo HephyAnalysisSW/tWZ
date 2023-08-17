@@ -137,7 +137,8 @@ def getCombinedSignal(fname, hname, altbinning, rate=None, rate_process=None, sy
 def getNonpromptFromCR(fname, histname, altbinning):
     # Get prompt backgrounds in CR
     firstbkg = True
-    for bkg in ["ttZ", "WZ", "ZZ", "tWZ", "ttX", "tZq", "triBoson"]:
+    backgrounds = ["ttZ", "WZTo3LNu", "ZZ", "tWZ", "ttX", "tZq", "triBoson"]
+    for bkg in backgrounds:
         h_bkg = getHist(fname, histname+"__"+bkg, altbinning)
         if firstbkg:
             h_bkg_CR = h_bkg.Clone()
@@ -166,7 +167,7 @@ regions = ["WZ", "ZZ", "ttZ"]
 # histname
 histname = "Z1_pt"
 
-version = "v10"
+version = "v11"
 logger.info( "Version = %s", version )
 
 if args.noData:
@@ -240,6 +241,21 @@ sysnames = {
     "BTag_b_uncorrelated_2018":       ("BTag_b_uncorrelated_2018_UP", "BTag_b_uncorrelated_2018_DOWN"),
     "BTag_l_uncorrelated_2018":       ("BTag_l_uncorrelated_2018_UP", "BTag_l_uncorrelated_2018_DOWN"),
     "Fakerate":                       ("Fakerate_UP", "Fakerate_DOWN"), # THIS IS ONLY IN NONPROMPT
+    "FakerateClosure_correlated_elec":              ("FakerateClosure_correlated_elec_UP", "FakerateClosure_correlated_elec_DOWN"),
+    "FakerateClosure_uncorrelated_elec_2016preVFP": ("FakerateClosure_uncorrelated_elec_2016preVFP_UP", "FakerateClosure_uncorrelated_elec_2016preVFP_DOWN"),
+    "FakerateClosure_uncorrelated_elec_2016":       ("FakerateClosure_uncorrelated_elec_2016_UP", "FakerateClosure_uncorrelated_elec_2016_DOWN"),
+    "FakerateClosure_uncorrelated_elec_2017":       ("FakerateClosure_uncorrelated_elec_2017_UP", "FakerateClosure_uncorrelated_elec_2017_DOWN"),
+    "FakerateClosure_uncorrelated_elec_2018":       ("FakerateClosure_uncorrelated_elec_2018_UP", "FakerateClosure_uncorrelated_elec_2018_DOWN"),
+    "FakerateClosure_correlated_muon":              ("FakerateClosure_correlated_muon_UP", "FakerateClosure_correlated_muon_DOWN"),
+    "FakerateClosure_uncorrelated_muon_2016preVFP": ("FakerateClosure_uncorrelated_muon_2016preVFP_UP", "FakerateClosure_uncorrelated_muon_2016preVFP_DOWN"),
+    "FakerateClosure_uncorrelated_muon_2016":       ("FakerateClosure_uncorrelated_muon_2016_UP", "FakerateClosure_uncorrelated_muon_2016_DOWN"),
+    "FakerateClosure_uncorrelated_muon_2017":       ("FakerateClosure_uncorrelated_muon_2017_UP", "FakerateClosure_uncorrelated_muon_2017_DOWN"),
+    "FakerateClosure_uncorrelated_muon_2018":       ("FakerateClosure_uncorrelated_muon_2018_UP", "FakerateClosure_uncorrelated_muon_2018_DOWN"),
+    "FakerateClosure_correlated_both":              ("FakerateClosure_correlated_both_UP", "FakerateClosure_correlated_both_DOWN"),
+    "FakerateClosure_uncorrelated_both_2016preVFP": ("FakerateClosure_uncorrelated_both_2016preVFP_UP", "FakerateClosure_uncorrelated_both_2016preVFP_DOWN"),
+    "FakerateClosure_uncorrelated_both_2016":       ("FakerateClosure_uncorrelated_both_2016_UP", "FakerateClosure_uncorrelated_both_2016_DOWN"),
+    "FakerateClosure_uncorrelated_both_2017":       ("FakerateClosure_uncorrelated_both_2017_UP", "FakerateClosure_uncorrelated_both_2017_DOWN"),
+    "FakerateClosure_uncorrelated_both_2018":       ("FakerateClosure_uncorrelated_both_2018_UP", "FakerateClosure_uncorrelated_both_2018_DOWN"),
     "Trigger":                        ("Trigger_UP", "Trigger_DOWN"),
     "Prefire":                        ("Prefire_UP", "Prefire_DOWN"),
     "LepReco":                        ("LepReco_UP", "LepReco_DOWN"),
@@ -395,12 +411,13 @@ for region in regions:
                 writeObjToDirInFile(outname, region+"__"+histname, pdfUP, process+"__PDFUp", update=True)
                 writeObjToDirInFile(outname, region+"__"+histname, pdfDOWN, process+"__PDFDown", update=True)
                 p.addSystematic(pdfUP, pdfDOWN, sys, processinfo[process][0])
-            elif sys == "Fakerate":
+            elif sys == "Fakerate" or "FakerateClosure_" in sys:
                 # The Fake rate uncertainty only exists for nonprompt, for all
                 # other processes just Clone the nominal
+                (upname, downname) = sysnames[sys]
                 if "nonprompt" in process and region in ["ttZ", "WZ"]:
-                    h_nonprompt_up = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', '_Fakerate_UP/Run').replace('/UL', '_Fakerate_UP/UL')+inname, histname, altbinning)
-                    h_nonprompt_down = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', '_Fakerate_DOWN/Run').replace('/UL', '_Fakerate_DOWN/UL')+inname, histname, altbinning)
+                    h_nonprompt_up = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', '_'+upname+'/Run').replace('/UL', '_'+upname+'/UL')+inname, histname, altbinning)
+                    h_nonprompt_down = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', '_'+downname+'/Run').replace('/UL', '_'+downname+'/UL')+inname, histname, altbinning)
                     p.addSystematic(h_nonprompt_up, h_nonprompt_down, sys, processinfo[process][0])
                 elif process == "sm":
                     # For all processes that are non prompt,
