@@ -40,6 +40,8 @@ WW = Sample.fromDirectory(name="WW", treeName="Events", isData=False, color=colo
 dirs['WZTo3LNu']               = ["WZTo3LNu"]
 WZTo3LNu = Sample.fromDirectory(name="WZTo3LNu", treeName="Events", isData=False, color=color.WZ, texName="WZ", directory=make_dirs( dirs['WZTo3LNu']))
 
+dirs['WZTo3LNu_powheg']               = ["WZTo3LNu_powheg"]
+WZTo3LNu_powheg = Sample.fromDirectory(name="WZTo3LNu_powheg", treeName="Events", isData=False, color=color.WZ, texName="WZ", directory=make_dirs( dirs['WZTo3LNu_powheg']))
 
 dirs['triBoson']         = ["WWW_4F","WWZ_4F","WZZ","ZZZ"]
 triBoson = Sample.fromDirectory(name="triBoson", treeName="Events", isData=False, color=color.triBoson, texName="VVV", directory=make_dirs( dirs['triBoson']))

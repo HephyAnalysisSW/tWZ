@@ -11,7 +11,7 @@ mIsoWP = { "VT":5, "T":4, "M":3 , "L":2 , "VL":1, 0:"None" }
 
 
 ################################################################################
-# build string for lepton fake region 
+# build string for lepton fake region
 # first list all the cases of 1, 2 or 3 leptons failing a WP
 leptonTCRstring = ""
 failcases = [
@@ -30,7 +30,7 @@ firstIteration = True
 for (l1cut, l2cut, l3cut) in failcases:
     if firstIteration:
         leptonTCRstring += "("
-        firstIteration = False 
+        firstIteration = False
     else:
         leptonTCRstring += " || ("
     leptonTCRstring += "l1_mvaTOPv2WP"+l1cut+WPtight+"&&l2_mvaTOPv2WP"+l2cut+WPtight+"&&l3_mvaTOPv2WP"+l3cut+WPtight
@@ -51,11 +51,12 @@ special_cuts = {
     "trilepFOnoT" :        "l1_pt>40&&l2_pt>20&&l3_pt>10&&l1_passFO&&l2_passFO&&l3_passFO&&Sum$(lep_passFO)==3&&((!(l1_passTight))||(!(l2_passTight))||(!(l3_passTight)))",
     "qualepT" :            "l1_pt>40&&l2_pt>20&&l3_pt>10&&l4_pt>10&&l1_passTight&&l2_passTight&&l3_passTight&&l4_passTight",
     "trilepTCR":           "l1_pt>40&&l2_pt>20&&l3_pt>10&&"+leptonTCRstring,
-    "onZ1"   : "abs(Z1_mass-91.2)<10",
-    "onZ2"   : "abs(Z2_mass-91.2)<10",
-    "offZ1"    : "(abs(Z1_mass-91.2)>10)",
-    "offZ2"  : "(!(abs(Z2_mass-91.2)<20))",
-    "vetoMET" : "met_pt<20"
+    "onZ1"   :             "abs(Z1_mass-91.2)<10",
+    "onZ2"   :             "abs(Z2_mass-91.2)<10",
+    "offZ1"    :           "(abs(Z1_mass-91.2)>10)",
+    "offZ2"  :             "(!(abs(Z2_mass-91.2)<20))",
+    "vetoMET" :            "met_pt<20",
+    "vetoMET60" :          "met_pt<60&&met_pt>20",
   }
 
 continous_variables = [ ('ht','Sum$(JetGood_pt*(JetGood_pt>30&&abs(JetGood_eta)<2.4))'), ("met", "met_pt"), ("Z2mass", "Z2_mass"), ("Z1mass", "Z1_mass"), ("minDLmass", "minDLmass"), ("mT", "mT")]

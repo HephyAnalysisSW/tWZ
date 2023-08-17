@@ -43,15 +43,13 @@ def getRMS(nominal, variations):
         rmsdown = sqrt(diff_sum2_down/Nvars_down) if Nvars_down > 0 else 0
         up.SetBinContent(bin, nominal.GetBinContent(bin)+rmsup)
         down.SetBinContent(bin, nominal.GetBinContent(bin)-rmsdown)
-        # up.SetBinContent(bin, rmsup)
-        # down.SetBinContent(bin, rmsdown)
     return (up, down)
 
 
 # histname
 histname = "Z1_pt"
 
-version = "v10"
+version = "v11"
 logger.info( "Version = %s", version )
 
 # Directories
