@@ -133,6 +133,7 @@ variations = [
     "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN", # first is mu_r, second is mu_f
     "ISR_UP", "ISR_DOWN",
     "FSR_UP", "FSR_DOWN",
+    "WZnJet",
 ]
 
 for i in range(100):
@@ -1041,7 +1042,7 @@ def getNjetWZreweight(sample, event):
     # numbers from 4 top analysis AN v12
     # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/182
     event.reweightNjetWZ = 1
-    if args.WZreweight:
+    if args.WZreweight or args.sys=="WZnJet":
         if "WZ_EFT" in sample.name:
             if event.nJetGood == 0:
                 event.reweightNjetWZ = 1.07
