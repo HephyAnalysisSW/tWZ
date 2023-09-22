@@ -230,70 +230,87 @@ lumi = {
 
 # Define Systematics
 sysnames = {
-    "BTag_b_correlated":              ("BTag_b_correlated_UP", "BTag_b_correlated_DOWN"),
-    "BTag_l_correlated":              ("BTag_l_correlated_UP", "BTag_l_correlated_DOWN"),
-    "BTag_b_uncorrelated_2016preVFP": ("BTag_b_uncorrelated_2016preVFP_UP", "BTag_b_uncorrelated_2016preVFP_DOWN"),
-    "BTag_l_uncorrelated_2016preVFP": ("BTag_l_uncorrelated_2016preVFP_UP", "BTag_l_uncorrelated_2016preVFP_DOWN"),
-    "BTag_b_uncorrelated_2016":       ("BTag_b_uncorrelated_2016_UP", "BTag_b_uncorrelated_2016_DOWN"),
-    "BTag_l_uncorrelated_2016":       ("BTag_l_uncorrelated_2016_UP", "BTag_l_uncorrelated_2016_DOWN"),
-    "BTag_b_uncorrelated_2017":       ("BTag_b_uncorrelated_2017_UP", "BTag_b_uncorrelated_2017_DOWN"),
-    "BTag_l_uncorrelated_2017":       ("BTag_l_uncorrelated_2017_UP", "BTag_l_uncorrelated_2017_DOWN"),
-    "BTag_b_uncorrelated_2018":       ("BTag_b_uncorrelated_2018_UP", "BTag_b_uncorrelated_2018_DOWN"),
-    "BTag_l_uncorrelated_2018":       ("BTag_l_uncorrelated_2018_UP", "BTag_l_uncorrelated_2018_DOWN"),
-    "Fakerate":                       ("Fakerate_UP", "Fakerate_DOWN"), # THIS IS ONLY IN NONPROMPT
-    "FakerateClosure_correlated_elec":              ("FakerateClosure_correlated_elec_UP", "FakerateClosure_correlated_elec_DOWN"),
-    "FakerateClosure_uncorrelated_elec_2016preVFP": ("FakerateClosure_uncorrelated_elec_2016preVFP_UP", "FakerateClosure_uncorrelated_elec_2016preVFP_DOWN"),
-    "FakerateClosure_uncorrelated_elec_2016":       ("FakerateClosure_uncorrelated_elec_2016_UP", "FakerateClosure_uncorrelated_elec_2016_DOWN"),
-    "FakerateClosure_uncorrelated_elec_2017":       ("FakerateClosure_uncorrelated_elec_2017_UP", "FakerateClosure_uncorrelated_elec_2017_DOWN"),
-    "FakerateClosure_uncorrelated_elec_2018":       ("FakerateClosure_uncorrelated_elec_2018_UP", "FakerateClosure_uncorrelated_elec_2018_DOWN"),
-    "FakerateClosure_correlated_muon":              ("FakerateClosure_correlated_muon_UP", "FakerateClosure_correlated_muon_DOWN"),
-    "FakerateClosure_uncorrelated_muon_2016preVFP": ("FakerateClosure_uncorrelated_muon_2016preVFP_UP", "FakerateClosure_uncorrelated_muon_2016preVFP_DOWN"),
-    "FakerateClosure_uncorrelated_muon_2016":       ("FakerateClosure_uncorrelated_muon_2016_UP", "FakerateClosure_uncorrelated_muon_2016_DOWN"),
-    "FakerateClosure_uncorrelated_muon_2017":       ("FakerateClosure_uncorrelated_muon_2017_UP", "FakerateClosure_uncorrelated_muon_2017_DOWN"),
-    "FakerateClosure_uncorrelated_muon_2018":       ("FakerateClosure_uncorrelated_muon_2018_UP", "FakerateClosure_uncorrelated_muon_2018_DOWN"),
-    "FakerateClosure_correlated_both":              ("FakerateClosure_correlated_both_UP", "FakerateClosure_correlated_both_DOWN"),
-    "FakerateClosure_uncorrelated_both_2016preVFP": ("FakerateClosure_uncorrelated_both_2016preVFP_UP", "FakerateClosure_uncorrelated_both_2016preVFP_DOWN"),
-    "FakerateClosure_uncorrelated_both_2016":       ("FakerateClosure_uncorrelated_both_2016_UP", "FakerateClosure_uncorrelated_both_2016_DOWN"),
-    "FakerateClosure_uncorrelated_both_2017":       ("FakerateClosure_uncorrelated_both_2017_UP", "FakerateClosure_uncorrelated_both_2017_DOWN"),
-    "FakerateClosure_uncorrelated_both_2018":       ("FakerateClosure_uncorrelated_both_2018_UP", "FakerateClosure_uncorrelated_both_2018_DOWN"),
-    "Trigger":                        ("Trigger_UP", "Trigger_DOWN"),
-    "Prefire":                        ("Prefire_UP", "Prefire_DOWN"),
-    "LepReco":                        ("LepReco_UP", "LepReco_DOWN"),
-    "LepIDstat_2016preVFP":           ("LepIDstat_2016preVFP_UP", "LepIDstat_2016preVFP_DOWN"),
-    "LepIDstat_2016":                 ("LepIDstat_2016_UP", "LepIDstat_2016_DOWN"),
-    "LepIDstat_2017":                 ("LepIDstat_2017_UP", "LepIDstat_2017_DOWN"),
-    "LepIDstat_2018":                 ("LepIDstat_2018_UP", "LepIDstat_2018_DOWN"),
-    "LepIDsys":                       ("LepIDsys_UP", "LepIDsys_DOWN"),
-    "PU":                             ("PU_UP", "PU_DOWN"),
-    "JES":                            ("JES_UP", "JES_DOWN"),
-    "JER":                            ("JER_UP", "JER_DOWN"),
-    "Lumi_uncorrelated_2016":         ("Lumi_uncorrelated_2016_UP", "Lumi_uncorrelated_2016_DOWN"),
-    "Lumi_uncorrelated_2017":         ("Lumi_uncorrelated_2017_UP", "Lumi_uncorrelated_2017_DOWN"),
-    "Lumi_uncorrelated_2018":         ("Lumi_uncorrelated_2018_UP", "Lumi_uncorrelated_2018_DOWN"),
-    "Lumi_correlated_161718":         ("Lumi_correlated_161718_UP", "Lumi_correlated_161718_DOWN"),
-    "Lumi_correlated_1718":           ("Lumi_correlated_1718_UP", "Lumi_correlated_1718_DOWN"),
-    "ISR":                            ("ISR_UP", "ISR_DOWN"),
-    "FSR":                            ("FSR_UP", "FSR_DOWN"),
-    "muR_ttZ":                        ("Scale_UPNONE", "Scale_DOWNNONE"),
-    "muR_WZ":                         ("Scale_UPNONE", "Scale_DOWNNONE"),
-    "muR_ZZ":                         ("Scale_UPNONE", "Scale_DOWNNONE"),
-    "muR_tZq":                        ("Scale_UPNONE", "Scale_DOWNNONE"),
-    "muR_tWZ":                        ("Scale_UPNONE", "Scale_DOWNNONE"),
-    "muR_ttX":                        ("Scale_UPNONE", "Scale_DOWNNONE"),
-    "muR_triBoson":                   ("Scale_UPNONE", "Scale_DOWNNONE"),
-    "muF_ttZ":                        ("Scale_NONEUP", "Scale_NONEDOWN"),
-    "muF_WZ":                         ("Scale_NONEUP", "Scale_NONEDOWN"),
-    "muF_ZZ":                         ("Scale_NONEUP", "Scale_NONEDOWN"),
-    "muF_tZq":                        ("Scale_NONEUP", "Scale_NONEDOWN"),
-    "muF_tWZ":                        ("Scale_NONEUP", "Scale_NONEDOWN"),
-    "muF_ttX":                        ("Scale_NONEUP", "Scale_NONEDOWN"),
-    "muF_triBoson":                   ("Scale_NONEUP", "Scale_NONEDOWN"),
-    "PDF":                            (), # HAS 100 VARIATIONS, TREAT DIFFERENTLY
+    "BTag_b_correlated":              ("_BTag_b_correlated_UP", "_BTag_b_correlated_DOWN"),
+    "BTag_l_correlated":              ("_BTag_l_correlated_UP", "_BTag_l_correlated_DOWN"),
+    "BTag_b_uncorrelated_2016preVFP": ("_BTag_b_uncorrelated_2016preVFP_UP", "_BTag_b_uncorrelated_2016preVFP_DOWN"),
+    "BTag_l_uncorrelated_2016preVFP": ("_BTag_l_uncorrelated_2016preVFP_UP", "_BTag_l_uncorrelated_2016preVFP_DOWN"),
+    "BTag_b_uncorrelated_2016":       ("_BTag_b_uncorrelated_2016_UP", "_BTag_b_uncorrelated_2016_DOWN"),
+    "BTag_l_uncorrelated_2016":       ("_BTag_l_uncorrelated_2016_UP", "_BTag_l_uncorrelated_2016_DOWN"),
+    "BTag_b_uncorrelated_2017":       ("_BTag_b_uncorrelated_2017_UP", "_BTag_b_uncorrelated_2017_DOWN"),
+    "BTag_l_uncorrelated_2017":       ("_BTag_l_uncorrelated_2017_UP", "_BTag_l_uncorrelated_2017_DOWN"),
+    "BTag_b_uncorrelated_2018":       ("_BTag_b_uncorrelated_2018_UP", "_BTag_b_uncorrelated_2018_DOWN"),
+    "BTag_l_uncorrelated_2018":       ("_BTag_l_uncorrelated_2018_UP", "_BTag_l_uncorrelated_2018_DOWN"),
+    "Fakerate":                       ("_Fakerate_UP", "_Fakerate_DOWN"), # THIS IS ONLY IN NONPROMPT
+    "FakerateClosure_correlated_elec":              ("_FakerateClosure_correlated_elec_UP", "_FakerateClosure_correlated_elec_DOWN"),
+    "FakerateClosure_uncorrelated_elec_2016preVFP": ("_FakerateClosure_uncorrelated_elec_2016preVFP_UP", "_FakerateClosure_uncorrelated_elec_2016preVFP_DOWN"),
+    "FakerateClosure_uncorrelated_elec_2016":       ("_FakerateClosure_uncorrelated_elec_2016_UP", "_FakerateClosure_uncorrelated_elec_2016_DOWN"),
+    "FakerateClosure_uncorrelated_elec_2017":       ("_FakerateClosure_uncorrelated_elec_2017_UP", "_FakerateClosure_uncorrelated_elec_2017_DOWN"),
+    "FakerateClosure_uncorrelated_elec_2018":       ("_FakerateClosure_uncorrelated_elec_2018_UP", "_FakerateClosure_uncorrelated_elec_2018_DOWN"),
+    "FakerateClosure_correlated_muon":              ("_FakerateClosure_correlated_muon_UP", "_FakerateClosure_correlated_muon_DOWN"),
+    "FakerateClosure_uncorrelated_muon_2016preVFP": ("_FakerateClosure_uncorrelated_muon_2016preVFP_UP", "_FakerateClosure_uncorrelated_muon_2016preVFP_DOWN"),
+    "FakerateClosure_uncorrelated_muon_2016":       ("_FakerateClosure_uncorrelated_muon_2016_UP", "_FakerateClosure_uncorrelated_muon_2016_DOWN"),
+    "FakerateClosure_uncorrelated_muon_2017":       ("_FakerateClosure_uncorrelated_muon_2017_UP", "_FakerateClosure_uncorrelated_muon_2017_DOWN"),
+    "FakerateClosure_uncorrelated_muon_2018":       ("_FakerateClosure_uncorrelated_muon_2018_UP", "_FakerateClosure_uncorrelated_muon_2018_DOWN"),
+    "FakerateClosure_correlated_both":              ("_FakerateClosure_correlated_both_UP", "_FakerateClosure_correlated_both_DOWN"),
+    "FakerateClosure_uncorrelated_both_2016preVFP": ("_FakerateClosure_uncorrelated_both_2016preVFP_UP", "_FakerateClosure_uncorrelated_both_2016preVFP_DOWN"),
+    "FakerateClosure_uncorrelated_both_2016":       ("_FakerateClosure_uncorrelated_both_2016_UP", "_FakerateClosure_uncorrelated_both_2016_DOWN"),
+    "FakerateClosure_uncorrelated_both_2017":       ("_FakerateClosure_uncorrelated_both_2017_UP", "_FakerateClosure_uncorrelated_both_2017_DOWN"),
+    "FakerateClosure_uncorrelated_both_2018":       ("_FakerateClosure_uncorrelated_both_2018_UP", "_FakerateClosure_uncorrelated_both_2018_DOWN"),
+    "Trigger":                        ("_Trigger_UP", "_Trigger_DOWN"),
+    "Prefire":                        ("_Prefire_UP", "_Prefire_DOWN"),
+    "LepReco":                        ("_LepReco_UP", "_LepReco_DOWN"),
+    "LepIDstat_2016preVFP":           ("_LepIDstat_2016preVFP_UP", "_LepIDstat_2016preVFP_DOWN"),
+    "LepIDstat_2016":                 ("_LepIDstat_2016_UP", "_LepIDstat_2016_DOWN"),
+    "LepIDstat_2017":                 ("_LepIDstat_2017_UP", "_LepIDstat_2017_DOWN"),
+    "LepIDstat_2018":                 ("_LepIDstat_2018_UP", "_LepIDstat_2018_DOWN"),
+    "LepIDsys":                       ("_LepIDsys_UP", "_LepIDsys_DOWN"),
+    "PU":                             ("_PU_UP", "_PU_DOWN"),
+    "JES":                            ("_JES_UP", "_JES_DOWN"),
+    "JER":                            ("_JER_UP", "_JER_DOWN"),
+    "Lumi_uncorrelated_2016":         ("_Lumi_uncorrelated_2016_UP", "_Lumi_uncorrelated_2016_DOWN"),
+    "Lumi_uncorrelated_2017":         ("_Lumi_uncorrelated_2017_UP", "_Lumi_uncorrelated_2017_DOWN"),
+    "Lumi_uncorrelated_2018":         ("_Lumi_uncorrelated_2018_UP", "_Lumi_uncorrelated_2018_DOWN"),
+    "Lumi_correlated_161718":         ("_Lumi_correlated_161718_UP", "_Lumi_correlated_161718_DOWN"),
+    "Lumi_correlated_1718":           ("_Lumi_correlated_1718_UP", "_Lumi_correlated_1718_DOWN"),
+    "ISR_ttZ":                        ("_ISR_UP", "_ISR_DOWN"),
+    "ISR_WZ":                         ("_ISR_UP", "_ISR_DOWN"),
+    "ISR_ZZ":                         ("_ISR_UP", "_ISR_DOWN"),
+    "ISR_tZq":                        ("_ISR_UP", "_ISR_DOWN"),
+    "ISR_tWZ":                        ("_ISR_UP", "_ISR_DOWN"),
+    "ISR_ttX":                        ("_ISR_UP", "_ISR_DOWN"),
+    "ISR_triBoson":                   ("_ISR_UP", "_ISR_DOWN"),
+    "FSR_ttZ":                        ("_FSR_UP", "_FSR_DOWN"),
+    "FSR_WZ":                         ("_FSR_UP", "_FSR_DOWN"),
+    "FSR_ZZ":                         ("_FSR_UP", "_FSR_DOWN"),
+    "FSR_tZq":                        ("_FSR_UP", "_FSR_DOWN"),
+    "FSR_tWZ":                        ("_FSR_UP", "_FSR_DOWN"),
+    "FSR_ttX":                        ("_FSR_UP", "_FSR_DOWN"),
+    "FSR_triBoson":                   ("_FSR_UP", "_FSR_DOWN"),
+    "muR_ttZ":                        ("_Scale_UPNONE", "_Scale_DOWNNONE"),
+    "muR_WZ":                         ("_Scale_UPNONE", "_Scale_DOWNNONE"),
+    "muR_ZZ":                         ("_Scale_UPNONE", "_Scale_DOWNNONE"),
+    "muR_tZq":                        ("_Scale_UPNONE", "_Scale_DOWNNONE"),
+    "muR_tWZ":                        ("_Scale_UPNONE", "_Scale_DOWNNONE"),
+    "muR_ttX":                        ("_Scale_UPNONE", "_Scale_DOWNNONE"),
+    "muR_triBoson":                   ("_Scale_UPNONE", "_Scale_DOWNNONE"),
+    "muF_ttZ":                        ("_Scale_NONEUP", "_Scale_NONEDOWN"),
+    "muF_WZ":                         ("_Scale_NONEUP", "_Scale_NONEDOWN"),
+    "muF_ZZ":                         ("_Scale_NONEUP", "_Scale_NONEDOWN"),
+    "muF_tZq":                        ("_Scale_NONEUP", "_Scale_NONEDOWN"),
+    "muF_tWZ":                        ("_Scale_NONEUP", "_Scale_NONEDOWN"),
+    "muF_ttX":                        ("_Scale_NONEUP", "_Scale_NONEDOWN"),
+    "muF_triBoson":                   ("_Scale_NONEUP", "_Scale_NONEDOWN"),
+    # "PDF_RMS":                            (), # HAS 100 VARIATIONS, TREAT DIFFERENTLY
     "rate_ttZ":                       (),
     "rate_WZ":                        (),
     "rate_ZZ":                        (),
 }
 
+for i in range(100):
+    pdfstring = 'PDF_'+str(i+1)
+    sysnames[pdfstring] = ('_'+pdfstring, "")
+
+# print sysnames
 
 
 ################################################################################
@@ -358,7 +375,7 @@ for region in regions:
         ## Now we run systematics. There are many things to take care of
         logger.info( '    Get systematic variations' )
         for sys in sysnames.keys():
-            if sys == "PDF":
+            if sys == "PDF_RMS":
                 # For PDF we do the RMS of the 100 variations
                 # As for the nominal histograms, nonprompt and SM need to be
                 # treated differently
@@ -416,8 +433,8 @@ for region in regions:
                 # other processes just Clone the nominal
                 (upname, downname) = sysnames[sys]
                 if "nonprompt" in process and region in ["ttZ", "WZ"]:
-                    h_nonprompt_up = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', '_'+upname+'/Run').replace('/UL', '_'+upname+'/UL')+inname, histname, altbinning)
-                    h_nonprompt_down = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', '_'+downname+'/Run').replace('/UL', '_'+downname+'/UL')+inname, histname, altbinning)
+                    h_nonprompt_up = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', upname+'/Run').replace('/UL', upname+'/UL')+inname, histname, altbinning)
+                    h_nonprompt_down = getNonpromptFromCR(dirs[region+"_CR"].replace('/Run', downname+'/Run').replace('/UL', downname+'/UL')+inname, histname, altbinning)
                     p.addSystematic(h_nonprompt_up, h_nonprompt_down, sys, processinfo[process][0])
                 elif process == "sm":
                     # For all processes that are non prompt,
@@ -456,13 +473,13 @@ for region in regions:
                 uncert = None
                 rate_process = None
                 if sys == "rate_ttZ":
-                    uncert= 0.11
+                    uncert = 0.11
                     rate_process = "ttZ"
                 elif sys == "rate_WZ":
-                    uncert= 0.025
+                    uncert = 0.05
                     rate_process = "WZ"
                 elif sys == "rate_ZZ":
-                    uncert= 0.025
+                    uncert = 0.05
                     rate_process = "ZZ"
 
                 if process == "sm":
@@ -491,17 +508,17 @@ for region in regions:
                     histDOWN = nominalHists[process].Clone()
                 writeObjToDirInFile(outname, region+"__"+histname, histUP, process+"__"+sys+"Up", update=True)
                 writeObjToDirInFile(outname, region+"__"+histname, histDOWN, process+"__"+sys+"Down", update=True)
-            elif "muR_" in sys or "muF" in sys:
-                # muR and muF are divided by process, thus we have to do the variations
+            elif "muR_" in sys or "muF_" in sys or "ISR_" in sys or "FSR_" in sys:
+                # muR, muF, FSR and ISR are divided by process, thus we have to do the variations
                 # manually. For the "sm" histogram, the combination of signals is
                 # built such that single processes can be read from a file that
                 # contains the muR/muF variations while for other processes we use
                 # the nominal.
                 (upname, downname) = sysnames[sys]
                 sysdirUP = dirs[region]
-                sysdirUP = sysdirUP.replace('/Run', '_'+upname+'/Run').replace('/UL', '_'+upname+'/UL')
+                sysdirUP = sysdirUP.replace('/Run', upname+'/Run').replace('/UL', upname+'/UL')
                 sysdirDOWN = dirs[region]
-                sysdirDOWN = sysdirDOWN.replace('/Run', '_'+downname+'/Run').replace('/UL', '_'+downname+'/UL')
+                sysdirDOWN = sysdirDOWN.replace('/Run', downname+'/Run').replace('/UL', downname+'/UL')
                 if process == "nonprompt" and region in ["ttZ", "WZ"]:
                     # Nonprompt has no variations since it is estimated from data
                     # So, just copy the nominal
@@ -539,8 +556,13 @@ for region in regions:
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
 
                 else:
-                    histUP   = getHist(sysdirUP+inname, name, altbinning)
-                    histDOWN = getHist(sysdirDOWN+inname, name, altbinning)
+                    processToVary = sys.split("_")[1]
+                    if processToVary == process:
+                        histUP   = getHist(sysdirUP+inname, name, altbinning)
+                        histDOWN = getHist(sysdirDOWN+inname, name, altbinning)
+                    else:
+                        histUP = nominalHists[process].Clone()
+                        histDOWN = nominalHists[process].Clone()
                 writeObjToDirInFile(outname, region+"__"+histname, histUP, process+"__"+sys+"Up", update=True)
                 writeObjToDirInFile(outname, region+"__"+histname, histDOWN, process+"__"+sys+"Down", update=True)
                 p.addSystematic(histUP, histDOWN, sys, processinfo[process][0])
@@ -549,9 +571,9 @@ for region in regions:
                 # treatment.
                 (upname, downname) = sysnames[sys]
                 sysdirUP = dirs[region]
-                sysdirUP = sysdirUP.replace('/Run', '_'+upname+'/Run').replace('/UL', '_'+upname+'/UL')
+                sysdirUP = sysdirUP.replace('/Run', upname+'/Run').replace('/UL', upname+'/UL')
                 sysdirDOWN = dirs[region]
-                sysdirDOWN = sysdirDOWN.replace('/Run', '_'+downname+'/Run').replace('/UL', '_'+downname+'/UL')
+                sysdirDOWN = sysdirDOWN.replace('/Run', downname+'/Run').replace('/UL', downname+'/UL')
                 if process == "nonprompt" and region in ["ttZ", "WZ"]:
                     # Nonprompt has no variations since it is estimated from data
                     # So, just copy the nominal
