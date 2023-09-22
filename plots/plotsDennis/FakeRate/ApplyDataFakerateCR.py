@@ -68,9 +68,10 @@ prefix_CR = "trilepFOnoT-"
 
 selections = [
     # "minDLmass12-offZ1/",
-    "minDLmass12-offZ1-njet3p-btag1p/",
-    "minDLmass12-offZ1-btag0-met60/",
+    # "minDLmass12-offZ1-njet3p-btag1p/",
+    # "minDLmass12-offZ1-btag0-met60/",
     "minDLmass12-onZ1-btag0-vetoMET60/",
+    "minDLmass12-onZ1-btag0-vetoMET60v2/",
 ]
 
 
@@ -88,8 +89,8 @@ if args.SR:
     years = ["ULRunII"]
 
 
-# channels = ["all", "eee", "mumumu"]
-channels = ["all"]
+channels = ["all", "eee", "mumumu"]
+# channels = ["all"]
 
 histnames = ["Z1_pt", "l1_pt", "l2_pt", "l3_pt"]
 # histnames = ["Z1_pt"]
@@ -203,7 +204,7 @@ for year in years:
                 h_nonprompt_down = getObjFromFile(filename_DOWN, histname+"__data")
                 h_nonprompt_down.Add(h_bkg_CR, -1)
                 p.addSystematic(h_nonprompt_up, h_nonprompt_down, "Fakerate", "Nonprompt")
-                p.addNormSystematic("Nonprompt", 0.3)
+                p.addNormSystematic("Nonprompt", 0.4)
                 # Get all prompt backgrounds
                 for (process,legname,color) in prompt_processes:
                     h_bkg = getObjFromFile(filename_SR, histname+"__"+process)
