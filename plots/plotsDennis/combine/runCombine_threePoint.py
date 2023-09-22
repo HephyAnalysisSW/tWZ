@@ -153,7 +153,7 @@ for r in range(nRegions)+["combined"]:
     range_list = ""
     for i, wcname in enumerate(WCsInFit):
         if wcname in ["cHq3Re11", "cHq3Re1122"]:
-            range = "-1,1"
+            range = "-0.2,0.2"
         else:
             range = "-5,5"
             # range = "-3,3" if args.twoD is not None else "-5,5"

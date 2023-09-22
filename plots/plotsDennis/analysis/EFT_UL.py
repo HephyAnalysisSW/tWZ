@@ -1071,9 +1071,9 @@ def getFakeLeptonFlavor(sample, event):
     reweightFakerate = 1
     if "FakerateClosure_" in args.sys:
         if "_UP" in  args.sys:
-            uncert = 0.2
+            uncert = 0.25
         elif "_DOWN" in  args.sys:
-            uncert = -0.2
+            uncert = -0.25
 
         if event.fake_cat == 1 and "_muon_" in args.sys:
             if "_correlated_" in args.sys:
@@ -1085,7 +1085,7 @@ def getFakeLeptonFlavor(sample, event):
                     reweightFakerate = 1+uncert
                 elif "_2017_" in args.sys and event.year == 2017:
                     reweightFakerate = 1+uncert
-                elif "_2017_" in args.sys and event.year == 2017:
+                elif "_2018_" in args.sys and event.year == 2018:
                     reweightFakerate = 1+uncert
         elif event.fake_cat == 2 and "_elec_" in args.sys:
             if "_correlated_" in args.sys:
@@ -1097,7 +1097,7 @@ def getFakeLeptonFlavor(sample, event):
                     reweightFakerate = 1+uncert
                 elif "_2017_" in args.sys and event.year == 2017:
                     reweightFakerate = 1+uncert
-                elif "_2017_" in args.sys and event.year == 2017:
+                elif "_2018_" in args.sys and event.year == 2018:
                     reweightFakerate = 1+uncert
         elif event.fake_cat == 3 and "_both_" in args.sys:
             if "_correlated_" in args.sys:
@@ -1109,7 +1109,7 @@ def getFakeLeptonFlavor(sample, event):
                     reweightFakerate = 1+uncert
                 elif "_2017_" in args.sys and event.year == 2017:
                     reweightFakerate = 1+uncert
-                elif "_2017_" in args.sys and event.year == 2017:
+                elif "_2018_" in args.sys and event.year == 2018:
                     reweightFakerate = 1+uncert
 
     event.reweightFakerateClosure = reweightFakerate
@@ -2025,7 +2025,7 @@ if args.nicePlots and args.sys == "central":
 
 # Write Result Hist in root file
 if not args.nicePlots:
-    plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "N_jets", "yield"]
+    plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "N_jets", "yield", "FakeCategory"]
     logger.info( "Now write results in root files." )
     for mode in allModes+["all"]:
         logger.info( "Write file for channel: %s", mode )
