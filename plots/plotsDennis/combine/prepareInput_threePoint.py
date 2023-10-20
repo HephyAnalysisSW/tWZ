@@ -304,6 +304,8 @@ sysnames = {
     "rate_ttZ":                       (),
     "rate_WZ":                        (),
     "rate_ZZ":                        (),
+    "rate_ZZ":                        (),
+    "WZ_Njet_reweight":               ("_WZnJet", ""),
 }
 
 for i in range(100):
