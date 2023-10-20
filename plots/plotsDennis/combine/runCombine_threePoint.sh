@@ -5,8 +5,8 @@ python runCombine_threePoint.py --year=ULRunII --light --oneD=cHq1Re1122
 python runCombine_threePoint.py --year=ULRunII --light --oneD=cHq1Re33
 python runCombine_threePoint.py --year=ULRunII --light --oneD=cHq3Re1122
 python runCombine_threePoint.py --year=ULRunII --light --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --twoD=cHq1Re1122-cHq1Re33 --light
-python runCombine_threePoint.py --year=ULRunII --twoD=cHq3Re1122-cHq3Re33 --light
+python runCombine_threePoint.py --year=ULRunII --light --twoD=cHq1Re1122-cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --light --twoD=cHq3Re1122-cHq3Re33
 
 python runCombine_threePoint.py --year=UL2018 --light --oneD=cHq1Re1122
 python runCombine_threePoint.py --year=UL2018 --light --oneD=cHq1Re33
@@ -38,12 +38,12 @@ python runCombine_threePoint.py --year=UL2016preVFP --twoD=cHq3Re1122-cHq3Re33 -
 
 ################################################################################
 ## All three generations
-python runCombine_threePoint.py --year=ULRunII --oneD=cHq1Re11 --impacts
-python runCombine_threePoint.py --year=ULRunII --oneD=cHq1Re22 --impacts
-python runCombine_threePoint.py --year=ULRunII --oneD=cHq1Re33 --impacts
-python runCombine_threePoint.py --year=ULRunII --oneD=cHq3Re11 --impacts
-python runCombine_threePoint.py --year=ULRunII --oneD=cHq3Re22 --impacts
-python runCombine_threePoint.py --year=ULRunII --oneD=cHq3Re33 --impacts
+python runCombine_threePoint.py --year=ULRunII --oneD=cHq1Re11
+python runCombine_threePoint.py --year=ULRunII --oneD=cHq1Re22
+python runCombine_threePoint.py --year=ULRunII --oneD=cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --oneD=cHq3Re11
+python runCombine_threePoint.py --year=ULRunII --oneD=cHq3Re22
+python runCombine_threePoint.py --year=ULRunII --oneD=cHq3Re33
 
 python runCombine_threePoint.py --year=UL2018 --oneD=cHq1Re11
 python runCombine_threePoint.py --year=UL2018 --oneD=cHq1Re22

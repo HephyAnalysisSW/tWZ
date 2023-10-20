@@ -213,12 +213,8 @@ for r in range(nRegions)+["combined"]:
         outname = outname.replace(".pdf", "_statOnly.pdf")
     xmin, xmax = -4.5, 4.5
     if wcname1 in ["cHq3Re11","cHq3Re1122"]:
-        xmin, xmax = -0.5, 0.5
-        if region == "combined" or region == 2:
-            xmin, xmax = -0.2, 0.2
+        xmin, xmax = -0.15, 0.15
     ymin, ymax = -4.5, 4.5
     if wcname2 in ["cHq3Re11","cHq3Re1122"]:
-        ymin, ymax = -0.5, 0.5
-        if region == "combined" or region == 2:
-            ymin, ymax = -0.2, 0.2
+        ymin, ymax = -0.15, 0.15
     plot2Dlimit(hist, plotstyle[region][0], plotdir+outname, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2)

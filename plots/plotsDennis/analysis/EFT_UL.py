@@ -379,6 +379,7 @@ from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
 if args.era == "UL2016":
     # mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
     mc = [UL2016.TWZ_NLO_DR, UL2016.TTX_rare, UL2016.TZQ, UL2016.triBoson, UL2016.nonprompt_3l]
+    mc += [UL2016.TTZ, UL2016.WZTo3LNu, UL2016.WZTo3LNu_powheg, UL2016.ZZ, UL2016.WZ]
     samples_eft = [UL2016.TTZ_EFT, UL2016.WZ_EFT, UL2016.ZZ_EFT]
     if args.applyFakerate:
         mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
@@ -393,6 +394,7 @@ if args.era == "UL2016":
 elif args.era == "UL2016preVFP":
     # mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
     mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.triBoson, UL2016preVFP.nonprompt_3l]
+    mc += [UL2016preVFP.TTZ, UL2016preVFP.WZTo3LNu, UL2016preVFP.WZTo3LNu_powheg, UL2016preVFP.ZZ, UL2016preVFP.WZ]
     samples_eft = [UL2016preVFP.TTZ_EFT, UL2016preVFP.WZ_EFT, UL2016preVFP.ZZ_EFT]
     if args.applyFakerate:
         mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
@@ -407,6 +409,7 @@ elif args.era == "UL2016preVFP":
 elif args.era == "UL2017":
     # mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
     mc = [UL2017.TWZ_NLO_DR, UL2017.TTX_rare, UL2017.TZQ, UL2017.triBoson, UL2017.nonprompt_3l]
+    mc += [UL2017.TTZ, UL2017.WZTo3LNu, UL2017.WZTo3LNu_powheg, UL2017.ZZ, UL2017.WZ]
     samples_eft = [UL2017.TTZ_EFT, UL2017.WZ_EFT, UL2017.ZZ_EFT]
     if args.applyFakerate:
         mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
@@ -421,6 +424,7 @@ elif args.era == "UL2017":
 elif args.era == "UL2018":
     # mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
     mc = [UL2018.TWZ_NLO_DR, UL2018.TTX_rare, UL2018.TZQ, UL2018.triBoson, UL2018.nonprompt_3l]
+    mc += [UL2018.TTZ, UL2018.WZTo3LNu, UL2018.WZTo3LNu_powheg, UL2018.ZZ, UL2018.WZ]
     samples_eft = [UL2018.TTZ_EFT, UL2018.WZ_EFT, UL2018.ZZ_EFT]
     if args.applyFakerate:
         mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
@@ -436,7 +440,7 @@ elif args.era == "UL2018":
 elif args.era == "ULRunII":
     # mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
     mc = [TWZ_NLO_DR, TTX_rare, TZQ, triBoson, nonprompt_3l]
-    mc += [WZTo3LNu, WZTo3LNu_powheg]
+    mc += [TTZ, WZTo3LNu, WZTo3LNu_powheg, ZZ, WZ]
     samples_eft = [TTZ_EFT, WZ_EFT, ZZ_EFT] ## add other WZ samples for cross check
     if args.ttWonly:
         mc = [TTX_rare_noTTW, TTW]
@@ -1117,13 +1121,20 @@ def getFakeLeptonFlavor(sample, event):
 sequence.append( getFakeLeptonFlavor )
 
 def getEFTnormweight(sample, event):
+    # scale to newest NLO cross section
     normweight = 1.0
     if "TTZ_EFT" in sample.name:
-        normweight = 0.84
+        normweight = 0.91 * 1.11
     elif "WZ_EFT" in sample.name:
-        normweight = 0.64
+        normweight = 0.64 * 1.17
     elif "ZZ_EFT" in sample.name:
-        normweight = 0.60
+        normweight = 0.60 * 1.02
+    elif "TTZ" in sample.name:
+        normweight = 1.11
+    elif "WZTo3LNu_powheg" in sample.name or "WZTo3LNu" in sample.name:
+        normweight = 1.17
+    elif "ZZ" in sample.name:
+        normweight = 1.02
     event.EFTnormweight = normweight
 sequence.append( getEFTnormweight )
 
@@ -1360,6 +1371,25 @@ def getJetId( event, sample ):
     event.jetIds = jetIds
 sequence.append(getJetId)
 
+# def modifyXS(event, sample):
+#     XS = {
+#         "TTZ_EFT": (0.86*0.10, 0.281/3.0)),
+#         "ZZ_EFT": (16.523*0.10*0.10, 1.256),
+#         "WZ_EFT": (47.13*(3*0.108)*0.10, 4.9173),
+#         "WZTo3LNu_powheg": (4.42965, 4.9173),
+#         "WZTo3LNu": (4.42965, 4.9173),
+#         "TTZ": (),
+#         "WZ": (47.13, ),
+#     }
+#
+#     if sample.name in XS.keys():
+#         (old_XS, new_XS) = XS[sample.name]
+#         XSfactor = new_XS/old_XS
+#         print sample.name, old_XS, XSfactor
+#
+#     event.XSfactor = XSfactor
+#
+# sequence.append(modifyXS)
 
 ################################################################################
 # Read variables
@@ -1459,6 +1489,7 @@ for i_mode, mode in enumerate(allModes):
     weightnames += ['reweightFakerateClosure']
     weightnames += ['EFTnormweight']
     weightnames += ['reweightNjetWZ']
+    # weightnames += ['XSfactor']
 
     # weightnames = ['weight']
 
@@ -2054,7 +2085,7 @@ if not args.nicePlots:
                         elif "ttZ01j_lepWFilter" in histname: process = "ttZ"
                         elif "ttZ01j" in histname: process = "ttZ"
                         elif "TTZ_EFT" in histname: process = "ttZ"
-                        elif "TTZ" in histname: process = "ttZ"
+                        elif "TTZ" in histname: process = "ttZ_sm"
                         elif "TTX_rare_noTTW" in histname: process = "ttX_noTTW"
                         elif "TTX_rare" in histname: process = "ttX"
                         elif "TTW" in histname: process = "ttW"
@@ -2062,9 +2093,9 @@ if not args.nicePlots:
                         elif "WZTo3LNu_powheg" in histname: process = "WZTo3LNu_powheg"
                         elif "WZTo3LNu" in histname: process = "WZTo3LNu"
                         elif "WZ_EFT" in histname: process = "WZ"
-                        elif "WZ" in histname: process = "WZ"
+                        elif "WZ" in histname: process = "WZ_pythia"
                         elif "ZZ_EFT" in histname: process = "ZZ"
-                        elif "ZZ" in histname: process = "ZZ"
+                        elif "ZZ" in histname: process = "ZZ_pythia"
                         elif "triBoson" in histname: process = "triBoson"
                         elif "nonprompt" in histname: process = "nonprompt"
                         elif "WW" in histname: process = "WW"
