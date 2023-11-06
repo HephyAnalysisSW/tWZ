@@ -30,15 +30,14 @@ if args.scaleCorrelation:
 cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notnjetSplit notscaleCorrelation"
 
 dirname_suffix = ""
-
 if args.light:
-    cmd_harvester.replace("notlight", "light")
+    cmd_harvester = cmd_harvester.replace("notlight", "light")
     dirname_suffix+="_light"
 if args.NjetSplit:
-    cmd_harvester.replace("notnjetSplit", "njetSplit")
+    cmd_harvester = cmd_harvester.replace("notnjetSplit", "njetSplit")
     dirname_suffix+="_NjetSplit"
 if args.scaleCorrelation:
-    cmd_harvester.replace("notscaleCorrelation", "scaleCorrelation")
+    cmd_harvester = cmd_harvester.replace("notscaleCorrelation", "scaleCorrelation")
     dirname_suffix+="_scaleCorrelation"
 
 this_dir = os.getcwd()
