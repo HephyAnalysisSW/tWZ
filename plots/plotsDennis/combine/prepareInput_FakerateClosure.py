@@ -144,8 +144,8 @@ logger.info( "Version = %s", version )
 dirs = {
     "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint/"+args.year+"/all/trilepT-minDLmass12-onZ1-btag0-vetoMET60v2/",
     "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint/"+args.year+"/all/trilepT-minDLmass12-offZ1-njet3p-btag1p/",
-    "WZ_CR":  "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-btag0-vetoMET60v2/",
-    "ttZ_CR": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-offZ1-njet3p-btag1p/",
+    "WZ_CR":  "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_threePoint_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-btag0-vetoMET60v2/",
+    "ttZ_CR": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_threePoint_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-offZ1-njet3p-btag1p/",
 }
 
 outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_FakerateClosure/"+args.year+"/"

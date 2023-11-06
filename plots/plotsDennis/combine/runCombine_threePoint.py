@@ -42,12 +42,14 @@ argParser.add_argument('--twoD',             action='store', type=str, default=N
 argParser.add_argument('--freeze',           action='store', type=str, default=None)
 argParser.add_argument('--float',            action='store_true', default=False)
 argParser.add_argument('--statOnly',         action='store_true', default=False)
-argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--impacts',          action='store_true', default=False)
 argParser.add_argument('--postFit',          action='store_true', default=False)
+argParser.add_argument('--light',            action='store_true', default=False)
+argParser.add_argument('--NjetSplit',        action='store_true', default=False)
+argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 args = argParser.parse_args()
 
-nRegions = 3
+nRegions = 4 if args.NjetSplit else 3
 allWCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33"]
 if args.light:
     allWCnames = ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]
@@ -116,10 +118,14 @@ logger.info( "Deactivate these uncertainty groups: %s", freezeGroups)
 
 logger.info( "Number of regions: %s", nRegions)
 
+
+dirname_suffix = ""
+if args.light:               dirname_suffix+="_light"
+if args.NjetSplit:           dirname_suffix+="_NjetSplit"
+if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
+
 this_dir = os.getcwd()
-dataCard_dir = this_dir+"/DataCards_threePoint/"+args.year+"/"
-if args.light:
-    dataCard_dir = this_dir+"/DataCards_threePoint_light/"+args.year+"/"
+dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
 
 os.chdir(dataCard_dir)
 logger.info( "Run combine based on data cards in %s", dataCard_dir )
