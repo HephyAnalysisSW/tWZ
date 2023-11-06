@@ -6,6 +6,8 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 argParser.add_argument('--light',            action='store_true', default=False)
+argParser.add_argument('--NjetSplit',        action='store_true', default=False)
+argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 args = argParser.parse_args()
 
 
@@ -15,21 +17,32 @@ if args.year not in ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]:
     raise RuntimeError( "Year %s is not knwon", args.year)
 logger.info( "Year = %s", args.year )
 
-nRegions = 3
+nRegions = 4 if args.NjetSplit else 3
 logger.info( "Number of regions: %s", nRegions)
 
 if args.light:
     logger.info( "Use combined wilson coefficients for 1st and 2nd generation" )
+
+if args.scaleCorrelation:
+    logger.info( "Correlate scales of Diboson" )
 ################################################################################
 ## Run Combine Harvester
-cmd_harvester = "CreateCards_topEFT_threePoint "+args.year
+cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notnjetSplit notscaleCorrelation"
+
+dirname_suffix = ""
+
 if args.light:
-    cmd_harvester+= " light"
+    cmd_harvester.replace("notlight", "light")
+    dirname_suffix+="_light"
+if args.NjetSplit:
+    cmd_harvester.replace("notnjetSplit", "njetSplit")
+    dirname_suffix+="_NjetSplit"
+if args.scaleCorrelation:
+    cmd_harvester.replace("notscaleCorrelation", "scaleCorrelation")
+    dirname_suffix+="_scaleCorrelation"
 
 this_dir = os.getcwd()
-dataCard_dir = this_dir+"/DataCards_threePoint/"+args.year+"/"
-if args.light:
-    dataCard_dir = this_dir+"/DataCards_threePoint_light/"+args.year+"/"
+dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
 
 if not os.path.exists( dataCard_dir ): os.makedirs( dataCard_dir )
 

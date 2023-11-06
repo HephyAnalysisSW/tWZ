@@ -20,6 +20,9 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--noData',           action='store_true', default=False)
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 argParser.add_argument('--light',            action='store_true', default=False)
+argParser.add_argument('--NjetSplit',        action='store_true', default=False)
+argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
+
 args = argParser.parse_args()
 
 ################################################################################
@@ -57,8 +60,8 @@ def getQuadratic(hist_sm, hist_plus, hist_minus):
 
     # Thus, we can get the quad from
     # (1)+(2) = SM + SM + QUAD + QUAD | -2*(3)
-    # (1)+(2)-(3) = QUAD + QUAD       | /2
-    # 0.5*[(1)+(2)-(3)] = QUAD
+    # (1)+(2)-2*(3) = QUAD + QUAD     | /2
+    # 0.5*[(1)+(2)-2*(3)] = QUAD
     hist_quad = hist_plus.Clone(hist_plus.GetName()+"_quad")
     hist_quad.Add(hist_minus)
     hist_quad.Add(hist_sm, -2)
@@ -115,12 +118,12 @@ def getHist(fname, hname, altbinning=False):
         hist = removeZeros(hist)
     return hist
 
-def getCombinedSignal(fname, hname, altbinning, rate=None, rate_process=None, sys_process=None, fname_sys=None):
+def getCombinedSignal(fname, hname, altbinning, rate=None, rate_process=None, sys_processes=[], fname_sys=None):
     signals = ["ttZ", "WZ", "ZZ"]
     for i_sig, sig in enumerate(signals):
         # If one of the signals should be varied, use alternative file
         filename = fname
-        if sig == sys_process:
+        if sig in sys_processes:
             filename = fname_sys
         # If this is the first in the loop clone, otherwise Add to cloned
         if i_sig==0:
@@ -137,8 +140,9 @@ def getCombinedSignal(fname, hname, altbinning, rate=None, rate_process=None, sy
 def getNonpromptFromCR(fname, histname, altbinning):
     # Get prompt backgrounds in CR
     firstbkg = True
-    backgrounds = ["ttZ", "WZTo3LNu", "ZZ", "tWZ", "ttX", "tZq", "triBoson"]
+    backgrounds = ["ttZ_sm", "WZTo3LNu", "ZZ_pythia", "tWZ", "ttX", "tZq", "triBoson"]
     for bkg in backgrounds:
+        # print fname, histname+"__"+bkg
         h_bkg = getHist(fname, histname+"__"+bkg, altbinning)
         if firstbkg:
             h_bkg_CR = h_bkg.Clone()
@@ -161,8 +165,17 @@ logger.info( "Year = %s", args.year )
 if args.year == "ULRunII":
     logger.info( "For the RunII combination, histograms of the eras are added" )
 
+if args.NjetSplit:
+    logger.info( "Will split ttZ region in 3 jet and 4+ jet regions" )
+
+if args.scaleCorrelation:
+    logger.info( "Correlating QCD scales of Diboson processes" )
+
 # regions
 regions = ["WZ", "ZZ", "ttZ"]
+if args.NjetSplit:
+    regions = ["WZ", "ZZ", "ttZ_3jets", "ttZ_4jets"]
+
 
 # histname
 histname = "Z1_pt"
@@ -182,16 +195,24 @@ dirs = {
     "ZZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"/"+args.year+"/all/qualepT-minDLmass12-onZ1-onZ2/",
     "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"/"+args.year+"/all/trilepT-minDLmass12-onZ1-btag0-met60/",
     "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"/"+args.year+"/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/",
-    "WZ_CR":  "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-btag0-met60/",
-    "ttZ_CR": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p/",
+    "WZ_CR":  "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_threePoint_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-btag0-met60/",
+    "ttZ_CR": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_threePoint_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p/",
+    "ttZ_3jets":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"/"+args.year+"/all/trilepT-minDLmass12-onZ1-njet3-btag1p/",
+    "ttZ_4jets":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"/"+args.year+"/all/trilepT-minDLmass12-onZ1-njet4p-btag1p/",
+    "ttZ_3jets_CR": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_threePoint_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-njet3-btag1p/",
+    "ttZ_4jets_CR": "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_threePoint_FakeRateSF_useDataSF/"+args.year+"/all/trilepFOnoT-minDLmass12-onZ1-njet4p-btag1p/",
 }
 
-outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dataTag+"/"+args.year+"/"
-if args.light:
-    outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_light"+dataTag+"/"+args.year+"/"
+dirname_suffix = ""
+if args.light:               dirname_suffix+="_light"
+if args.NjetSplit:           dirname_suffix+="_NjetSplit"
+if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
 
+outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dataTag+dirname_suffix+"/"+args.year+"/"
+plotdir = plot_directory+"/PreFit_threePoint"+dirname_suffix+"/"
 
 if not os.path.exists( outdir ): os.makedirs( outdir )
+if not os.path.exists( plotdir ): os.makedirs( plotdir )
 
 
 # Define backgrounds
@@ -306,11 +327,21 @@ sysnames = {
     "rate_ZZ":                        (),
     "rate_ZZ":                        (),
     "WZ_Njet_reweight":               ("_WZnJet", ""),
+    "WZ_heavyFlavour":                ("_WZheavy_UP", "_WZheavy_DOWN"),
 }
 
 for i in range(100):
     pdfstring = 'PDF_'+str(i+1)
     sysnames[pdfstring] = ('_'+pdfstring, "")
+
+
+if args.scaleCorrelation:
+    del sysnames['muR_WZ']
+    del sysnames['muR_ZZ']
+    del sysnames['muF_WZ']
+    del sysnames['muF_ZZ']
+    sysnames['muR_diboson'] = ("_Scale_UPNONE", "_Scale_DOWNNONE")
+    sysnames['muF_diboson'] = ("_Scale_NONEUP", "_Scale_NONEDOWN")
 
 # print sysnames
 
@@ -331,7 +362,7 @@ for region in regions:
     altbinning = True if "ZZ" in region else False
     logger.info( 'Filling region %s', region )
     p = Plotter(args.year+"__"+region+"__"+histname)
-    p.plot_dir = plot_directory+"/PreFit_threePoint/"
+    p.plot_dir = plotdir
     p.lumi = lumi[args.year]
     p.drawRatio = True
     nominalHists = {}
@@ -341,7 +372,7 @@ for region in regions:
         ## First get the nominal processes.
         ## Nonprompt needs special treatment because it is constructed from
         ## a control region
-        if process == "nonprompt" and region in ["ttZ", "WZ"]:
+        if process == "nonprompt" and region in ["ttZ", "WZ", "ttZ_3jets", "ttZ_4jets"]:
             # Get prompt backgrounds in CR
             logger.info( '    (estimate from CR)')
             nominalHists[process] = getNonpromptFromCR(dirs[region+"_CR"]+inname, histname, altbinning)
@@ -381,7 +412,7 @@ for region in regions:
                 # For PDF we do the RMS of the 100 variations
                 # As for the nominal histograms, nonprompt and SM need to be
                 # treated differently
-                if process == "nonprompt" and region in ["ttZ", "WZ"]:
+                if process == "nonprompt" and region in ["ttZ", "WZ", "ttZ_3jets", "ttZ_4jets"]:
                     pdfUP = nominalHists[process].Clone()
                     pdfDOWN = nominalHists[process].Clone()
                 elif process == "sm":
@@ -517,6 +548,12 @@ for region in regions:
                 # contains the muR/muF variations while for other processes we use
                 # the nominal.
                 (upname, downname) = sysnames[sys]
+                sysprocess = sys.split("_")[1]
+                sysprocesses = []
+                if sysprocess == "diboson":
+                    sysprocesses = ["WZ", "ZZ"]
+                else:
+                    sysprocesses = [sys.split("_")[1]]
                 sysdirUP = dirs[region]
                 sysdirUP = sysdirUP.replace('/Run', upname+'/Run').replace('/UL', upname+'/UL')
                 sysdirDOWN = dirs[region]
@@ -527,23 +564,26 @@ for region in regions:
                     histUP = nominalHists[process].Clone()
                     histDOWN = nominalHists[process].Clone()
                 elif process == "sm":
-                    processToVary = None
+                    processesToVary = []
                     upFile = None
                     downFile = None
                     for p_vary in signals:
-                        if p_vary == sys.split("_")[1]:
-                            processToVary = p_vary
+                        if p_vary in sysprocesses:
+                            processesToVary.append(p_vary)
                             upFile = sysdirUP+inname
                             downFile = sysdirDOWN+inname
-                            logger.info('      - only vary '+p_vary+" for "+sys)
-                    histUP = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=upFile)
-                    histDOWN = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=downFile)
+                    if len(processesToVary) > 0:
+                        logger.info('      - for '+sys+' vary:')
+                        for processToVary in processesToVary:
+                            logger.info('          - '+processToVary)
+                    histUP = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
+                    histDOWN = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
                     for WCname in WCnames:
-                        histUP_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=upFile)
-                        histUP_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=upFile)
+                        histUP_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
+                        histUP_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
                         histUP_quad = getQuadratic(histUP, histUP_plus, histUP_minus)
-                        histDOWN_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=downFile)
-                        histDOWN_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_process=processToVary, fname_sys=downFile)
+                        histDOWN_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
+                        histDOWN_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
                         histDOWN_quad = getQuadratic(histDOWN, histDOWN_plus, histDOWN_minus)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_plus, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_plus, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
@@ -558,8 +598,7 @@ for region in regions:
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
 
                 else:
-                    processToVary = sys.split("_")[1]
-                    if processToVary == process:
+                    if process in sysprocesses:
                         histUP   = getHist(sysdirUP+inname, name, altbinning)
                         histDOWN = getHist(sysdirDOWN+inname, name, altbinning)
                     else:
@@ -576,7 +615,7 @@ for region in regions:
                 sysdirUP = sysdirUP.replace('/Run', upname+'/Run').replace('/UL', upname+'/UL')
                 sysdirDOWN = dirs[region]
                 sysdirDOWN = sysdirDOWN.replace('/Run', downname+'/Run').replace('/UL', downname+'/UL')
-                if process == "nonprompt" and region in ["ttZ", "WZ"]:
+                if process == "nonprompt" and region in ["ttZ", "WZ", "ttZ_3jets", "ttZ_4jets"]:
                     # Nonprompt has no variations since it is estimated from data
                     # So, just copy the nominal
                     histUP = nominalHists[process].Clone()
@@ -618,7 +657,7 @@ for region in regions:
         observed = ROOT.TH1F()
         for process in processes:
             logger.info( '    adding up process %s', process)
-            if process == "nonprompt" and region in ["ttZ", "WZ"]:
+            if process == "nonprompt" and region in ["ttZ", "WZ", "ttZ_3jets", "ttZ_4jets"]:
                 # Get prompt backgrounds in CR
                 logger.info( '    (estimate from CR)')
                 h_obs_tmp = getNonpromptFromCR(dirs[region+"_CR"]+inname, histname, altbinning)

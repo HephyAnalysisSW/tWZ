@@ -141,6 +141,8 @@ argParser.add_argument('--float',            action='store_true', default=False)
 argParser.add_argument('--freeze',           action='store', type=str, default=None)
 argParser.add_argument('--statOnly',         action='store_true', default=False)
 argParser.add_argument('--light',            action='store_true', default=False)
+argParser.add_argument('--NjetSplit',        action='store_true', default=False)
+argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 args = argParser.parse_args()
 
 logger.info( "Make 2D limit plot")
@@ -176,17 +178,17 @@ if args.freeze is not None:
         if group not in uncertaintyGroups:
             raise RuntimeError( "Uncertainty group %s not known. You also might have used a wrong format: --freeze=btag-jec", group )
 
-nRegions = 3
+nRegions = 4 if args.NjetSplit else 3
 logger.info( "Number of regions: %s", nRegions)
 
+dirname_suffix = ""
+if args.light:               dirname_suffix+="_light"
+if args.NjetSplit:           dirname_suffix+="_NjetSplit"
+if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
+
 this_dir = os.getcwd()
-if args.light:
-    dataCard_dir = this_dir+"/DataCards_threePoint_light/"+args.year+"/"
-
-
-plotdir = plot_directory+"/Limits_UL_threePoint/"+args.year+"/"
-if args.light:
-    plotdir = plot_directory+"/Limits_UL_threePoint_light/"+args.year+"/"
+dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
+plotdir = plot_directory+"/Limits_UL_threePoint"+dirname_suffix+"/"+args.year+"/"
 
 if not os.path.exists( plotdir ): os.makedirs( plotdir )
 
@@ -196,6 +198,14 @@ plotstyle = {
     3: ("ttZ region", ROOT.kAzure+4),
     "combined": ("Combination", 1),
 }
+if args.NjetSplit:
+    plotstyle = {
+        1: ("ZZ region", ROOT.kGreen+3),
+        2: ("WZ region", ROOT.kRed-2),
+        3: ("ttZ (3j) region", ROOT.kAzure+4),
+        4: ("ttZ (4+j) region", ROOT.kBlue),
+        "combined": ("Combination", 1),
+    }
 
 for r in range(nRegions)+["combined"]:
     region = r+1 if isinstance(r, int) else r
