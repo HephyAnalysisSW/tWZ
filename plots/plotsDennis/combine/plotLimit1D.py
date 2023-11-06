@@ -110,6 +110,7 @@ argParser.add_argument('--freeze',           action='store', type=str, default=N
 argParser.add_argument('--statOnly',         action='store_true', default=False)
 argParser.add_argument('--addStatOnly',      action='store_true', default=False)
 argParser.add_argument('--light',            action='store_true', default=False)
+argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 args = argParser.parse_args()
 
 logger.info( "Make 1D limit plot")
@@ -146,13 +147,17 @@ logger.info( "Number of regions: %s", nRegions)
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint/"+args.year+"/"
+if args.scaleCorrelation:
+    dataCard_dir = this_dir+"/DataCards_threePoint_scaleCorr/"+args.year+"/"
 if args.light:
-    dataCard_dir = this_dir+"/DataCards_threePoint_light/"+args.year+"/"
+    dataCard_dir = dataCard_dir.replace("threePoint", "threePoint_light")
 
 
 plotdir = plot_directory+"/Limits_UL_threePoint/"+args.year+"/"
+if args.scaleCorrelation:
+    plotdir = plot_directory+"/Limits_UL_threePoint_scaleCorr/"+args.year+"/"
 if args.light:
-    plotdir = plot_directory+"/Limits_UL_threePoint_light/"+args.year+"/"
+    plotdir = plotdir.replace("threePoint", "threePoint_light")
 
 if not os.path.exists( plotdir ): os.makedirs( plotdir )
 
