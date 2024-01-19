@@ -51,7 +51,7 @@ argParser.add_argument('--noData',         action='store_true', default=False, h
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v11')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_gamma_v1')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -381,85 +381,20 @@ else:
 from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
 
 if args.era == "UL2016":
-    # mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
-    mc = [UL2016.TWZ_NLO_DR, UL2016.TTX_rare, UL2016.TZQ, UL2016.triBoson, UL2016.nonprompt_3l]
-    mc += [UL2016.TTZ, UL2016.WZTo3LNu, UL2016.WZTo3LNu_powheg, UL2016.ZZ, UL2016.WZ]
-    samples_eft = [UL2016.TTZ_EFT, UL2016.WZ_EFT, UL2016.ZZ_EFT]
-    if args.applyFakerate:
-        mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
-        samples_eft = []
-        if args.splitTTX:
-            mc = [UL2016.TWZ_NLO_DR, UL2016.TTZ, UL2016.TTX_rare_noTTW, UL2016.TTW, UL2016.TZQ, UL2016.WZTo3LNu, UL2016.triBoson, UL2016.ZZ, UL2016.nonprompt_3l]
-        if args.nonpromptOnly:
-            if args.splitnonprompt:
-                mc = [UL2016.WW, UL2016.Top, UL2016.DY]
-            else:
-                mc = [UL2016.nonprompt_3l]
+    mc = []
+    samples_eft = []
 elif args.era == "UL2016preVFP":
-    # mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
-    mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.triBoson, UL2016preVFP.nonprompt_3l]
-    mc += [UL2016preVFP.TTZ, UL2016preVFP.WZTo3LNu, UL2016preVFP.WZTo3LNu_powheg, UL2016preVFP.ZZ, UL2016preVFP.WZ]
-    samples_eft = [UL2016preVFP.TTZ_EFT, UL2016preVFP.WZ_EFT, UL2016preVFP.ZZ_EFT]
-    if args.applyFakerate:
-        mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
-        samples_eft = []
-        if args.splitTTX:
-            mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTZ, UL2016preVFP.TTX_rare_noTTW, UL2016preVFP.TTW, UL2016preVFP.TZQ, UL2016preVFP.WZTo3LNu, UL2016preVFP.triBoson, UL2016preVFP.ZZ, UL2016preVFP.nonprompt_3l]
-        if args.nonpromptOnly:
-            if args.splitnonprompt:
-                mc = [UL2016preVFP.WW, UL2016preVFP.Top, UL2016preVFP.DY]
-            else:
-                mc = [UL2016preVFP.nonprompt_3l]
+    mc = []
+    samples_eft = []
 elif args.era == "UL2017":
-    # mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
-    mc = [UL2017.TWZ_NLO_DR, UL2017.TTX_rare, UL2017.TZQ, UL2017.triBoson, UL2017.nonprompt_3l]
-    mc += [UL2017.TTZ, UL2017.WZTo3LNu, UL2017.WZTo3LNu_powheg, UL2017.ZZ, UL2017.WZ]
-    samples_eft = [UL2017.TTZ_EFT, UL2017.WZ_EFT, UL2017.ZZ_EFT]
-    if args.applyFakerate:
-        mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
-        samples_eft = []
-        if args.splitTTX:
-            mc = [UL2017.TWZ_NLO_DR, UL2017.TTZ, UL2017.TTX_rare_noTTW, UL2017.TTW, UL2017.TZQ, UL2017.WZTo3LNu, UL2017.triBoson, UL2017.ZZ, UL2017.nonprompt_3l]
-        if args.nonpromptOnly:
-            if args.splitnonprompt:
-                mc = [UL2017.WW, UL2017.Top, UL2017.DY]
-            else:
-                mc = [UL2017.nonprompt_3l]
+    mc = []
+    samples_eft = []
 elif args.era == "UL2018":
-    # mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
-    mc = [UL2018.TWZ_NLO_DR, UL2018.TTX_rare, UL2018.TZQ, UL2018.triBoson, UL2018.nonprompt_3l]
-    mc += [UL2018.TTZ, UL2018.WZTo3LNu, UL2018.WZTo3LNu_powheg, UL2018.ZZ, UL2018.WZ]
-    samples_eft = [UL2018.TTZ_EFT, UL2018.WZ_EFT, UL2018.ZZ_EFT]
-    if args.applyFakerate:
-        mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
-        samples_eft = []
-        if args.splitTTX:
-            mc = [UL2018.TWZ_NLO_DR, UL2018.TTZ, UL2018.TTX_rare_noTTW, UL2018.TTW, UL2018.TZQ, UL2018.WZTo3LNu, UL2018.triBoson, UL2018.ZZ, UL2018.nonprompt_3l]
-        if args.nonpromptOnly:
-            samples_eft = []
-            if args.splitnonprompt:
-                mc = [UL2018.WW, UL2018.Top, UL2018.DY]
-            else:
-                mc = [UL2018.nonprompt_3l]
+    mc = [UL2018.DY, UL2018.TTLep, UL2018.TTGamma, UL2018.ZGamma]
+    samples_eft = []
 elif args.era == "ULRunII":
-    # mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
-    mc = [TWZ_NLO_DR, TTX_rare, TZQ, triBoson, nonprompt_3l]
-    mc += [TTZ, WZTo3LNu, WZTo3LNu_powheg, ZZ, WZ]
-    samples_eft = [TTZ_EFT, WZ_EFT, ZZ_EFT] ## add other WZ samples for cross check
-    if args.ttWonly:
-        mc = [TTX_rare_noTTW, TTW]
-        samples_eft = []
-    if args.applyFakerate:
-        mc = [TWZ_NLO_DR, TTZ, TTX_rare, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
-        mc += [WZTo3LNu_powheg, WZ_EFT] ## add other WZ samples for cross check
-        samples_eft = []
-        if args.splitTTX:
-            mc = [TWZ_NLO_DR, TTZ, TTX_rare_noTTW, TTW, TZQ, WZTo3LNu, triBoson, ZZ, nonprompt_3l]
-        if args.nonpromptOnly:
-            if args.splitnonprompt:
-                mc = [WW, Top, DY]
-            else:
-                mc = [nonprompt_3l]
+    mc = []
+    samples_eft = []
 
 
 
@@ -1434,6 +1369,37 @@ sequence.append(getWZheavyFlavor)
 #
 # sequence.append(modifyXS)
 
+def fromGamma(event, sample):
+    PhotonConv = 0
+    matched_leptons_idx = []
+    Nmax = 100
+    if event.nGenPart < Nmax:
+        Nmax = event.nGenPart
+    if sample.name != "data":
+        for i in range(Nmax):
+            if abs(event.GenPart_pdgId[i]) in [11,13]:
+                motherID = event.GenPart_genPartIdxMother[i]
+                if motherID >= 0:
+                    motherPDG = event.GenPart_pdgId[motherID]
+                    if motherPDG != event.GenPart_pdgId[i]:
+                        if abs(motherPDG) == 22:
+                            PhotonConv = 1
+                            matched_leptons_idx.append(i)
+
+    # match to reco leptons
+    for i in matched_leptons_idx:
+        eta = event.GenPart_eta[i]
+        phi = event.GenPart_phi[i]
+        for (eta_rec, phi_rec) in [ (event.l1_eta,event.l1_phi), (event.l2_eta,event.l2_phi), (event.l3_eta,event.l3_phi)]:
+            deta = eta-eta_rec
+            dphi = deltaPhi(phi,phi_rec)
+            dR = sqrt( deta*deta + dphi*dphi)
+            if dR < 0.2:
+                PhotonConv = 2
+
+    event.PhotonConv = PhotonConv
+sequence.append(fromGamma)
+
 ################################################################################
 # Read variables
 
@@ -1667,6 +1633,13 @@ for i_mode, mode in enumerate(allModes):
         texX = 'M(3l) (GeV)', texY = 'Number of Events',
         attribute = lambda event, sample:event.m3l,
         binning=[25,0,500],
+    ))
+
+    plots.append(Plot(
+        name = "PhotonConv",
+        texX = 'Photon conversion category', texY = 'Number of Events',
+        attribute = lambda event, sample: event.PhotonConv,
+        binning=[5,-0.5,4.5],
     ))
 
     plots.append(Plot(
