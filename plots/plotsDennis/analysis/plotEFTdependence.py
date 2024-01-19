@@ -14,6 +14,7 @@ logger    = logger.get_logger(   "INFO", logFile = None)
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
+argParser.add_argument('--moreEFToperators',action='store_true', default=False)
 args = argParser.parse_args()
 
 logger.info("Plot EFT effects")
@@ -47,7 +48,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 regions = ["WZ", "ZZ", "ttZ"]
 years = ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]
 WCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33", "cHq1Re1122", "cHq3Re1122"]
-version = "v10"
+version = "v11"
 histname = "Z1_pt"
 dataTag = "_noData"
 
@@ -56,6 +57,26 @@ dirs = {
     "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"/YEAR/all/trilepT-minDLmass12-onZ1-btag0-met60/",
     "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"/YEAR/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/",
 }
+
+if args.moreEFToperators:
+    dirs = {
+        "ZZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"_moreEFToperators/YEAR/all/qualepT-minDLmass12-onZ1-onZ2/",
+        "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"_moreEFToperators/YEAR/all/trilepT-minDLmass12-onZ1-btag0-met60/",
+        "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_"+version+"_reduceEFT_threePoint"+dataTag+"_moreEFToperators/YEAR/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/",
+    }
+    regions = ["ZZ", "ttZ", "WZ"]
+    years = ["UL2018"]
+    WCnames += [
+        "cHuRe11",
+        "cHuRe22",
+        "cHuRe33",
+        "cHdRe11",
+        "cHdRe22",
+        "cHdRe33",
+        "cW",
+        "cWtil",
+    ]
+
 
 lumi = {
     "UL2016preVFP": "19.5",
