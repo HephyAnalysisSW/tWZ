@@ -28,6 +28,9 @@ WZ = Sample.fromDirectory(name="WZ", treeName="Events", isData=False, color=colo
 dirs['ZZ']               = ["ZZ"]
 ZZ = Sample.fromDirectory(name="ZZ", treeName="Events", isData=False, color=color.ZZ, texName="ZZ", directory=make_dirs( dirs['ZZ']))
 
+dirs['ZZ_powheg']               = ["ZZ_powheg"]
+ZZ_powheg = Sample.fromDirectory(name="ZZ_powheg", treeName="Events", isData=False, color=color.ZZ, texName="ZZ", directory=make_dirs( dirs['ZZ_powheg']))
+
 dirs['WW']               = ["WW"]
 # dirs['VVTo2L2Nu']        = ["VVTo2L2Nu"] # NOT YET THERE IN UL
 WW = Sample.fromDirectory(name="WW", treeName="Events", isData=False, color=color.WW, texName="WW", directory=make_dirs( dirs['WW']))
@@ -77,6 +80,9 @@ TTW  = Sample.fromDirectory(name="TTW", treeName="Events", isData=False, color=c
 dirs['TTTT']            = ['TTTT']
 TTTT = Sample.fromDirectory(name="TTTT", treeName="Events", isData=False, color=color.TTTT, texName="t#bar{t}W", directory=make_dirs( dirs['TTTT']))
 
+dirs['TTW_EWK']        = ["TTW_EWK"]
+TTW_EWK = Sample.fromDirectory(name="TTW_EWK", treeName="Events", isData=False, color=color.TTW, texName="t#bar{t}W (EWK)", directory=make_dirs( dirs['TTW_EWK']))
+
 # TT
 dirs['TTLep']           = ['TTLep_pow_CP5']
 TTLep = Sample.fromDirectory(name="TTLep",      treeName="Events", isData=False, color=color.TTZ, texName="t#bar{t}Lep", directory=make_dirs( dirs['TTLep']))
@@ -93,6 +99,23 @@ dirs['nonprompt_3l']    = dirs['WW'] + dirs['singleTop'] + dirs['DY_LO'] + dirs[
 dirs['nonprompt_4l']    = dirs['WW'] + dirs['singleTop'] + dirs['TZQ'] + dirs["WZ"] + dirs['DY_LO'] + dirs['TTLep']
 nonprompt_3l = Sample.fromDirectory(name="nonprompt_3l", treeName="Events", isData=False, color=color.nonprompt, texName="nonprompt_3l", directory=make_dirs( dirs['nonprompt_3l']))
 nonprompt_4l = Sample.fromDirectory(name="nonprompt_4l", treeName="Events", isData=False, color=color.nonprompt, texName="nonprompt_4l", directory=make_dirs( dirs['nonprompt_4l']))
+
+# TTGamma
+dirs['TTGamma'] = ["TTGammaDilep","TTGammaHadronic","TTGammaSinglelep"]
+TTGamma  = Sample.fromDirectory(name="TTGamma", treeName="Events", isData=False, color=color.TTG, texName="t#bar{t}#gamma", directory=make_dirs(dirs['TTGamma']))
+
+# ZGamma
+dirs['ZGamma'] = ["Zgamma"]
+ZGamma  = Sample.fromDirectory(name="ZGamma", treeName="Events", isData=False, color=color.ZG, texName="Z#gamma", directory=make_dirs(dirs['ZGamma']))
+
+# ggToZZ
+dirs['ggToZZ'] = ["ggToZZ_2e2mu","ggToZZ_2e2nu","ggToZZ_2e2tau","ggToZZ_2mu2nu","ggToZZ_2mu2tau","ggToZZ_4e","ggToZZ_4mu","ggToZZ_4tau"]
+ggToZZ  = Sample.fromDirectory(name="ggToZZ", treeName="Events", isData=False, color=color.ZZ, texName="ggToZZ", directory=make_dirs(dirs['ggToZZ']))
+
+# HToZZ
+dirs['HToZZ'] = ["VHToNonbb","VBF_HToZZTo4L","ggToHToZZTo2L2Q","ggToHToZZTo4L"]
+HToZZ  = Sample.fromDirectory(name="HToZZ", treeName="Events", isData=False, color=color.ZG, texName="HToZZ", directory=make_dirs(dirs['HToZZ']))
+
 
 # EFT samples
 dirs['ZZ_EFT'] = ['ZZ_EFT']

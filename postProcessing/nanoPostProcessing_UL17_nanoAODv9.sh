@@ -2,7 +2,7 @@
 # python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample WZ_EFT #SPLIT200
 # python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample TTZ_EFT #SPLIT200
 
-python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample WZTo3LNu_powheg #SPLIT10
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample WZTo3LNu_powheg #SPLIT10
 # python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample DYJetsToLL_M10to50_LO  #SPLIT42
 # python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample DYJetsToLL_M50 #SPLIT35
 # python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample TTLep_pow_CP5 #SPLIT99
@@ -38,3 +38,23 @@ python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year U
 # python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample TTWW #SPLIT5
 # python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample TTWZ
 # python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample TTZZ #SPLIT5
+
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample TTGammaDilep #SPLIT6
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample TTGammaHadronic #SPLIT10
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample TTGammaSinglelep #SPLIT10
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample Zgamma #SPLIT22
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToZZ_2e2mu #SPLIT11
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToZZ_2e2nu #SPLIT6
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToZZ_2e2tau #SPLIT10
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToZZ_2mu2nu #SPLIT6
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToZZ_2mu2tau #SPLIT10
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToZZ_4e #SPLIT13
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToZZ_4mu #SPLIT15
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToZZ_4tau #SPLIT9
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample VHToNonbb #SPLIT6
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample VBF_HToZZTo4L #SPLIT7
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToHToZZTo2L2Q #SPLIT8
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ggToHToZZTo4L #SPLIT7
+
+# python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample TTW_EWK #SPLIT27
+python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year UL2017 --processingEra tWZ_UL_nAODv9_v4 --sample ZZ_powheg #SPLIT54

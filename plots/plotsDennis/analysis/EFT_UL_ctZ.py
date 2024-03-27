@@ -29,7 +29,6 @@ from tWZ.Tools.objectSelection_UL        import lepString, lepStringNoMVA
 from tWZ.Tools.helpers                   import getCollection, cosThetaStarNew, getTheta, gettheta, getphi
 # from tWZ.Tools.leptonSF_topMVA           import leptonSF_topMVA
 from tWZ.Tools.leptonFakerate            import leptonFakerate
-from tWZ.Tools.dibosonEWKcorrection      import getNNLOtoNLO,getEWKtoQCD
 
 # Analysis
 from Analysis.Tools.helpers              import deltaPhi, deltaR
@@ -53,7 +52,7 @@ argParser.add_argument('--onlyData',       action='store_true', default=False)
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v14')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_ctZ_v2')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -139,7 +138,6 @@ variations = [
     "FSR_UP", "FSR_DOWN",
     "WZnJet",
     "WZheavy_UP", "WZheavy_DOWN",
-    "EWK_mul", "EWK_add",
 ]
 
 for i in range(100):
@@ -385,78 +383,20 @@ else:
 from tWZ.samples.nanoTuples_ULRunII_nanoAODv9_postProcessed import *
 
 if args.era == "UL2016":
-    mc = [UL2016.TWZ_NLO_DR, UL2016.TTX_rare, UL2016.TZQ, UL2016.triBoson, UL2016.nonprompt_3l]
-    mc += [UL2016.TTZ, UL2016.WZTo3LNu, UL2016.WZTo3LNu_powheg, UL2016.ZZ, UL2016.ZZ_powheg, UL2016.WZ]
-    mc += [UL2016.TTGamma, UL2016.ZGamma, UL2016.ggToZZ, UL2016.HToZZ, UL2016.TTW_EWK]
-    samples_eft = [UL2016.TTZ_EFT, UL2016.WZ_EFT, UL2016.ZZ_EFT]
-    if args.applyFakerate:
-        samples_eft = []
-        if args.splitTTX:
-            mc += [UL2016.TTX_rare_noTTW, UL2016.TTW]
-        if args.nonpromptOnly:
-            if args.splitnonprompt:
-                mc = [UL2016.WW, UL2016.Top, UL2016.DY]
-            else:
-                mc = [UL2016.nonprompt_3l]
+    mc = []
+    samples_eft = []
 elif args.era == "UL2016preVFP":
-    mc = [UL2016preVFP.TWZ_NLO_DR, UL2016preVFP.TTX_rare, UL2016preVFP.TZQ, UL2016preVFP.triBoson, UL2016preVFP.nonprompt_3l]
-    mc += [UL2016preVFP.TTZ, UL2016preVFP.WZTo3LNu, UL2016preVFP.WZTo3LNu_powheg, UL2016preVFP.ZZ, UL2016preVFP.ZZ_powheg, UL2016preVFP.WZ]
-    mc += [UL2016preVFP.TTGamma, UL2016preVFP.ZGamma, UL2016preVFP.ggToZZ, UL2016preVFP.HToZZ, UL2016preVFP.TTW_EWK]
-    samples_eft = [UL2016preVFP.TTZ_EFT, UL2016preVFP.WZ_EFT, UL2016preVFP.ZZ_EFT]
-    if args.applyFakerate:
-        samples_eft = []
-        if args.splitTTX:
-            mc += [UL2016preVFP.TTX_rare_noTTW, UL2016preVFP.TTW]
-        if args.nonpromptOnly:
-            if args.splitnonprompt:
-                mc = [UL2016preVFP.WW, UL2016preVFP.Top, UL2016preVFP.DY]
-            else:
-                mc = [UL2016preVFP.nonprompt_3l]
+    mc = []
+    samples_eft = []
 elif args.era == "UL2017":
-    mc = [UL2017.TWZ_NLO_DR, UL2017.TTX_rare, UL2017.TZQ, UL2017.triBoson, UL2017.nonprompt_3l]
-    mc += [UL2017.TTZ, UL2017.WZTo3LNu, UL2017.WZTo3LNu_powheg, UL2017.ZZ, UL2017.ZZ_powheg, UL2017.WZ]
-    mc += [UL2017.TTGamma, UL2017.ZGamma, UL2017.ggToZZ, UL2017.HToZZ, UL2017.TTW_EWK]
-    samples_eft = [UL2017.TTZ_EFT, UL2017.WZ_EFT, UL2017.ZZ_EFT]
-    if args.applyFakerate:
-        samples_eft = []
-        if args.splitTTX:
-            mc += [UL2017.TTX_rare_noTTW, UL2017.TTW]
-        if args.nonpromptOnly:
-            if args.splitnonprompt:
-                mc = [UL2017.WW, UL2017.Top, UL2017.DY]
-            else:
-                mc = [UL2017.nonprompt_3l]
+    mc = []
+    samples_eft = []
 elif args.era == "UL2018":
-    mc = [UL2018.TWZ_NLO_DR, UL2018.TTX_rare, UL2018.TZQ, UL2018.triBoson, UL2018.nonprompt_3l]
-    mc += [UL2018.TTZ, UL2018.WZTo3LNu, UL2018.WZTo3LNu_powheg, UL2018.ZZ, UL2018.ZZ_powheg, UL2018.WZ]
-    mc += [UL2018.TTGamma, UL2018.ZGamma, UL2018.ggToZZ, UL2018.HToZZ, UL2018.TTW_EWK]
-    samples_eft = [UL2018.TTZ_EFT, UL2018.WZ_EFT, UL2018.ZZ_EFT]
-    if args.applyFakerate:
-        samples_eft = []
-        if args.splitTTX:
-            mc += [UL2018.TTX_rare_noTTW, UL2018.TTW]
-        if args.nonpromptOnly:
-            samples_eft = []
-            if args.splitnonprompt:
-                mc = [UL2018.WW, UL2018.Top, UL2018.DY]
-            else:
-                mc = [UL2018.nonprompt_3l]
+    mc = []
+    samples_eft = [UL2018.TTZ_ctZ_final]
 elif args.era == "ULRunII":
-    mc = [TWZ_NLO_DR, TTX_rare, TZQ, triBoson, nonprompt_3l]
-    mc += [TTZ, WZTo3LNu, WZTo3LNu_powheg, ZZ, ZZ_powheg, WZ]
-    mc += [TTGamma, ZGamma, ggToZZ, HToZZ, TTW_EWK]
-    samples_eft = [TTZ_EFT, WZ_EFT, ZZ_EFT]
-    if args.applyFakerate:
-        samples_eft = []
-        if args.splitTTX:
-            mc += [TTX_rare_noTTW, TTW]
-        if args.nonpromptOnly:
-            samples_eft = []
-            if args.splitnonprompt:
-                mc = [WW, Top, DY]
-            else:
-                mc = [nonprompt_3l]
-
+    mc = []
+    samples_eft = []
 if args.onlyData:
     mc = []
     samples_eft = []
@@ -495,21 +435,25 @@ if args.nicePlots:
 
 WCs = []
 WC_setup = [
-    ('cHq1Re11',     ROOT.kRed),
-    ('cHq1Re22',     ROOT.kRed),
-    ('cHq1Re33',     ROOT.kRed),
-    ('cHq1Re1122',   ROOT.kRed),
-    ('cHq1Re1133',   ROOT.kRed),
-    ('cHq1Re2233',   ROOT.kRed),
-    ('cHq1Re112233', ROOT.kRed),
-    ('cHq3Re11',     ROOT.kBlue),
-    ('cHq3Re22',     ROOT.kBlue),
-    ('cHq3Re33',     ROOT.kBlue),
-    ('cHq3Re1122',   ROOT.kBlue),
-    ('cHq3Re1133',   ROOT.kBlue),
-    ('cHq3Re2233',   ROOT.kBlue),
-    ('cHq3Re112233', ROOT.kBlue),
+    ('cHq1Re33',    ROOT.kRed),
+    ('cHq3Re33',    ROOT.kRed),
+    ('cuWRe33',     ROOT.kRed),
+    ('cuBRe33',     ROOT.kRed),
+    ('cuWIm33',     ROOT.kRed),
+    ('cuBIm33',     ROOT.kRed),
+    ('ctZ',     ROOT.kRed),
+    ('ctW',     ROOT.kRed),
+    ('ctZI',     ROOT.kRed),
+    ('ctWI',     ROOT.kRed),
 ]
+
+# ctZ = -ctWRe cos(theta) + ctBRe sin(theta)
+# sin^2(theta) = 0.223
+# theta = 0.492
+# sin(theta) = 0.472
+# cos(theta) = 0.88
+sintheta = 0.472
+costheta = 0.88
 
 if args.moreEFToperators:
     WC_setup.append(('cHuRe11',     ROOT.kRed))
@@ -557,6 +501,14 @@ for i_sample, sample in enumerate(samples_eft):
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re22':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
         elif WC=="cHq3Re112233":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re22':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="ctW":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cuWRe33': -WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="ctWI":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cuWIm33': -WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="ctZ":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cuBRe33': WCval/sintheta}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="ctZI":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cuBIm33': WCval/sintheta}, 'sample': sample, 'i_sample': i_sample})
         else:
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{WC:WCval} , 'sample': sample, 'i_sample': i_sample})
 
@@ -824,48 +776,10 @@ def getWlep( event ):
         Wleps.append([Wlep, lepton, neu])
     return Wleps
 
-def findHardestBoson(event):
-    # print "================="
-    i_hardest = -1
-    pt_max = 0
-    for i in range(event.nGenPart):
-        if abs(event.GenPart_pdgId[i]) in [23, 24]:
-            # i_mother = event.GenPart_genPartIdxMother[i]
-            # pdgId_mother = event.GenPart_pdgId[i_mother]
-            if event.GenPart_pt[i] > pt_max:
-                pt_max = event.GenPart_pt[i]
-                i_hardest = i
-    return i_hardest
-
 
 ################################################################################
 # Define sequences
 sequence       = []
-
-def applyEWKcorrections(sample, event):
-    SF_EWK = 1
-    process = None
-    i_hardest = -1
-    if args.sys in ["EWK_add", "EWK_mul"]:
-        if sample.name in ["WZ","ZZ","ZZ_powheg","WZTo3LNu","WZTo3LNu_powheg","ggToZZ","ZZ_EFT","WZ_EFT"]:
-            i_hardest = findHardestBoson(event)
-            # print i_hardest, event.GenPart_pdgId[i_hardest], event.GenPart_pt[i_hardest]
-            if "ZZ" in sample.name:
-                process = "ZZ"
-            elif "WZ" in sample.name:
-                process = "WZ"
-        if i_hardest >= 0 and process is not None:
-            f_NNLO = getNNLOtoNLO(event.GenPart_pt[i_hardest], process, True)
-            f_EWK_add = getEWKtoQCD(event.GenPart_pt[i_hardest], process, "add")
-            f_EWK_mul = getEWKtoQCD(event.GenPart_pt[i_hardest], process, "mul")
-            if args.sys == "EWK_add":
-                SF_EWK = f_NNLO*f_EWK_add
-            elif args.sys == "EWK_mul":
-                SF_EWK = f_NNLO*f_EWK_mul
-            else:
-                SF_EWK = 1.
-    event.EWKweight = SF_EWK
-sequence.append(applyEWKcorrections)
 
 def tunePtCone(sample, event):
     if args.tunePtCone:
@@ -1176,7 +1090,7 @@ sequence.append( getFakeLeptonFlavor )
 def getEFTnormweight(sample, event):
     # scale to newest NLO cross section
     normweight = 1.0
-    if "TTZ_EFT" in sample.name:
+    if "TTZ_EFT" in sample.name or "TTZ_ctZ" in sample.name:
         normweight = 0.91 * 1.11
     elif "WZ_EFT" in sample.name:
         normweight = 0.64 * 1.17
@@ -1449,25 +1363,6 @@ def getWZheavyFlavor( event, sample ):
 
 sequence.append(getWZheavyFlavor)
 
-# def modifyXS(event, sample):
-#     XS = {
-#         "TTZ_EFT": (0.86*0.10, 0.281/3.0)),
-#         "ZZ_EFT": (16.523*0.10*0.10, 1.256),
-#         "WZ_EFT": (47.13*(3*0.108)*0.10, 4.9173),
-#         "WZTo3LNu_powheg": (4.42965, 4.9173),
-#         "WZTo3LNu": (4.42965, 4.9173),
-#         "TTZ": (),
-#         "WZ": (47.13, ),
-#     }
-#
-#     if sample.name in XS.keys():
-#         (old_XS, new_XS) = XS[sample.name]
-#         XSfactor = new_XS/old_XS
-#         print sample.name, old_XS, XSfactor
-#
-#     event.XSfactor = XSfactor
-#
-# sequence.append(modifyXS)
 
 ################################################################################
 # Read variables
@@ -1568,7 +1463,6 @@ for i_mode, mode in enumerate(allModes):
     weightnames += ['EFTnormweight']
     weightnames += ['reweightNjetWZ']
     weightnames += ['reweightWZheavyFlavor']
-    weightnames += ['EWKweight']
 
 
     # weightnames += ['XSfactor']
@@ -1965,14 +1859,6 @@ for i_mode, mode in enumerate(allModes):
         ))
 
         plots.append(Plot(
-            name = "SF_EWK",
-            texX = 'Diboson EWK correction', texY = 'Number of Events',
-            attribute = lambda event, sample: event.EWKweight if not sample.isData else -1,
-            addOverFlowBin='both',
-            binning=[50, 0.5, 1.5],
-        ))
-
-        plots.append(Plot(
             name = "SF_Trigger",
             texX = 'Trigger SF', texY = 'Number of Events',
             attribute = lambda event, sample: event.reweightTrigger if not sample.isData else -1,
@@ -2187,6 +2073,8 @@ for mode in allModes+["all"]:
                     elif "ttZ01j_lepWFilter" in histname: process = "ttZ"
                     elif "ttZ01j" in histname: process = "ttZ"
                     elif "TTZ_EFT" in histname: process = "ttZ"
+                    elif "TTZ_ctZ_final" in histname: process = "ttZ_ctZ"
+                    elif "TTZ_ctZ" in histname: process = "ttZ_ctZ"
                     elif "TTZ" in histname: process = "ttZ_sm"
                     elif "TTX_rare_noTTW" in histname: process = "ttX_noTTW"
                     elif "TTX_rare" in histname: process = "ttX"

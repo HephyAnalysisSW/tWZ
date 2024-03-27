@@ -21,7 +21,7 @@ args = argParser.parse_args()
 
 
 
-def getHist(fname, hname, altbinning=False):
+def getHist(fname, hname, rebin, altbinning=False):
     bins  = [0, 60, 120, 180, 240, 300, 400, 1000]
     if altbinning:
         bins  = [0, 60, 120, 180, 1000]
@@ -38,7 +38,8 @@ def getHist(fname, hname, altbinning=False):
         hist.Add(hist_16preVFP)
     else:
         hist = getObjFromFile(fname, hname)
-    hist = hist.Rebin(len(bins)-1, hist.GetName()+"_rebin", array.array('d',bins))
+    if rebin:
+        hist = hist.Rebin(len(bins)-1, hist.GetName()+"_rebin", array.array('d',bins))
     return hist
 
 ################################################################################
@@ -46,9 +47,14 @@ def getHist(fname, hname, altbinning=False):
 logger.info( "Compare EFT and SM files")
 
 # histname
-histname = "Z1_pt"
+histnames = {
+    "Z1_pt":   "Z p_{T} [GeV]",
+    "l1_pt":   "Leading lepton p_{T} [GeV]",
+    "N_jets":  "Number of jets",
+    "N_bjets": "Number of b-tagged jets",
+    }
 
-version = "v11"
+version = "v12"
 logger.info( "Version = %s", version )
 
 # Directories
@@ -59,7 +65,7 @@ dirs = {
 }
 
 processes = {
-    "ZZ":  ("ZZ", "ZZ_pythia"),
+    "ZZ":  ("ZZ", "ZZ_powheg"),
     "WZ":  ("WZ", "WZTo3LNu_powheg"),
     "ttZ": ("ttZ", "ttZ_sm"),
 }
@@ -73,38 +79,46 @@ lumi = {
 }
 
 
-outdir = plot_directory+"/EFTvsSMv2/"
+outdir = plot_directory+"/EFTvsSMv3/"
 if not os.path.exists( outdir ): os.makedirs( outdir )
 
 for year in ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]:
     for region in ["WZ", "ZZ", "ttZ"]:
-        altbinning = region=="ZZ"
-        (process_eft, process_sm) = processes[region]
-        file = dirs[region].replace("YEAR", year)+"Results.root"
-        h_SM  = getHist(file, histname+"__"+process_sm, altbinning)
-        h_EFT = getHist(file, histname+"__"+process_eft, altbinning)
-        h_EFT_muR_up   = getHist(file.replace("noData", "noData_Scale_UPNONE"), histname+"__"+process_eft, altbinning)
-        h_EFT_muR_down = getHist(file.replace("noData", "noData_Scale_DOWNNONE"), histname+"__"+process_eft, altbinning)
-        h_EFT_muF_up   = getHist(file.replace("noData", "noData_Scale_NONEUP"), histname+"__"+process_eft, altbinning)
-        h_EFT_muF_down = getHist(file.replace("noData", "noData_Scale_NONEDOWN"), histname+"__"+process_eft, altbinning)
+        for histname in histnames.keys():
+            rebin = False
+            if histname == "Z1_pt":
+                rebin = True
+            altbinning = region=="ZZ"
+            (process_eft, process_sm) = processes[region]
+            file = dirs[region].replace("YEAR", year)+"Results.root"
+            h_SM  = getHist(file, histname+"__"+process_sm, rebin, altbinning)
+            h_EFT = getHist(file, histname+"__"+process_eft, rebin, altbinning)
+            h_EFT_muR_up   = getHist(file.replace("noData", "noData_Scale_UPNONE"), histname+"__"+process_eft, rebin, altbinning)
+            h_EFT_muR_down = getHist(file.replace("noData", "noData_Scale_DOWNNONE"), histname+"__"+process_eft, rebin, altbinning)
+            h_EFT_muF_up   = getHist(file.replace("noData", "noData_Scale_NONEUP"), histname+"__"+process_eft, rebin, altbinning)
+            h_EFT_muF_down = getHist(file.replace("noData", "noData_Scale_NONEDOWN"), histname+"__"+process_eft, rebin, altbinning)
 
-        f_xs = 1.11 if region=="ttZ" else (1.17 if region=="WZ" else 1.02)
-        SF = h_EFT.Integral()/h_SM.Integral()
-        SF_xscorr = h_EFT.Integral()/(h_SM.Integral()*f_xs)
-        h_SM.Scale(SF)
+            f_xs = 1
+            if region == "ttZ":
+                f_xs = 1.11
+            elif region == "WZ":
+                f_xs = 1.17
+            # SF = h_EFT.Integral()/h_SM.Integral()
+            # SF_xscorr = h_EFT.Integral()/(h_SM.Integral()*f_xs)
+            # h_EFT.Scale(1/SF)
+            #
+            # print SF, 1/SF
+            # print SF_xscorr, 1/SF_xscorr
 
-        print SF, 1/SF
-        print SF_xscorr, 1/SF_xscorr
 
-
-        p = Plotter(year+"__"+region+"__"+histname)
-        p.plot_dir = outdir
-        p.lumi = lumi[year]
-        p.xtitle = "Z p_{T} [GeV]"
-        p.drawRatio = True
-        # p.setCustomXRange(0,600)
-        p.addBackground(h_EFT, "EFT sample", 15)
-        p.addSignal(h_SM, "SM sample", ROOT.kRed)
-        p.addSystematic(h_EFT_muR_up, h_EFT_muR_down, "muR", "EFT sample")
-        p.addSystematic(h_EFT_muF_up, h_EFT_muF_down, "muF", "EFT sample")
-        p.draw()
+            p = Plotter(year+"__"+region+"__"+histname)
+            p.plot_dir = outdir
+            p.lumi = lumi[year]
+            p.xtitle = histnames[histname]
+            p.drawRatio = True
+            # p.setCustomXRange(0,600)
+            p.addBackground(h_EFT, "EFT sample", 15)
+            p.addSignal(h_SM, "SM sample", ROOT.kRed)
+            p.addSystematic(h_EFT_muR_up, h_EFT_muR_down, "muR", "EFT sample")
+            p.addSystematic(h_EFT_muF_up, h_EFT_muF_down, "muF", "EFT sample")
+            p.draw()

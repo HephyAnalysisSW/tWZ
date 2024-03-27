@@ -55,13 +55,13 @@ for year in ["2016preVFP", "2016", "2017", "2018"]:
             stuffmissing.append("ps")
 
         if len(stuffmissing) > 0:
-            missing.append( (year, sample, stuffmissing) )
+            missing.append( (year, sample.name, stuffmissing) )
 
 
-        print "-----------------"
-        printBins(ps_norm_histo)
+        # print "-----------------"
+        # printBins(ps_norm_histo)
 
-        # if "TTHTobb" in sample.name:
+        # if "TTW_EWK" in sample.name:
         #     print "-----------------"
         #     printBins(scale_norm_histo)
         #     print "-----------------"
@@ -71,5 +71,7 @@ for year in ["2016preVFP", "2016", "2017", "2018"]:
 print "--------------------------------------------------------------------"
 print "--------------------------------------------------------------------"
 print "--------------------------------------------------------------------"
+print "Missing normalizations:"
+print ""
 for m in missing:
     print m
