@@ -32,7 +32,7 @@ if not os.path.exists( plotdir ): os.makedirs( plotdir )
 regions = ["WZ", "ZZ", "ttZ"]
 histname = "Z1_pt"
 signals = ["sm"]
-backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "nonprompt"]
+backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "ggToZZ", "nonprompt"]
 WCs = {
     "WZ" : "cHq3Re1122",
     "ZZ" : "cHq1Re1122",
@@ -43,6 +43,7 @@ processinfo = {
     "sm":        ("t#bar{t}Z + WZ + ZZ", ROOT.kAzure+7),
     "ttZ":       ("t#bar{t}Z", color.TTZ),
     "WZ":        ("WZ",  color.WZ),
+    "ggToZZ":    ("gg #rightarrow ZZ", color.ZZ),
     "ZZ":        ("ZZ", color.ZZ),
     "tWZ":       ("tWZ", color.TWZ),
     "ttX":       ("t#bar{t}X", color.TTX_rare),
@@ -54,19 +55,19 @@ processinfo = {
 
 sys = [
     'BTag_b_correlated', 'BTag_b_uncorrelated_2016', 'BTag_b_uncorrelated_2016preVFP', 'BTag_b_uncorrelated_2017', 'BTag_b_uncorrelated_2018', 'BTag_l_correlated', 'BTag_l_uncorrelated_2016', 'BTag_l_uncorrelated_2016preVFP', 'BTag_l_uncorrelated_2017', 'BTag_l_uncorrelated_2018',
-    'FSR_WZ', 'FSR_ZZ', 'FSR_tWZ', 'FSR_tZq', 'FSR_triBoson', 'FSR_ttX', 'FSR_ttZ',
+    'FSR_WZ', 'FSR_ZZ', 'FSR_tWZ', 'FSR_tZq', 'FSR_triBoson', 'FSR_ttX', 'FSR_ttZ', 'FSR_ggToZZ',
     'Fakerate', 'FakerateClosure_correlated_both', 'FakerateClosure_correlated_elec', 'FakerateClosure_correlated_muon',
     'FakerateClosure_uncorrelated_both_2016', 'FakerateClosure_uncorrelated_both_2016preVFP', 'FakerateClosure_uncorrelated_both_2017', 'FakerateClosure_uncorrelated_both_2018',
     'FakerateClosure_uncorrelated_elec_2016', 'FakerateClosure_uncorrelated_elec_2016preVFP', 'FakerateClosure_uncorrelated_elec_2017', 'FakerateClosure_uncorrelated_elec_2018',
     'FakerateClosure_uncorrelated_muon_2016', 'FakerateClosure_uncorrelated_muon_2016preVFP', 'FakerateClosure_uncorrelated_muon_2017', 'FakerateClosure_uncorrelated_muon_2018',
-    'ISR_WZ', 'ISR_ZZ', 'ISR_tWZ', 'ISR_tZq', 'ISR_triBoson', 'ISR_ttX', 'ISR_ttZ',
+    'ISR_WZ', 'ISR_ZZ', 'ISR_tWZ', 'ISR_tZq', 'ISR_triBoson', 'ISR_ttX', 'ISR_ttZ', 'ISR_ggToZZ',
     'JER', 'JES',
     'LepIDstat_2016', 'LepIDstat_2016preVFP', 'LepIDstat_2017', 'LepIDstat_2018', 'LepIDsys', 'LepReco',
     'Lumi_correlated_161718', 'Lumi_correlated_1718',
     'Lumi_uncorrelated_2016', 'Lumi_uncorrelated_2017', 'Lumi_uncorrelated_2018',
     'PU', 'Prefire', 'Trigger', 'WZ_Njet_reweight', 'WZ_heavyFlavour',
-    'muF_WZ', 'muF_ZZ', 'muF_tWZ', 'muF_tZq', 'muF_triBoson', 'muF_ttX', 'muF_ttZ',
-    'muR_WZ', 'muR_ZZ', 'muR_tWZ', 'muR_tZq', 'muR_triBoson', 'muR_ttX', 'muR_ttZ',
+    'muF_WZ', 'muF_ZZ', 'muF_tWZ', 'muF_tZq', 'muF_triBoson', 'muF_ttX', 'muF_ttZ', 'muF_ggToZZ',
+    'muR_WZ', 'muR_ZZ', 'muR_tWZ', 'muR_tZq', 'muR_triBoson', 'muR_ttX', 'muR_ttZ', 'muR_ggToZZ',
     'rate_WZ', 'rate_ZZ', 'rate_ttZ'
 ]
 
@@ -75,6 +76,7 @@ rates_bkg = {
     "ttX": 0.2,
     "tZq": 0.1,
     "triBoson": 0.2,
+    "ggToZZ": 0.2,
 }
 
 for region in regions:

@@ -2,8 +2,13 @@ import os
 import tWZ.Tools.logger as logger
 logger    = logger.get_logger(   "INFO", logFile = None)
 
-def getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname):
+def getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, additionalOptions):
     cmd = "combine INROOTFILE -M FitDiagnostics --saveShapes --saveWithUnc --numToysForShape 2000   --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST --preFitValue 0 --plots -n OUTNAME"
+    cmd += additionalOptions
+    if "cminDefaultMinimizerStrategy" in additionalOptions:
+        outname += "_minimizerStrategy"
+    if "ignoreCovWarning" in additionalOptions:
+        outname += "_ignoreCovWarning"
     cmd = cmd.replace("INROOTFILE", dataCard_dir+infile)
     cmd = cmd.replace("POILIST", poi_list)
     cmd = cmd.replace("FREEZELIST", freeze_list)
@@ -12,8 +17,10 @@ def getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, rang
     cmd = cmd.replace("OUTNAME", outname+"_SHAPES")
     return cmd
 
-def getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname):
+def getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, doSignalInjection):
     base_cmd =  "combineTool.py -M Impacts -d INROOTFILE -m 125 -t -1 --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST"
+    if doSignalInjection:
+        base_cmd = base_cmd.replace("-t -1", "")
     base_cmd = base_cmd.replace("INROOTFILE", dataCard_dir+infile)
     base_cmd = base_cmd.replace("POILIST", poi_list)
     base_cmd = base_cmd.replace("FREEZELIST", freeze_list)
@@ -40,6 +47,7 @@ argParser.add_argument('--year',             action='store', type=str, default="
 argParser.add_argument('--oneD',             action='store', type=str, default=None)
 argParser.add_argument('--twoD',             action='store', type=str, default=None)
 argParser.add_argument('--freeze',           action='store', type=str, default=None)
+argParser.add_argument('--region',           action='store', type=str, default="all")
 argParser.add_argument('--float',            action='store_true', default=False)
 argParser.add_argument('--statOnly',         action='store_true', default=False)
 argParser.add_argument('--impacts',          action='store_true', default=False)
@@ -47,9 +55,19 @@ argParser.add_argument('--postFit',          action='store_true', default=False)
 argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
+argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
+argParser.add_argument('--minimizerStrategy',action='store_true', default=False)
+argParser.add_argument('--ignoreCovWarning', action='store_true', default=False)
 args = argParser.parse_args()
 
 nRegions = 4 if args.NjetSplit else 3
+if args.region != "all":
+    nRegions = 1
+
+
 allWCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33"]
 if args.light:
     allWCnames = ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]
@@ -123,15 +141,23 @@ dirname_suffix = ""
 if args.light:               dirname_suffix+="_light"
 if args.NjetSplit:           dirname_suffix+="_NjetSplit"
 if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
+if args.signalInjectionLight:     dirname_suffix+="_signalInjectionLight"
+if args.signalInjectionHeavy:     dirname_suffix+="_signalInjectionHeavy"
+if args.signalInjectionMixed:     dirname_suffix+="_signalInjectionMixed"
+if args.signalInjectionWZjets:     dirname_suffix+="_signalInjectionWZjets"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
 
 os.chdir(dataCard_dir)
 logger.info( "Run combine based on data cards in %s", dataCard_dir )
-for r in range(nRegions)+["combined"]:
-    region = r+1 if isinstance(r, int) else r
-    infile = "topEFT_%s_%s_13TeV_%s.root"%(args.year, str(region), args.year)
+allRegions = []
+if args.region == "all":
+    allRegions = range(1, nRegions+1)+["combined"]
+else:
+    allRegions = [args.region]
+for region in allRegions:
+    infile = "topEFT_%s_%s_13TeV_%s.root"%(args.year, region, args.year)
     outname = "."+infile.replace(".root", "")
     outname += "_2D-"+args.twoD if args.twoD is not None else "_1D-"+args.oneD
     outname += "_float" if args.float else "_margin"
@@ -159,9 +185,9 @@ for r in range(nRegions)+["combined"]:
     range_list = ""
     for i, wcname in enumerate(WCsInFit):
         if wcname in ["cHq3Re11", "cHq3Re1122"]:
-            range = "-0.2,0.2"
+            range = "-0.5,0.5"
         else:
-            range = "-5,5"
+            range = "-7,7"
             # range = "-3,3" if args.twoD is not None else "-5,5"
         if i > 0:
             range_list += ":"
@@ -171,6 +197,8 @@ for r in range(nRegions)+["combined"]:
     # Npoints = "40401" if args.twoD is not None else "200"
     # Now put together combine command
     cmd_combine =  "combine -M MultiDimFit INROOTFILE --algo=grid --points NPOINTS -m 125 -t -1 -n OUTNAME --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST --verbose -1 --saveToys --saveWorkspace"
+    if args.signalInjectionLight or args.signalInjectionHeavy or args.signalInjectionMixed or args.signalInjectionWZjets:
+        cmd_combine = cmd_combine.replace("-t -1", "")
     cmd_combine = cmd_combine.replace("INROOTFILE", infile)
     cmd_combine = cmd_combine.replace("NPOINTS", Npoints)
     cmd_combine = cmd_combine.replace("OUTNAME", outname)
@@ -189,19 +217,27 @@ for r in range(nRegions)+["combined"]:
     logger.info( "Command = %s", cmd_combine )
     os.system(cmd_combine)
     if args.impacts:
-        if region == "combined":
-            logger.info( "Also create impact plot" )
-            impact_dir = dataCard_dir+"Impacts__"+outname.replace(".", "")+"/"
-            if not os.path.exists( impact_dir ): os.makedirs( impact_dir )
-            os.chdir(impact_dir)
-            cmds_impact = getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname)
-            for cmd in cmds_impact:
-                logger.info( "Command = %s", cmd )
-                os.system(cmd)
-            os.chdir(dataCard_dir)
+        logger.info( "Also create impact plot" )
+        impact_dir = dataCard_dir+"Impacts__"+outname.replace(".", "")+"/"
+        if not os.path.exists( impact_dir ): os.makedirs( impact_dir )
+        os.chdir(impact_dir)
+        doSignalInjection = False
+        if args.signalInjectionLight or args.signalInjectionHeavy or args.signalInjectionMixed or args.signalInjectionWZjets:
+            doSignalInjection = True
+        cmds_impact = getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, doSignalInjection)
+        for cmd in cmds_impact:
+            logger.info( "Command = %s", cmd )
+            os.system(cmd)
+        os.chdir(dataCard_dir)
     if args.postFit:
         logger.info( "Also run FitDiagnostics and save shapes" )
-        cmd_shapes = getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname)
+        additionalOptions = ""
+        if args.minimizerStrategy:
+            additionalOptions += " --cminDefaultMinimizerStrategy 0 "
+        if args.ignoreCovWarning:
+            additionalOptions += " --ignoreCovWarning "
+
+        cmd_shapes = getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, additionalOptions)
         logger.info( "Command = %s", cmd_shapes )
         os.system(cmd_shapes)
 

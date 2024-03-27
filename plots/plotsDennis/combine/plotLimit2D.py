@@ -14,18 +14,47 @@ ROOT.gStyle.SetLegendBorderSize(0)
 ROOT.gStyle.SetPadTickX(1)
 ROOT.gStyle.SetPadTickY(1)
 
-def scanGraph(g):
-    minval = -3.
-    maxval = 3.
-    Nsteps = 20
-    stepsize = (maxval-minval)/Nsteps
-    print "---------------------------------------------------------------------"
-    for i in range(Nsteps):
-        # x = 0
-        # y = minval+i*stepsize
-        x = minval+i*stepsize
-        y = 0
-        print x, y, g.Interpolate(x, y)
+def getCMS(x,y,x2,y2,prelim=False):
+    labels = []
+    cmstext = ROOT.TLatex(3.5, 24, "CMS")
+    cmstext.SetNDC()
+    cmstext.SetTextAlign(11)
+    cmstext.SetTextFont(62)
+    cmstext.SetTextSize(0.06)
+    cmstext.SetX(x)
+    cmstext.SetY(y)
+    labels.append(cmstext)
+    if prelim:
+        prelimtext = ROOT.TLatex(3.5, 24, "Preliminary")
+        prelimtext.SetNDC()
+        prelimtext.SetTextAlign(11)
+        prelimtext.SetTextFont(52)
+        prelimtext.SetTextSize(0.04)
+        prelimtext.SetX(x+0.12)
+        prelimtext.SetY(y)
+        labels.append(prelimtext)
+    lumitext = ROOT.TLatex(3.5, 24, "138 fb^{-1} (13 TeV)")
+    lumitext.SetNDC()
+    lumitext.SetTextAlign(31)
+    lumitext.SetTextFont(42)
+    lumitext.SetTextSize(0.032)
+    lumitext.SetX(x2)
+    lumitext.SetY(y2)
+    labels.append(lumitext)
+    return labels
+
+# def scanGraph(g):
+#     minval = -3.
+#     maxval = 3.
+#     Nsteps = 20
+#     stepsize = (maxval-minval)/Nsteps
+#     print "---------------------------------------------------------------------"
+#     for i in range(Nsteps):
+#         # x = 0
+#         # y = minval+i*stepsize
+#         x = minval+i*stepsize
+#         y = 0
+#         print x, y, g.Interpolate(x, y)
 
 def getHist2DFromTree(filename, wcname1, wcname2):
     wc1values, wc2values, twodeltaNLLs = array.array( 'd' ), array.array( 'd' ), array.array( 'd' )
@@ -56,25 +85,36 @@ def getHist2DFromTree(filename, wcname1, wcname2):
     return hist, bestFit_wc1, bestFit_wc2
 
 def setDrawStyle(h, wcname1, wcname2):
+    from tWZ.Tools.histogramHelper import WClatexNames
     h.SetTitle('')
-    h.GetXaxis().SetTitle(wcname1)
-    h.GetYaxis().SetTitle(wcname2)
+    h.GetXaxis().SetTitle(WClatexNames[wcname1])
+    h.GetYaxis().SetTitle(WClatexNames[wcname2])
     h.GetZaxis().SetTitle('-2 #Delta ln L')
-    h.GetZaxis().SetTitleOffset(1.3)
+    h.GetXaxis().SetTitleOffset(1.1)
+    h.GetYaxis().SetTitleOffset(0.9)
+    h.GetZaxis().SetTitleOffset(1.1)
     h.GetXaxis().SetNdivisions(505)
     h.GetYaxis().SetNdivisions(505)
     return h
 
 def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2):
     c = ROOT.TCanvas(name, "", 700, 600)
-    ROOT.gPad.SetTopMargin(0.02)
-    ROOT.gPad.SetRightMargin(0.2)
+    topmargin = 0.08
+    rightmargin = 0.18
+    leftmargin = 0.12
+    bottommargin = 0.15
+
+    ROOT.gPad.SetTopMargin(topmargin)
+    ROOT.gPad.SetRightMargin(rightmargin)
+    ROOT.gPad.SetLeftMargin(leftmargin)
+    ROOT.gPad.SetBottomMargin(bottommargin)
     ROOT.gStyle.SetPalette(ROOT.kSunset)
 
     h.GetXaxis().SetRangeUser(xmin, xmax)
     h.GetYaxis().SetRangeUser(ymin, ymax)
     # h.GetZaxis().SetRangeUser(0.01, 100)
     ROOT.gPad.SetLogz()
+
 
     # Contours
     contours = [2.28, 5.99]# (68%, 95%) for 2D
@@ -119,13 +159,22 @@ def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_w
     BFpoint.SetMarkerColor(ROOT.kCyan-3)
     BFpoint.Draw("p same")
     # legend
-    leg = ROOT.TLegend(.6, .7, .75, .85)
+    leg = ROOT.TLegend(.55, .7, 1.0-rightmargin-0.03, 1.0-topmargin-0.03)
+    leg.SetTextSize(.035)
     leg.SetHeader(legname)
     leg.AddEntry( BFpoint, "Best fit","p")
     leg.AddEntry( SMpoint, "SM","p")
     leg.AddEntry( cont_p1.At(0), "68%s CL"%"%", "l")
     leg.AddEntry( cont_p2.At(0), "95%s CL"%"%", "l")
     leg.Draw()
+    # CMSlabel
+    x_CMS = leftmargin
+    y_CMS = 1.0-topmargin+0.01
+    x_lumi = 1.0-rightmargin
+    y_lumi = 1.0-topmargin+0.01
+    labels = getCMS(x_CMS, y_CMS, x_lumi, y_lumi, True)
+    for l in labels:
+        l.Draw()
     # Draw
     ROOT.gPad.RedrawAxis()
     c.Print(name)
@@ -143,6 +192,11 @@ argParser.add_argument('--statOnly',         action='store_true', default=False)
 argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
+argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
+argParser.add_argument('--onlyCombined',  action='store_true', default=False)
 args = argParser.parse_args()
 
 logger.info( "Make 2D limit plot")
@@ -179,12 +233,21 @@ if args.freeze is not None:
             raise RuntimeError( "Uncertainty group %s not known. You also might have used a wrong format: --freeze=btag-jec", group )
 
 nRegions = 4 if args.NjetSplit else 3
-logger.info( "Number of regions: %s", nRegions)
+
+if args.onlyCombined:
+    nRegions = 0 # combined region is added later
+    logger.info( "Only plot combined region")
+else:
+    logger.info( "Number of regions: %s", nRegions)
 
 dirname_suffix = ""
 if args.light:               dirname_suffix+="_light"
 if args.NjetSplit:           dirname_suffix+="_NjetSplit"
 if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
+if args.signalInjectionLight:     dirname_suffix+="_signalInjectionLight"
+if args.signalInjectionHeavy:     dirname_suffix+="_signalInjectionHeavy"
+if args.signalInjectionMixed:     dirname_suffix+="_signalInjectionMixed"
+if args.signalInjectionWZjets:     dirname_suffix+="_signalInjectionWZjets"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
@@ -221,10 +284,10 @@ for r in range(nRegions)+["combined"]:
         outname = outname.replace(".pdf", "_freeze-"+args.freeze+".pdf")
     if args.statOnly:
         outname = outname.replace(".pdf", "_statOnly.pdf")
-    xmin, xmax = -4.5, 4.5
+    xmin, xmax = -6.5, 6.5
     if wcname1 in ["cHq3Re11","cHq3Re1122"]:
-        xmin, xmax = -0.15, 0.15
-    ymin, ymax = -4.5, 4.5
+        xmin, xmax = -0.45, 0.45
+    ymin, ymax = -6.5, 6.5
     if wcname2 in ["cHq3Re11","cHq3Re1122"]:
-        ymin, ymax = -0.15, 0.15
+        ymin, ymax = -0.45, 0.45
     plot2Dlimit(hist, plotstyle[region][0], plotdir+outname, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2)

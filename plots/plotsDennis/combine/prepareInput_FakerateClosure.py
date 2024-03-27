@@ -74,11 +74,23 @@ def removeZeros(hist):
     return hist
 
 def getHist(fname, hname, altbinning=False):
+    # print fname, hname
     bins  = [0, 60, 120, 180, 240, 300, 400, 1000]
-    # bins  = [0, 40, 80, 120, 160, 200, 1000]
     if altbinning:
         bins  = [0, 60, 120, 180, 1000]
-    hist = getObjFromFile(fname, hname)
+    if "ULRunII" in fname:
+        # Get histograms from each era
+        hist_18 = getObjFromFile(fname.replace("/ULRunII/", "/UL2018/"), hname)
+        hist_17 = getObjFromFile(fname.replace("/ULRunII/", "/UL2017/"), hname)
+        hist_16 = getObjFromFile(fname.replace("/ULRunII/", "/UL2016/"), hname)
+        hist_16preVFP = getObjFromFile(fname.replace("/ULRunII/", "/UL2016preVFP/"), hname)
+        # add them
+        hist = hist_18.Clone(hist_18.GetName()+"_RunIIcombination")
+        hist.Add(hist_17)
+        hist.Add(hist_16)
+        hist.Add(hist_16preVFP)
+    else:
+        hist = getObjFromFile(fname, hname)
     hist = hist.Rebin(len(bins)-1, hist.GetName()+"_rebin", array.array('d',bins))
     hist = removeNegative(hist)
     if hist.Integral() < 0.01:
@@ -107,8 +119,9 @@ def getCombinedSignal(fname, hname, altbinning, rate=None, rate_process=None, sy
 def getNonpromptFromCR(fname, histname, altbinning):
     # Get prompt backgrounds in CR
     firstbkg = True
-    backgrounds = ["ttZ", "WZ", "ZZ", "tWZ", "ttX", "tZq", "triBoson"]
+    backgrounds = ["ttZ_sm", "WZTo3LNu", "ZZ_pythia", "tWZ", "ttX", "tZq", "triBoson"]
     for bkg in backgrounds:
+        # print fname, histname+"__"+bkg
         h_bkg = getHist(fname, histname+"__"+bkg, altbinning)
         if firstbkg:
             h_bkg_CR = h_bkg.Clone()

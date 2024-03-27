@@ -30,9 +30,10 @@ def getGraphFromTree(filename, wcname):
     return graph
 
 def setDrawStyle(g, wcname):
+    from tWZ.Tools.histogramHelper import WClatexNames
     g.GetYaxis().SetRangeUser(0, 8)
     g.SetTitle('')
-    g.GetXaxis().SetTitle(wcname)
+    g.GetXaxis().SetTitle(WClatexNames[wcname])
     g.GetYaxis().SetTitle('-2 #Delta ln L')
     g.SetLineWidth(2)
     return g
@@ -112,6 +113,10 @@ argParser.add_argument('--addStatOnly',      action='store_true', default=False)
 argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
+argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
 args = argParser.parse_args()
 
 logger.info( "Make 1D limit plot")
@@ -150,6 +155,10 @@ dirname_suffix = ""
 if args.light:               dirname_suffix+="_light"
 if args.NjetSplit:           dirname_suffix+="_NjetSplit"
 if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
+if args.signalInjectionLight:     dirname_suffix+="_signalInjectionLight"
+if args.signalInjectionHeavy:     dirname_suffix+="_signalInjectionHeavy"
+if args.signalInjectionMixed:     dirname_suffix+="_signalInjectionMixed"
+if args.signalInjectionWZjets:     dirname_suffix+="_signalInjectionWZjets"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
