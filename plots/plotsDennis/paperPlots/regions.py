@@ -35,26 +35,31 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 plotdir = plot_directory+"/PaperPlots/"
 
 
-path_ZZ     = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v11_reduceEFT_threePoint_noData/ULRunII/all/qualepT-minDLmass12-onZ1-onZ2/Results.root"
-path_WZ     = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v11_reduceEFT_threePoint_noData/ULRunII/all/trilepT-minDLmass12-onZ1-btag0-met60/Results.root"
-path_ttZ    = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v11_reduceEFT_threePoint_noData/ULRunII/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/Results.root"
-path_WZ_CR  = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v11_reduceEFT_threePoint/ULRunII/all/trilepFOnoT-minDLmass12-onZ1-btag0-met60/Results.root"
-path_ttZ_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v11_reduceEFT_threePoint/ULRunII/all/trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p/Results.root"
+path_ZZ     = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v14_reduceEFT_threePoint_noData/ULRunII/all/qualepT-minDLmass12-onZ1-onZ2/Results.root"
+path_WZ     = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v14_reduceEFT_threePoint_noData/ULRunII/all/trilepT-minDLmass12-onZ1-btag0-met60/Results.root"
+path_ttZ    = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v14_reduceEFT_threePoint_noData/ULRunII/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/Results.root"
+path_WZ_CR  = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v14_threePoint/ULRunII/all/trilepFOnoT-minDLmass12-onZ1-btag0-met60/Results.root"
+path_ttZ_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v14_threePoint/ULRunII/all/trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p/Results.root"
 
 processinfo = {
     "ttZ":       ("t#bar{t}Z", color.TTZ),
+    "ttZ_sm":    ("t#bar{t}Z", color.TTZ),
+    "WZTo3LNu":  ("WZ",  color.WZ),
     "WZ":        ("WZ",  color.WZ),
-    "ZZ":        ("ZZ", color.ZZ),
+    "ZZ":        ("ZZ", color.ZZ-2),
+    "ZZ_powheg": ("ZZ", color.ZZ-2),
     "tWZ":       ("tWZ", color.TWZ),
     "ttX":       ("t#bar{t}X", color.TTX_rare),
     "tZq":       ("tZq", color.TZQ),
     "triBoson":  ("Triboson", color.triBoson),
     "nonprompt": ("Nonprompt", color.nonprompt),
+    "ggToZZ":    ("gg #rightarrow ZZ", color.ZZ),
 }
 histname = "Z1_pt"
 
 signals = ["ttZ", "WZ", "ZZ"]
-backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "nonprompt"]
+backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "ggToZZ", "nonprompt"]
+processes_CR = ["nonprompt", "ttZ_sm", "WZTo3LNu", "ZZ_powheg", "tWZ", "ttX", "tZq", "triBoson", "ggToZZ"]
 
 regions = {
     ("ttZ", path_ttZ, "SR_{t#bar{t}Z}"),
@@ -74,7 +79,10 @@ for (regionname, path, regiontext) in regions:
     p.subtext = "Preliminary"
     p.legshift = (-0.1, -0.1, 0.0, 0.0)
     p.addText(0.22, 0.75, regiontext, font=43, size=16)
-    for process in signals+backgrounds:
+    processes = signals+backgrounds
+    if regionname in ["ttZ_CR", "WZ_CR"]:
+        processes = processes_CR
+    for process in processes:
         altbinning = True if regionname in ["ZZ", "ttZ_CR", "WZ_CR"] else False
         hist = getHist(path, histname+"__"+process, altbinning)
         p.addBackground(hist, processinfo[process][0], processinfo[process][1])

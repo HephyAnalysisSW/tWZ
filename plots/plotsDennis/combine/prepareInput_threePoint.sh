@@ -3,8 +3,13 @@
 # python prepareInput_threePoint.py --noData --year=UL2017
 # python prepareInput_threePoint.py --noData --year=UL2016
 # python prepareInput_threePoint.py --noData --year=UL2016preVFP
-#
-# python prepareInput_threePoint.py --noData --year=ULRunII      --light
+
+# python prepareInput_threePoint.py --noData --year=ULRunII --light
+# python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionLight
+# python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionHeavy
+# python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionMixed
+python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionWZjets
+
 # python prepareInput_threePoint.py --noData --year=UL2018       --light
 # python prepareInput_threePoint.py --noData --year=UL2017       --light
 # python prepareInput_threePoint.py --noData --year=UL2016       --light
@@ -34,7 +39,7 @@
 # python prepareInput_threePoint.py --noData --year=UL2016       --NjetSplit --scaleCorrelation
 # python prepareInput_threePoint.py --noData --year=UL2016preVFP --NjetSplit --scaleCorrelation
 
-python prepareInput_threePoint.py --noData --year=ULRunII      --light
-python prepareInput_threePoint.py --noData --year=ULRunII      --light --scaleCorrelation
-# python prepareInput_threePoint.py --noData --year=ULRunII      --NjetSplit
+# python prepareInput_threePoint.py --noData --year=ULRunII      --light
+# python prepareInput_threePoint.py --noData --year=ULRunII      --light --scaleCorrelation
+# python prepareInput_threePoint.py --noData --year=ULRunII --light --NjetSplit
 # python prepareInput_threePoint.py --noData --year=ULRunII      --NjetSplit --scaleCorrelation

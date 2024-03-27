@@ -54,7 +54,7 @@ regions = {
 }
 histname = "Z1_pt"
 signals = ["total_signal"]
-backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "nonprompt"]
+backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "ggToZZ", "nonprompt"]
 
 
 processinfo = {
@@ -67,6 +67,7 @@ processinfo = {
     "ttX":       ("t#bar{t}X", color.TTX_rare),
     "tZq":       ("tZq", color.TZQ),
     "triBoson":  ("Triboson", color.triBoson),
+    "ggToZZ":    ("gg #rightarrow ZZ", color.ZZ),
     "nonprompt": ("Nonprompt", color.nonprompt),
 }
 

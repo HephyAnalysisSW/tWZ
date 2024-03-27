@@ -8,6 +8,10 @@ argParser.add_argument('--year',             action='store', type=str, default="
 argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
+argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
+argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
 args = argParser.parse_args()
 
 
@@ -25,9 +29,17 @@ if args.light:
 
 if args.scaleCorrelation:
     logger.info( "Correlate scales of Diboson" )
+
+NsignalBool = [args.signalInjectionLight,args.signalInjectionHeavy,args.signalInjectionMixed,args.signalInjectionWZjets].count(True)
+if NsignalBool == 1:
+    logger.info( "Use EFT signal as pseudo data" )
+elif NsignalBool > 1:
+    raise RuntimeError( "Cannot perform more than one signal injection test at once")
+
+
 ################################################################################
 ## Run Combine Harvester
-cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notnjetSplit notscaleCorrelation"
+cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notnjetSplit notscaleCorrelation notsignalInjection"
 
 dirname_suffix = ""
 if args.light:
@@ -39,6 +51,18 @@ if args.NjetSplit:
 if args.scaleCorrelation:
     cmd_harvester = cmd_harvester.replace("notscaleCorrelation", "scaleCorrelation")
     dirname_suffix+="_scaleCorrelation"
+if args.signalInjectionLight:
+    cmd_harvester = cmd_harvester.replace("notsignalInjection", "signalInjectionLight")
+    dirname_suffix+="_signalInjectionLight"
+if args.signalInjectionHeavy:
+    cmd_harvester = cmd_harvester.replace("notsignalInjection", "signalInjectionHeavy")
+    dirname_suffix+="_signalInjectionHeavy"
+if args.signalInjectionMixed:
+    cmd_harvester = cmd_harvester.replace("notsignalInjection", "signalInjectionMixed")
+    dirname_suffix+="_signalInjectionMixed"
+if args.signalInjectionWZjets:
+    cmd_harvester = cmd_harvester.replace("notsignalInjection", "signalInjectionWZjets")
+    dirname_suffix+="_signalInjectionWZjets"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
