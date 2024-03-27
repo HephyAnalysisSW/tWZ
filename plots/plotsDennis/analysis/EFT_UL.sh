@@ -43,7 +43,7 @@ python EFT_UL.py --noData --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --e
 python EFT_UL.py --noData --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=ULRunII --sys=Scale_NONEUP
 python EFT_UL.py --noData --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=ULRunII --sys=Scale_DOWNDOWN
 python EFT_UL.py --noData --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=ULRunII --sys=Scale_DOWNNONE
-python EFT_UL.py --noData --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=ULRunII --sys=Scale_NONEDOWN 
+python EFT_UL.py --noData --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=ULRunII --sys=Scale_NONEDOWN
 
 # WZ
 python EFT_UL.py --noData --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=ULRunII

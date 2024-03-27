@@ -463,9 +463,43 @@ else:
     branchKeepStrings = branchKeepStrings_DATAMC + branchKeepStrings_MC
 
 jetVars         = ['pt/F', 'chEmEF/F', 'chHEF/F', 'neEmEF/F', 'neHEF/F', 'rawFactor/F', 'eta/F', 'phi/F', 'jetId/I', 'btagDeepB/F', 'btagDeepFlavB/F', 'btagCSVV2/F', 'area/F', 'pt_nom/F', 'corr_JER/F'] + jetCorrInfo
+jesUncertainties = [
+    "Total",
+    "AbsoluteMPFBias",
+    "AbsoluteScale",
+    "AbsoluteStat",
+    "RelativeBal",
+    "RelativeFSR",
+    "RelativeJEREC1",
+    "RelativeJEREC2",
+    "RelativeJERHF",
+    "RelativePtBB",
+    "RelativePtEC1",
+    "RelativePtEC2",
+    "RelativePtHF",
+    "RelativeStatEC",
+    "RelativeStatFSR",
+    "RelativeStatHF",
+    "PileUpDataMC",
+    "PileUpPtBB",
+    "PileUpPtEC1",
+    "PileUpPtEC2",
+    "PileUpPtHF",
+    "PileUpPtRef",
+    "FlavorQCD",
+    "Fragmentation",
+    "SinglePionECAL",
+    "SinglePionHCAL",
+    "TimePtEta",
+]
+
 if isMC:
     jetVars     += jetMCInfo
-    jetVars     += ['pt_jesTotalUp/F', 'pt_jesTotalDown/F', 'pt_jerUp/F', 'pt_jerDown/F', 'corr_JER/F', 'corr_JEC/F']
+    jesVariations = ["pt_jes%s%s"%(var, upOrDown) for var in jesUncertainties for upOrDown in ["Up","Down"]]
+    jetVars     += ["%s/F"%var for var in jesVariations]
+    jetVars     += ['pt_jerUp/F', 'pt_jerDown/F', 'corr_JER/F', 'corr_JEC/F']
+else:
+    jesVariations = []
 jetVarNames     = [x.split('/')[0] for x in jetVars]
 genLepVars      = ['pt/F', 'phi/F', 'eta/F', 'pdgId/I', 'genPartIdxMother/I', 'status/I', 'statusFlags/I'] # some might have different types
 genLepVarNames  = [x.split('/')[0] for x in genLepVars]
@@ -574,9 +608,14 @@ if options.checkTTGJetsOverlap:
     new_variables.extend( ['TTGJetsEventType/I'] )
 
 if addSystematicVariations:
-    for var in ['jesTotalUp', 'jesTotalDown', 'jerUp', 'jer', 'jerDown', 'unclustEnUp', 'unclustEnDown']:
+    for var in ['jerUp', 'jer', 'jerDown', 'unclustEnUp', 'unclustEnDown']:
         if not var.startswith('unclust'):
             new_variables.extend( ['nJetGood_'+var+'/I', 'nBTag_'+var+'/I'] )
+    for uncert in jesUncertainties:
+        for upOrDown in ["Up", "Down"]:
+            var = "jes"+uncert+upOrDown
+            if not var.startswith('unclust'):
+                new_variables.extend( ['nJetGood_'+var+'/I', 'nBTag_'+var+'/I'] )
         # new_variables.extend( ['met_pt_'+var+'/F', 'met_phi_'+var+'/F'] ) # MET variations are calculated with JMECorrector
 
 
@@ -640,7 +679,7 @@ if not options.skipNanoTools:
             isMC        = (not sample.isData),
             dataYear    = options.year,
             runPeriod   = runPeriod,
-            jesUncert   = "Total",
+            jesUncert   = ",".join(jesUncertainties),
             jetType     = "AK4PFchs",
             metBranchName = METBranchName,
             isFastSim   = False,
@@ -796,7 +835,8 @@ def filler( event ):
         for n in xrange( hyperPoly.ndof ):
             event.p_C[n] = coeff[n]
 
-    allSlimmedJets      = getJets(r)
+    # allSlimmedJets      = getJets(r)
+
     event.reweightL1Prefire, event.reweightL1PrefireUp, event.reweightL1PrefireDown = r.L1PreFiringWeight_Nom, r.L1PreFiringWeight_Up, r.L1PreFiringWeight_Dn
 
     # get electrons and muons
@@ -916,18 +956,24 @@ def filler( event ):
     nonBjets_sys  = {}
 
     if addSystematicVariations:
-        for var in ['jesTotalUp', 'jesTotalDown', 'jerUp', 'jerDown', 'unclustEnUp', 'unclustEnDown']: # don't use 'jer' as of now
-            # MET variations are calculated with JMECorrector, not here
-            # setattr(event, 'met_pt_'+var,  getattr(r, 'METFixEE2017_pt_'+var)  if options.year == 2017 else getattr(r, 'MET_pt_'+var) )
-            # setattr(event, 'met_phi_'+var, getattr(r, 'METFixEE2017_phi_'+var) if options.year == 2017 else getattr(r, 'MET_phi_'+var) )
+        for var in ['jerUp', 'jerDown', 'unclustEnUp', 'unclustEnDown']:
             if not var.startswith('unclust'):
                 corrFactor = 'corr_JER' if var == 'jer' else None
                 jets_sys[var]       = filter(lambda j:j['pt_'+var]>30, clean_jets_acc)
                 bjets_sys[var]      = filter(lambda j: isBJet(j, tagger=b_tagger, year=options.year) and abs(j['eta'])<2.4, jets_sys[var])
                 nonBjets_sys[var]   = filter(lambda j: not ( isBJet(j, tagger=b_tagger, year=options.year) and abs(j['eta'])<2.4), jets_sys[var])
-
                 setattr(event, "nJetGood_"+var, len(jets_sys[var]))
                 setattr(event, "nBTag_"+var,    len(bjets_sys[var]))
+
+        for var_ in jesUncertainties:
+            for upOrDown in ["Up", "Down"]:
+                var                 = "jes"+var_+upOrDown
+                jets_sys[var]       = filter(lambda j:j['pt_'+var]>30, clean_jets_acc)
+                bjets_sys[var]      = filter(lambda j: isBJet(j, tagger=b_tagger, year=options.year) and abs(j['eta'])<2.4, jets_sys[var])
+                nonBjets_sys[var]   = filter(lambda j: not ( isBJet(j, tagger=b_tagger, year=options.year) and abs(j['eta'])<2.4), jets_sys[var])
+                setattr(event, "nJetGood_"+var, len(jets_sys[var]))
+                setattr(event, "nBTag_"+var,    len(bjets_sys[var]))
+
 
     if isSingleLep or isTriLep or isDiLep:
         event.nGoodMuons      = len(filter( lambda l:abs(l['pdgId'])==13, leptons))
