@@ -90,6 +90,7 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 ################################################################################
 # Possible SYS variations
 variations = [
+    # Fakerate
     "Fakerate_UP", "Fakerate_DOWN",
     "FakerateClosure_correlated_elec_UP", "FakerateClosure_correlated_elec_DOWN",
     "FakerateClosure_uncorrelated_elec_2016preVFP_UP", "FakerateClosure_uncorrelated_elec_2016preVFP_DOWN",
@@ -106,14 +107,27 @@ variations = [
     "FakerateClosure_uncorrelated_both_2016_UP", "FakerateClosure_uncorrelated_both_2016_DOWN",
     "FakerateClosure_uncorrelated_both_2017_UP", "FakerateClosure_uncorrelated_both_2017_DOWN",
     "FakerateClosure_uncorrelated_both_2018_UP", "FakerateClosure_uncorrelated_both_2018_DOWN",
-    "Trigger_UP", "Trigger_DOWN",
+    # Trigger
+    "Trigger_2016preVFP_UP", "Trigger_2016preVFP_DOWN",
+    "Trigger_2016_UP", "Trigger_2016_DOWN",
+    "Trigger_2017_UP", "Trigger_2017_DOWN",
+    "Trigger_2018_UP", "Trigger_2018_DOWN",
+    # Prefire
     "Prefire_UP", "Prefire_DOWN",
+    # Lepton reco
     "LepReco_UP", "LepReco_DOWN",
-    "LepIDstat_2016preVFP_UP", "LepIDstat_2016preVFP_DOWN",
-    "LepIDstat_2016_UP", "LepIDstat_2016_DOWN",
-    "LepIDstat_2017_UP", "LepIDstat_2017_DOWN",
-    "LepIDstat_2018_UP", "LepIDstat_2018_DOWN",
-    "LepIDsys_UP", "LepIDsys_DOWN",
+    # Lepton ID
+    "LepIDstat_elec_2016preVFP_UP", "LepIDstat_elec_2016preVFP_DOWN",
+    "LepIDstat_elec_2016_UP", "LepIDstat_elec_2016_DOWN",
+    "LepIDstat_elec_2017_UP", "LepIDstat_elec_2017_DOWN",
+    "LepIDstat_elec_2018_UP", "LepIDstat_elec_2018_DOWN",
+    "LepIDsys_elec_UP", "LepIDsys_elec_DOWN",
+    "LepIDstat_muon_2016preVFP_UP", "LepIDstat_muon_2016preVFP_DOWN",
+    "LepIDstat_muon_2016_UP", "LepIDstat_muon_2016_DOWN",
+    "LepIDstat_muon_2017_UP", "LepIDstat_muon_2017_DOWN",
+    "LepIDstat_muon_2018_UP", "LepIDstat_muon_2018_DOWN",
+    "LepIDsys_muon_UP", "LepIDsys_muon_DOWN",
+    # Btagging
     "BTag_b_UP", "BTag_b_DOWN", # not needed when running single sources
     "BTag_l_UP", "BTag_l_DOWN", # not needed when running single sources
     "BTag_b_correlated_UP", "BTag_b_correlated_DOWN",
@@ -126,19 +140,28 @@ variations = [
     "BTag_l_uncorrelated_2017_UP", "BTag_l_uncorrelated_2017_DOWN",
     "BTag_b_uncorrelated_2018_UP", "BTag_b_uncorrelated_2018_DOWN",
     "BTag_l_uncorrelated_2018_UP", "BTag_l_uncorrelated_2018_DOWN",
+    # pileup
     "PU_UP", "PU_DOWN",
+    # JEC
     "JES_UP", "JES_DOWN",
+    #JER
     "JER_UP", "JER_DOWN",
+    # Lumi
     "Lumi_uncorrelated_2016_UP", "Lumi_uncorrelated_2016_DOWN",
     "Lumi_uncorrelated_2017_UP", "Lumi_uncorrelated_2017_DOWN",
     "Lumi_uncorrelated_2018_UP", "Lumi_uncorrelated_2018_DOWN",
     "Lumi_correlated_161718_UP", "Lumi_correlated_161718_DOWN",
     "Lumi_correlated_1718_UP", "Lumi_correlated_1718_DOWN",
+    # Scale
     "Scale_UPUP", "Scale_UPNONE", "Scale_NONEUP", "Scale_NONEDOWN", "Scale_DOWNNONE", "Scale_DOWNDOWN", # first is mu_r, second is mu_f
+    # ISR
     "ISR_UP", "ISR_DOWN",
+    # FSR
     "FSR_UP", "FSR_DOWN",
+    # WZ modelling
     "WZnJet",
     "WZheavy_UP", "WZheavy_DOWN",
+    # Diboson EWK corrections
     "EWK_mul", "EWK_add",
 ]
 
@@ -838,6 +861,83 @@ def findHardestBoson(event):
     return i_hardest
 
 
+def getLepIdSysConfig(pdgId, year, preVFP, sysname):
+    sigma = 0
+    mode = "syst"
+    if sysname in ["LepIDstat_elec_2016preVFP_UP", "LepIDstat_elec_2016preVFP_DOWN"]:
+        if abs(pdgId) == 11 and year==2016 and preVFP:
+            mode = "stat"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    elif sysname in ["LepIDstat_elec_2016_UP", "LepIDstat_elec_2016_DOWN"]:
+        if abs(pdgId) == 11 and year==2016 and not preVFP:
+            mode = "stat"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    elif sysname in ["LepIDstat_elec_2017_UP", "LepIDstat_elec_2017_DOWN"]:
+        if abs(pdgId) == 11 and year==2017:
+            mode = "stat"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    elif sysname in ["LepIDstat_elec_2018_UP", "LepIDstat_elec_2018_DOWN"]:
+        if abs(pdgId) == 11 and year==2018:
+            mode = "stat"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    elif sysname in ["LepIDsys_elec_UP","LepIDsys_elec_DOWN"]:
+        if abs(pdgId) == 11:
+            mode = "syst"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    elif sysname in ["LepIDstat_muon_2016preVFP_UP", "LepIDstat_muon_2016preVFP_DOWN"]:
+        if abs(pdgId) == 13 and year==2016 and preVFP:
+            mode = "stat"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    elif sysname in ["LepIDstat_muon_2016_UP", "LepIDstat_muon_2016_DOWN"]:
+        if abs(pdgId) == 13 and year==2016 and not preVFP:
+            mode = "stat"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    elif sysname in ["LepIDstat_muon_2017_UP", "LepIDstat_muon_2017_DOWN"]:
+        if abs(pdgId) == 13 and year==2017:
+            mode = "stat"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    elif sysname in ["LepIDstat_muon_2018_UP", "LepIDstat_muon_2018_DOWN"]:
+        if abs(pdgId) == 13 and year==2018:
+            mode = "stat"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    elif sysname in ["LepIDsys_muon_UP", "LepIDsys_muon_DOWN",]:
+        if abs(pdgId) == 13:
+            mode = "syst"
+            if "_UP" in sysname:
+                sigma = 1
+            elif "_DOWN" in sysname:
+                sigma = -1
+    return mode, sigma
+
+
+
 ################################################################################
 # Define sequences
 sequence       = []
@@ -934,42 +1034,12 @@ def getLeptonSF(sample, event):
     if sample.isData:
         return
     SF = 1
+    isLepIduncert = False
     # Only apply SF when also cutting on WP
     if "trilepT" in args.selection or "qualepT" in args.selection:
         # Search for variation type and direction
         # Statistical should only be applied for the corresponding year
-        uncert = "syst"
-        sigma = 0
-        if args.sys == "LepIDsys_UP":
-            uncert = "syst"
-            sigma = 1
-        elif args.sys == "LepIDsys_DOWN":
-            uncert = "syst"
-            sigma = -1
-        elif args.sys == "LepIDstat_2016preVFP_UP" and event.year == 2016 and event.preVFP:
-            uncert = "stat"
-            sigma = 1
-        elif args.sys == "LepIDstat_2016preVFP_DOWN" and event.year == 2016 and event.preVFP:
-            uncert = "stat"
-            sigma = -1
-        elif args.sys == "LepIDstat_2016_UP" and event.year == 2016 and not event.preVFP:
-            uncert = "stat"
-            sigma = 1
-        elif args.sys == "LepIDstat_2016_DOWN" and event.year == 2016 and not event.preVFP:
-            uncert = "stat"
-            sigma = -1
-        elif args.sys == "LepIDstat_2017_UP" and event.year == 2017:
-            uncert = "stat"
-            sigma = 1
-        elif args.sys == "LepIDstat_2017_DOWN" and event.year == 2017:
-            uncert = "stat"
-            sigma = -1
-        elif args.sys == "LepIDstat_2018_UP" and event.year == 2018:
-            uncert = "stat"
-            sigma = 1
-        elif args.sys == "LepIDstat_2018_DOWN" and event.year == 2018:
-            uncert = "stat"
-            sigma = -1
+
         # Go through the 3 leptons and multiply SF
         idx1 = event.l1_index
         idx2 = event.l2_index
@@ -979,6 +1049,11 @@ def getLeptonSF(sample, event):
             eta = event.lep_eta[i]
             if abs(pdgId)==11:
                 eta+=event.Electron_deltaEtaSC[event.lep_eleIndex[i]]
+            # get correct mode and sigma for uncertainty
+            sigma = 0
+            uncert = "syst"
+            uncert, sigma = getLepIdSysConfig(pdgId, event.year, event.preVFP, args.sys)
+            ####
             pt = event.lep_pt[i]
             if event.year == 2016:
                 if event.preVFP:
@@ -1449,25 +1524,23 @@ def getWZheavyFlavor( event, sample ):
 
 sequence.append(getWZheavyFlavor)
 
-# def modifyXS(event, sample):
-#     XS = {
-#         "TTZ_EFT": (0.86*0.10, 0.281/3.0)),
-#         "ZZ_EFT": (16.523*0.10*0.10, 1.256),
-#         "WZ_EFT": (47.13*(3*0.108)*0.10, 4.9173),
-#         "WZTo3LNu_powheg": (4.42965, 4.9173),
-#         "WZTo3LNu": (4.42965, 4.9173),
-#         "TTZ": (),
-#         "WZ": (47.13, ),
-#     }
-#
-#     if sample.name in XS.keys():
-#         (old_XS, new_XS) = XS[sample.name]
-#         XSfactor = new_XS/old_XS
-#         print sample.name, old_XS, XSfactor
-#
-#     event.XSfactor = XSfactor
-#
-# sequence.append(modifyXS)
+
+def changeTriggerSF( event, sample ):
+    if "Trigger_" in args.sys:
+        uncert = 0.0
+        if "_UP" in args.sys:
+            uncert = 0.01
+        elif "_DOWN" in args.sys:
+            uncert = -0.01
+        if "Trigger_2016preVFP_" in args.sys and (event.year==2016 and event.preVFP):
+            event.reweightTrigger = event.reweightTrigger + uncert
+        elif "Trigger_2016_" in args.sys and (event.year==2016 and not event.preVFP):
+            event.reweightTrigger = event.reweightTrigger + uncert
+        elif "Trigger_2017_" in args.sys and event.year==2017:
+            event.reweightTrigger = event.reweightTrigger + uncert
+        elif "Trigger_2018_" in args.sys and event.year==2018:
+            event.reweightTrigger = event.reweightTrigger + uncert
+sequence.append(changeTriggerSF)
 
 ################################################################################
 # Read variables
@@ -1600,8 +1673,6 @@ for i_mode, mode in enumerate(allModes):
         "BTag_l_uncorrelated_2017_DOWN"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2017'),
         "BTag_l_uncorrelated_2018_UP"         : ('reweightBTag_SF','reweightBTag_SF_l_Up_Uncorrelated_2018'),
         "BTag_l_uncorrelated_2018_DOWN"       : ('reweightBTag_SF','reweightBTag_SF_l_Down_Uncorrelated_2018'),
-        'Trigger_UP'    : ('reweightTrigger','reweightTriggerUp'),
-        'Trigger_DOWN'  : ('reweightTrigger','reweightTriggerDown'),
         'PU_UP'         : ('reweightPU','reweightPUUp'),
         'PU_DOWN'       : ('reweightPU','reweightPUDown'),
         'Prefire_UP'    : ('reweightL1Prefire','reweightL1PrefireUp'),

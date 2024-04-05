@@ -49,7 +49,7 @@ def getRMS(nominal, variations):
 # histname
 histname = "Z1_pt"
 
-version = "v11"
+version = "v14"
 logger.info( "Version = %s", version )
 
 # Directories
@@ -88,14 +88,22 @@ sysnames = {
     "BTag_b_uncorrelated_2018":       ("BTag_b_uncorrelated_2018_UP", "BTag_b_uncorrelated_2018_DOWN"),
     "BTag_l_uncorrelated_2018":       ("BTag_l_uncorrelated_2018_UP", "BTag_l_uncorrelated_2018_DOWN"),
     # "Fakerate":                       ("Fakerate_UP", "Fakerate_DOWN"), # TREAT DIFFERENTLY
-    "Trigger":                        ("Trigger_UP", "Trigger_DOWN"),
+    "Trigger_2016preVFP":             ("Trigger_2016preVFP_UP", "Trigger_2016preVFP_DOWN"),
+    "Trigger_2016":                   ("Trigger_2016_UP", "Trigger_2016_DOWN"),
+    "Trigger_2017":                   ("Trigger_2017_UP", "Trigger_2017_DOWN"),
+    "Trigger_2018":                   ("Trigger_2018_UP", "Trigger_2018_DOWN"),
     "Prefire":                        ("Prefire_UP", "Prefire_DOWN"),
     "LepReco":                        ("LepReco_UP", "LepReco_DOWN"),
-    "LepIDstat_2016preVFP":           ("LepIDstat_2016preVFP_UP", "LepIDstat_2016preVFP_DOWN"),
-    "LepIDstat_2016":                 ("LepIDstat_2016_UP", "LepIDstat_2016_DOWN"),
-    "LepIDstat_2017":                 ("LepIDstat_2017_UP", "LepIDstat_2017_DOWN"),
-    "LepIDstat_2018":                 ("LepIDstat_2018_UP", "LepIDstat_2018_DOWN"),
-    "LepIDsys":                       ("LepIDsys_UP", "LepIDsys_DOWN"),
+    "LepIDstat_elec_2016preVFP":      ("LepIDstat_elec_2016preVFP_UP", "LepIDstat_elec_2016preVFP_DOWN"),
+    "LepIDstat_elec_2016":            ("LepIDstat_elec_2016_UP", "LepIDstat_elec_2016_DOWN"),
+    "LepIDstat_elec_2017":            ("LepIDstat_elec_2017_UP", "LepIDstat_elec_2017_DOWN"),
+    "LepIDstat_elec_2018":            ("LepIDstat_elec_2018_UP", "LepIDstat_elec_2018_DOWN"),
+    "LepIDsys_elec":                  ("LepIDsys_elec_UP", "LepIDsys_elec_DOWN"),
+    "LepIDstat_muon_2016preVFP":      ("LepIDstat_muon_2016preVFP_UP", "LepIDstat_muon_2016preVFP_DOWN"),
+    "LepIDstat_muon_2016":            ("LepIDstat_muon_2016_UP", "LepIDstat_muon_2016_DOWN"),
+    "LepIDstat_muon_2017":            ("LepIDstat_muon_2017_UP", "LepIDstat_muon_2017_DOWN"),
+    "LepIDstat_muon_2018":            ("LepIDstat_muon_2018_UP", "LepIDstat_muon_2018_DOWN"),
+    "LepIDsys_muon":                  ("LepIDsys_muon_UP", "LepIDsys_muon_DOWN"),
     "PU":                             ("PU_UP", "PU_DOWN"),
     "JES":                            ("JES_UP", "JES_DOWN"),
     "JER":                            ("JER_UP", "JER_DOWN"),

@@ -37,22 +37,38 @@ python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Lumi_correlated_161718_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Lumi_correlated_1718_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Lumi_correlated_1718_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_2016preVFP_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_2016preVFP_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_2016_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_2016_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_2017_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_2017_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_2018_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Trigger_2018_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Prefire_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=Prefire_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepReco_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepReco_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_2016preVFP_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_2016preVFP_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_2016_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_2016_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_2017_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_2017_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_2018_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_2018_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDsys_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDsys_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_elec_2016preVFP_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_elec_2016preVFP_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_elec_2016_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_elec_2016_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_elec_2017_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_elec_2017_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_elec_2018_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_elec_2018_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDsys_elec_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDsys_elec_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_muon_2016preVFP_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_muon_2016preVFP_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_muon_2016_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_muon_2016_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_muon_2017_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_muon_2017_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_muon_2018_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDstat_muon_2018_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDsys_muon_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=LepIDsys_muon_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=PU_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=PU_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --sys=JES_UP
@@ -207,22 +223,38 @@ python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Lumi_correlated_161718_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Lumi_correlated_1718_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Lumi_correlated_1718_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_2016preVFP_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_2016preVFP_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_2016_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_2016_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_2017_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_2017_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_2018_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Trigger_2018_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Prefire_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=Prefire_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepReco_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepReco_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_2016preVFP_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_2016preVFP_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_2016_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_2016_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_2017_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_2017_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_2018_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_2018_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDsys_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDsys_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_elec_2016preVFP_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_elec_2016preVFP_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_elec_2016_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_elec_2016_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_elec_2017_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_elec_2017_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_elec_2018_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_elec_2018_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDsys_elec_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDsys_elec_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_muon_2016preVFP_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_muon_2016preVFP_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_muon_2016_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_muon_2016_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_muon_2017_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_muon_2017_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_muon_2018_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDstat_muon_2018_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDsys_muon_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=LepIDsys_muon_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=PU_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=PU_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --sys=JES_UP
@@ -340,8 +372,8 @@ python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass
 
 ################################################################################
 # ZZ
-python EFT_UL.py --reduceEFT --noData --nicePlots --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP
+python EFT_UL.py --reduceEFT --noData --nicePlots --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=EWK_add
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=EWK_mul
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=WZnJet
@@ -377,22 +409,38 @@ python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Lumi_correlated_161718_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Lumi_correlated_1718_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Lumi_correlated_1718_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_2016preVFP_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_2016preVFP_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_2016_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_2016_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_2017_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_2017_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_2018_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Trigger_2018_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Prefire_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=Prefire_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepReco_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepReco_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_2016preVFP_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_2016preVFP_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_2016_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_2016_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_2017_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_2017_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_2018_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_2018_DOWN
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDsys_UP
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDsys_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_elec_2016preVFP_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_elec_2016preVFP_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_elec_2016_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_elec_2016_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_elec_2017_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_elec_2017_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_elec_2018_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_elec_2018_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDsys_elec_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDsys_elec_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_muon_2016preVFP_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_muon_2016preVFP_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_muon_2016_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_muon_2016_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_muon_2017_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_muon_2017_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_muon_2018_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDstat_muon_2018_DOWN
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDsys_muon_UP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=LepIDsys_muon_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=PU_UP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=PU_DOWN
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=JES_UP
@@ -510,7 +558,7 @@ python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass
 
 ################################################################################
 # TTZ CR
-python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016
 python EFT_UL.py --nicePlots --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --applyFakerate --useDataSF --sys=Fakerate_UP
@@ -547,7 +595,7 @@ python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-bt
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --applyFakerate --useDataSF --sys=FakerateClosure_uncorrelated_both_2018_DOWN
 ################################################################################
 # WZ CR
-python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016
 python EFT_UL.py --nicePlots --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --applyFakerate --useDataSF --sys=Fakerate_UP
