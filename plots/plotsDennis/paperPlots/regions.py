@@ -86,4 +86,7 @@ for (regionname, path, regiontext) in regions:
         altbinning = True if regionname in ["ZZ", "ttZ_CR", "WZ_CR"] else False
         hist = getHist(path, histname+"__"+process, altbinning)
         p.addBackground(hist, processinfo[process][0], processinfo[process][1])
+    if "_CR" in regionname:
+        h_data = getHist(path, histname+"__data", altbinning)
+        p.addData(h_data)
     p.draw()

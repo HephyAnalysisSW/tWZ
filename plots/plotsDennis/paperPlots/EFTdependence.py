@@ -59,7 +59,7 @@ for region in ["ttZ", "WZ", "ZZ"]:
         p = Plotter("EFT_ULRunII__"+region+"__"+histname+"__"+wc)
         p.plot_dir = plotdir
         p.lumi = "138"
-        p.xtitle = "Z #it{p}_{T} [GeV]"
+        p.xtitle = "Z boson candidate #it{p}_{T} [GeV]"
         p.drawRatio = True
         p.ratiotitle = "#splitline{Ratio}{to SM}"
         p.simtext = "Simulation"

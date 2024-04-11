@@ -39,9 +39,9 @@ def isBJet(j, tagger = 'DeepCSV', year = 2016):
             raise (NotImplementedError, "Don't know what cut to use for year %s"%year)
     elif tagger == 'DeepFlavor' or tagger == 'DeepJet':
         if year == "UL2016_preVFP":
-            return j['btagDeepFlavB'] > 0.2489
-        elif year == "UL2016":
             return j['btagDeepFlavB'] > 0.2598
+        elif year == "UL2016":
+            return j['btagDeepFlavB'] > 0.2489
         elif year == "UL2017":
             return j['btagDeepFlavB'] > 0.3040
         elif year == "UL2018":
@@ -203,7 +203,7 @@ def cbEleSelector( quality, removeCuts = [] ):
     for cut in removeCuts:
         if cut not in vidNestedWPBitMapNamingList:
             raise Exception( "Don't know about ele cut %r" % cut )
-    for cut in vidNestedWPBitMapNamingList: 
+    for cut in vidNestedWPBitMapNamingList:
         if cut not in removeCuts:
             thresholds.append( vidNestedWPBitMap[quality] )
         else:
@@ -315,7 +315,7 @@ def eleSelector( lepton_selection, year, ptCut = 10):
                 and abs(l["dz"])        < 0.1 \
                 and l["sip3d"]          < 15.0 \
                 and l['miniPFRelIso_all'] < 1.0 \
-                and ord(l["lostHits"])  < 2 
+                and ord(l["lostHits"])  < 2
     elif lepton_selection == 'presel':
         # L133 - 143 of http://cms.cern.ch/iCMS/jsp/openfile.jsp?tp=draft&files=AN2022_016_v3.pdf
         def func(l):

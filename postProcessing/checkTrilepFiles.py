@@ -56,6 +56,8 @@ if args.data:
 f = open(missingfilesname, "w")
 for (sampleName, i, nJobs) in missing:
     writeline = "python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --year "+args.year+" --processingEra "+version+" --sample "+sampleName
+    if args.data:
+        writeline = "python nanoPostProcessing_UL.py  --overwrite --forceProxy --skim trilep --triggerSelection --year "+args.year+" --processingEra "+version+" --sample "+sampleName    
     if nJobs != 1:
         writeline += " --nJobs="+str(nJobs)+" --job="+str(i)+"\n"
     f.write(writeline)
