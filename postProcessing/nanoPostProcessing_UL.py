@@ -68,6 +68,7 @@ def get_parser():
     argParser.add_argument('--flagTTBar',   action='store_true',                                                                        help="Is ttbar?" )
     argParser.add_argument('--doCRReweighting',             action='store_true',                                                        help="color reconnection reweighting?")
     argParser.add_argument('--triggerSelection',            action='store_true',                                                        help="Trigger selection?" )
+    argParser.add_argument('--triggerSF',            action='store_true',                                                        help="Trigger SF selection?" )
     #argParser.add_argument('--skipGenLepMatching',          action='store_true',                                                        help="skip matched genleps??" )
     argParser.add_argument('--checkTTGJetsOverlap',         action='store_true',                                                        help="Keep TTGJetsEventType which can be used to clean TTG events from TTJets samples" )
     argParser.add_argument('--skipSystematicVariations',    action='store_true',                                                        help="Don't calulcate BTag, JES and JER variations.")
@@ -372,6 +373,26 @@ if options.triggerSelection and isSingleLep:
     logger.info("Sample will have the following trigger skim: %s"%triggerstring)
     skimConds.append( triggerstring )
 
+if options.triggerSF and isTriLep:
+    # First store trigger decision of standard leptonic triggers
+    # Select option "MC" here to make an "or" of all leptonic triggers
+    from tWZ.Tools.triggerSelector import triggerSelector
+    ts           = triggerSelector(yearint)
+    triggerCond  = ts.getSelection("MC", triggerList = ts.getTriggerList(sample) )
+    treeFormulas["triggerDecision"] =  {'string':triggerCond}
+    # For data apply orthodonal triggers
+    if isData:
+        from tWZ.Tools.triggerForSF import getTriggerSelString
+        if "JetHT" in options.samples[0]:
+            jetht = "HT"
+        elif "MET" in options.samples[0]:
+            jetht = "MET"
+        triggerstring = getTriggerSelString(options.year, jetht)
+        print triggerstring
+        skimConds.append( triggerstring )
+
+
+
 # turn on all branches to be flexible for filter cut in skimCond etc.
 sample.chain.SetBranchStatus("*",1)
 
@@ -522,7 +543,7 @@ if isMC:
 
 new_variables = [ 'weight/F', 'year/I', 'preVFP/O']
 
-if options.triggerSelection and isTriLep:
+if (options.triggerSelection or options.triggerSF) and isTriLep:
     new_variables+= ['triggerDecision/I']
 
 read_variables.append( TreeVariable.fromString('L1PreFiringWeight_Dn/F') )
@@ -781,7 +802,7 @@ def filler( event ):
 
     ################################################################################
     # Trigger Decision
-    if options.triggerSelection and isTriLep:
+    if (options.triggerSelection or options.triggerSF) and isTriLep:
         event.triggerDecision = int(treeFormulas['triggerDecision']['TTreeFormula'].EvalInstance())
 
 
