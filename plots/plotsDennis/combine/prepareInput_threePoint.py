@@ -56,6 +56,21 @@ def getRMS(nominal, variations):
         down.SetBinContent(bin, nominal.GetBinContent(bin)-rmsdown)
     return (up, down)
 
+def getLinear(hist_plus, hist_minus):
+    # Since the quadratic term does not change sign, we can get it from the
+    # histograms where c = +1, c = 0, and c = -1
+    # (1) c = +1 is SM + LIN + QUAD
+    # (2) c = -1 is SM - LIN + QUAD
+
+    # Thus, we can get the lin from
+    # (1)-(2) = SM + LIN + QUAD - SM + LIN - QUAD
+    #         = 2* LIN     | /2
+    # ((1)-(2))/2 = LIN
+    hist_lin = hist_plus.Clone(hist_plus.GetName()+"_quad")
+    hist_lin.Add(hist_minus, -1)
+    hist_lin.Scale(0.5)
+    return hist_lin
+
 def getQuadratic(hist_sm, hist_plus, hist_minus):
     # Since the quadratic term does not change sign, we can get it from the
     # histograms where c = +1, c = 0, and c = -1
@@ -123,7 +138,26 @@ def getHist(fname, hname, altbinning=False):
         hist = removeZeros(hist)
     return hist
 
-def getCombinedSignal(fname, hname, altbinning, rate=None, rate_process=None, sys_processes=[], fname_sys=None):
+def getCombinedSignal_SM(fname, hname, altbinning, rate=None, rate_process=None, sys_processes=[], fname_sys=None):
+    signale = ["ttZ_sm", "WZTo3LNu", "ZZ_powheg"]
+    for i_sig, sig in enumerate(signals):
+        # If one of the signals should be varied, use alternative file
+        filename = fname
+        if sig in sys_processes:
+            filename = fname_sys
+        # If this is the first in the loop clone, otherwise Add to cloned
+        if i_sig==0:
+            hist = getHist(filename, hname.replace("sm", sig), altbinning)
+            if sig == rate_process:
+                hist.Scale(rate)
+        else:
+            tmp = getHist(filename, hname.replace("sm", sig), altbinning)
+            if sig == rate_process:
+                tmp.Scale(rate)
+            hist.Add(tmp)
+    return hist
+
+def getCombinedSignal_EFT(fname, hname, altbinning, rate=None, rate_process=None, sys_processes=[], fname_sys=None):
     signals = ["ttZ", "WZ", "ZZ"]
     for i_sig, sig in enumerate(signals):
         # If one of the signals should be varied, use alternative file
@@ -344,7 +378,6 @@ sysnames = {
     "muF_ttX":                        ("_Scale_NONEUP", "_Scale_NONEDOWN"),
     "muF_triBoson":                   ("_Scale_NONEUP", "_Scale_NONEDOWN"),
     # "muF_ggToZZ":                     ("_Scale_NONEUP", "_Scale_NONEDOWN"),
-    # "PDF_RMS":                            (), # HAS 100 VARIATIONS, TREAT DIFFERENTLY
     "rate_ttZ":                       (),
     "rate_WZ":                        (),
     "rate_ZZ":                        (),
@@ -407,21 +440,33 @@ for region in regions:
             # The SM also needs special treatment because we need to sum ttZ, WZ and ZZ
             # Also, we construct the lin and quad histograms for the EFT fit
             if process == "sm":
-                nominalHists[process] = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning)
+                # Get SM hist with SM samples
+                nominalHists[process] = getCombinedSignal_SM(dirs[region]+inname, histname+"__"+process, altbinning)
                 p.addBackground(nominalHists[process], processinfo[process][0], processinfo[process][1])
                 writeObjToDirInFile(outname, region+"__"+histname, nominalHists[process], "sm", update=True)
+                # Also get SM Hist from EFT samples
+                hist_eft_sm = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process, altbinning)
                 for WCname in WCnames:
-                    hist_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning)
-                    hist_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning)
-                    hist_quad = getQuadratic(nominalHists["sm"], hist_plus, hist_minus)
-                    nominalHists["sm_lin_quad_"+WCname] = hist_plus.Clone()
+                    # Get linear and quad terms from EFT samples
+                    hist_plus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning)
+                    hist_minus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning)
+                    hist_quad = getQuadratic(hist_eft_sm, hist_plus, hist_minus)
+                    hist_lin = getLinear(hist_plus, hist_minus)
+                    # And add to SM part of SM samples
+                    nominalHists["sm_lin_quad_"+WCname] = nominalHists[process].Clone()
+                    nominalHists["sm_lin_quad_"+WCname].Add(hist_lin)
+                    nominalHists["sm_lin_quad_"+WCname].Add(hist_quad)
                     nominalHists["quad_"+WCname] = hist_quad.Clone()
                     writeObjToDirInFile(outname, region+"__"+histname, nominalHists["sm_lin_quad_"+WCname], "sm_lin_quad_"+WCname, update=True)
                     writeObjToDirInFile(outname, region+"__"+histname, nominalHists["quad_"+WCname], "quad_"+WCname, update=True)
                 for WCmix in WCnames_mixed.keys():
+                    # get mixed term from EFT samples
                     wc1 = WCnames_mixed[WCmix][0]
                     wc2 = WCnames_mixed[WCmix][1]
-                    nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2] = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
+                    nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2] = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
+                    # Subtract SM part from EFT samples and add SM from SM samples
+                    nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Add(hist_eft_sm, -1)
+                    nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Add(nominalHists["sm"])
                     writeObjToDirInFile(outname, region+"__"+histname, nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2], "sm_lin_quad_mixed_"+wc1+"_"+wc2, update=True)
             else:
                 name = histname+"__"+process
@@ -432,60 +477,7 @@ for region in regions:
         ## Now we run systematics. There are many things to take care of
         logger.info( '    Get systematic variations' )
         for sys in sysnames.keys():
-            if sys == "PDF_RMS":
-                # For PDF we do the RMS of the 100 variations
-                # As for the nominal histograms, nonprompt and SM need to be
-                # treated differently
-                if process == "nonprompt" and region in ["ttZ", "WZ", "ttZ_3jets", "ttZ_4jets"]:
-                    pdfUP = nominalHists[process].Clone()
-                    pdfDOWN = nominalHists[process].Clone()
-                elif process == "sm":
-                    pdfvariations = []
-                    for i in range(100):
-                        pdfdir = dirs[region].replace('/Run', '_PDF_'+str(i+1)+'/Run').replace('/UL', '_PDF_'+str(i+1)+'/UL')
-                        h_pdf = getCombinedSignal(pdfdir+inname, histname+"__"+process, altbinning)
-                        pdfvariations.append(h_pdf)
-                    pdfUP, pdfDOWN = getRMS(nominalHists[process], pdfvariations)
-                    for WCname in WCnames:
-                        pdfvariations_lin_quad = []
-                        pdfvariations_quad = []
-                        for i in range(100):
-                            pdfdir = dirs[region].replace('/Run', '_PDF_'+str(i+1)+'/Run').replace('/UL', '_PDF_'+str(i+1)+'/UL')
-                            h_pdf = getCombinedSignal(pdfdir+inname, histname+"__"+process, altbinning)
-                            h_pdf_plus = getCombinedSignal(pdfdir+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning)
-                            h_pdf_minus = getCombinedSignal(pdfdir+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning)
-                            h_pdf_quad = getQuadratic(h_pdf, h_pdf_plus, h_pdf_minus)
-                            pdfvariations_lin_quad.append(h_pdf_plus)
-                            pdfvariations_quad.append(h_pdf_quad)
-                        pdfUP_lin_quad, pdfDOWN_lin_quad = getRMS(nominalHists["sm_lin_quad_"+WCname], pdfvariations_lin_quad)
-                        pdfUP_quad, pdfDOWN_quad = getRMS(nominalHists["quad_"+WCname], pdfvariations_quad)
-                        writeObjToDirInFile(outname, region+"__"+histname, pdfUP_lin_quad, "sm_lin_quad_"+WCname+"__PDFUp", update=True)
-                        writeObjToDirInFile(outname, region+"__"+histname, pdfDOWN_lin_quad, "sm_lin_quad_"+WCname+"__PDFDown", update=True)
-                        writeObjToDirInFile(outname, region+"__"+histname, pdfUP_quad, "quad_"+WCname+"__PDFUp", update=True)
-                        writeObjToDirInFile(outname, region+"__"+histname, pdfDOWN_quad, "quad_"+WCname+"__PDFDown", update=True)
-                    for WCmix in WCnames_mixed.keys():
-                        wc1 = WCnames_mixed[WCmix][0]
-                        wc2 = WCnames_mixed[WCmix][1]
-                        pdfvariations_lin_quad_mix = []
-                        for i in range(100):
-                            pdfdir = dirs[region].replace('/Run', '_PDF_'+str(i+1)+'/Run').replace('/UL', '_PDF_'+str(i+1)+'/UL')
-                            h_pdf_mix = getCombinedSignal(pdfdir+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
-                            pdfvariations_lin_quad_mix.append(h_pdf_mix)
-                        pdfUP_lin_quad_mix, pdfDOWN_lin_quad_mix = getRMS(nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2], pdfvariations_lin_quad_mix)
-                        writeObjToDirInFile(outname, region+"__"+histname, pdfUP_lin_quad_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__PDFUp", update=True)
-                        writeObjToDirInFile(outname, region+"__"+histname, pdfDOWN_lin_quad_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__PDFDown", update=True)
-
-                else:
-                    pdfvariations = []
-                    for i in range(100):
-                        pdfdir = dirs[region].replace('/Run', '_PDF_'+str(i+1)+'/Run').replace('/UL', '_PDF_'+str(i+1)+'/UL')
-                        h_pdf = getHist(pdfdir+inname, name, altbinning)
-                        pdfvariations.append(h_pdf)
-                    pdfUP, pdfDOWN = getRMS(nominalHists[process], pdfvariations)
-                writeObjToDirInFile(outname, region+"__"+histname, pdfUP, process+"__PDFUp", update=True)
-                writeObjToDirInFile(outname, region+"__"+histname, pdfDOWN, process+"__PDFDown", update=True)
-                p.addSystematic(pdfUP, pdfDOWN, sys, processinfo[process][0])
-            elif sys == "Fakerate" or "FakerateClosure_" in sys:
+            if sys == "Fakerate" or "FakerateClosure_" in sys:
                 # The Fake rate uncertainty only exists for nonprompt, for all
                 # other processes just Clone the nominal
                 (upname, downname) = sysnames[sys]
@@ -540,24 +532,38 @@ for region in regions:
                     rate_process = "ZZ"
 
                 if process == "sm":
-                    histUP = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=(1+uncert), rate_process=rate_process)
-                    histDOWN = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=(1-uncert), rate_process=rate_process)
+                    histUP = getCombinedSignal_SM(dirs[region]+inname, histname+"__"+process, altbinning, rate=(1+uncert), rate_process=rate_process)
+                    histDOWN = getCombinedSignal_SM(dirs[region]+inname, histname+"__"+process, altbinning, rate=(1-uncert), rate_process=rate_process)
+                    histUP_eft_sm = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process, altbinning, rate=(1+uncert), rate_process=rate_process)
+                    histDOWN_eft_sm = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process, altbinning, rate=(1-uncert), rate_process=rate_process)
                     for WCname in WCnames:
-                        histUP_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=(1+uncert), rate_process=rate_process)
-                        histUP_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=(1+uncert), rate_process=rate_process)
-                        histUP_quad = getQuadratic(histUP, histUP_plus, histUP_minus)
-                        histDOWN_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=(1-uncert), rate_process=rate_process)
-                        histDOWN_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=(1-uncert), rate_process=rate_process)
-                        histDOWN_quad = getQuadratic(histDOWN, histDOWN_plus, histDOWN_minus)
-                        writeObjToDirInFile(outname, region+"__"+histname, histUP_plus, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
-                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_plus, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
+                        histUP_plus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=(1+uncert), rate_process=rate_process)
+                        histUP_minus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=(1+uncert), rate_process=rate_process)
+                        histUP_lin = getLinear(histUP_plus, histUP_minus)
+                        histUP_quad = getQuadratic(histUP_eft_sm, histUP_plus, histUP_minus)
+                        histDOWN_plus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=(1-uncert), rate_process=rate_process)
+                        histDOWN_minus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=(1-uncert), rate_process=rate_process)
+                        histDOWN_lin = getLinear(histDOWN_plus, histDOWN_minus)
+                        histDOWN_quad = getQuadratic(histDOWN_eft_sm, histDOWN_plus, histDOWN_minus)
+                        histUP_lin_quad = histUP.Clone()
+                        histUP_lin_quad.Add(histUP_lin)
+                        histUP_lin_quad.Add(histUP_quad)
+                        histDOWN_lin_quad = histDOWN.Clone()
+                        histDOWN_lin_quad.Add(histDOWN_lin)
+                        histDOWN_lin_quad.Add(histDOWN_quad)
+                        writeObjToDirInFile(outname, region+"__"+histname, histUP_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_quad, "quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_quad, "quad_"+WCname+"__"+sys+"Down", update=True)
                     for WCmix in WCnames_mixed.keys():
                         wc1 = WCnames_mixed[WCmix][0]
                         wc2 = WCnames_mixed[WCmix][1]
-                        histUP_mix = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=(1+uncert), rate_process=rate_process)
-                        histDOWN_mix = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=(1-uncert), rate_process=rate_process)
+                        histUP_mix = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=(1+uncert), rate_process=rate_process)
+                        histDOWN_mix = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=(1-uncert), rate_process=rate_process)
+                        histUP_mix.Add(histUP_eft_sm, -1)
+                        histUP_mix.Add(histUP)
+                        histDOWN_mix.Add(histDOWN_eft_sm, -1)
+                        histDOWN_mix.Add(histDOWN)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
                 else:
@@ -600,24 +606,38 @@ for region in regions:
                         logger.info('      - for '+sys+' vary:')
                         for processToVary in processesToVary:
                             logger.info('          - '+processToVary)
-                    histUP = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
-                    histDOWN = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
+                    histUP = getCombinedSignal_SM(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
+                    histDOWN = getCombinedSignal_SM(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
+                    histUP_eft_sm = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
+                    histDOWN_eft_sm = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process, altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
                     for WCname in WCnames:
-                        histUP_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
-                        histUP_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
-                        histUP_quad = getQuadratic(histUP, histUP_plus, histUP_minus)
-                        histDOWN_plus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
-                        histDOWN_minus = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
-                        histDOWN_quad = getQuadratic(histDOWN, histDOWN_plus, histDOWN_minus)
-                        writeObjToDirInFile(outname, region+"__"+histname, histUP_plus, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
-                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_plus, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
+                        histUP_plus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
+                        histUP_minus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=upFile)
+                        histUP_lin = getLinear(histUP_plus, histUP_minus)
+                        histUP_quad = getQuadratic(histUP_eft_sm, histUP_plus, histUP_minus)
+                        histDOWN_plus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
+                        histDOWN_minus = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning, rate=None, rate_process=None, sys_processes=processesToVary, fname_sys=downFile)
+                        histDOWN_lin = getLinear(histDOWN_plus, histDOWN_minus)
+                        histDOWN_quad = getQuadratic(histDOWN_eft_sm, histDOWN_plus, histDOWN_minus)
+                        histUP_lin_quad = histUP.Clone()
+                        histUP_lin_quad.Add(histUP_lin)
+                        histUP_lin_quad.Add(histUP_quad)
+                        histDOWN_lin_quad = histDOWN.Clone()
+                        histDOWN_lin_quad.Add(histDOWN_lin)
+                        histDOWN_lin_quad.Add(histDOWN_quad)
+                        writeObjToDirInFile(outname, region+"__"+histname, histUP_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_quad, "quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_quad, "quad_"+WCname+"__"+sys+"Down", update=True)
                     for WCmix in WCnames_mixed.keys():
                         wc1 = WCnames_mixed[WCmix][0]
                         wc2 = WCnames_mixed[WCmix][1]
-                        histUP_mix = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=None, rate_process=None)
-                        histDOWN_mix = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=None, rate_process=None)
+                        histUP_mix = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=None, rate_process=None)
+                        histDOWN_mix = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning, rate=None, rate_process=None)
+                        histUP_mix.Add(histUP_eft_sm, -1)
+                        histUP_mix.Add(histUP)
+                        histDOWN_mix.Add(histDOWN_eft_sm, -1)
+                        histDOWN_mix.Add(histDOWN)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
 
@@ -645,24 +665,38 @@ for region in regions:
                     histUP = nominalHists[process].Clone()
                     histDOWN = nominalHists[process].Clone()
                 elif process == "sm":
-                    histUP = getCombinedSignal(sysdirUP+inname, histname+"__"+process, altbinning)
-                    histDOWN = getCombinedSignal(sysdirDOWN+inname, histname+"__"+process, altbinning)
+                    histUP = getCombinedSignal_SM(sysdirUP+inname, histname+"__"+process, altbinning)
+                    histDOWN = getCombinedSignal_SM(sysdirDOWN+inname, histname+"__"+process, altbinning)
+                    histUP_eft_sm = getCombinedSignal_EFT(sysdirUP+inname, histname+"__"+process, altbinning)
+                    histDOWN_eft_sm = getCombinedSignal_EFT(sysdirDOWN+inname, histname+"__"+process, altbinning)
                     for WCname in WCnames:
-                        histUP_plus = getCombinedSignal(sysdirUP+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning)
-                        histUP_minus = getCombinedSignal(sysdirUP+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning)
-                        histUP_quad = getQuadratic(histUP, histUP_plus, histUP_minus)
-                        histDOWN_plus = getCombinedSignal(sysdirDOWN+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning)
-                        histDOWN_minus = getCombinedSignal(sysdirDOWN+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning)
-                        histDOWN_quad = getQuadratic(histDOWN, histDOWN_plus, histDOWN_minus)
-                        writeObjToDirInFile(outname, region+"__"+histname, histUP_plus, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
-                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_plus, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
+                        histUP_plus = getCombinedSignal_EFT(sysdirUP+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning)
+                        histUP_minus = getCombinedSignal_EFT(sysdirUP+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning)
+                        histUP_lin = getLinear(histUP_plus, histUP_minus)
+                        histUP_quad = getQuadratic(histUP_eft_sm, histUP_plus, histUP_minus)
+                        histDOWN_plus = getCombinedSignal_EFT(sysdirDOWN+inname, histname+"__"+process+"__"+WCname+"=1.0000", altbinning)
+                        histDOWN_minus = getCombinedSignal_EFT(sysdirDOWN+inname, histname+"__"+process+"__"+WCname+"=-1.0000", altbinning)
+                        histDOWN_lin = getLinear(histDOWN_plus, histDOWN_minus)
+                        histDOWN_quad = getQuadratic(histDOWN_eft_sm, histDOWN_plus, histDOWN_minus)
+                        histUP_lin_quad = histUP.Clone()
+                        histUP_lin_quad.Add(histUP_lin)
+                        histUP_lin_quad.Add(histUP_quad)
+                        histDOWN_lin_quad = histDOWN.Clone()
+                        histDOWN_lin_quad.Add(histDOWN_lin)
+                        histDOWN_lin_quad.Add(histDOWN_quad)
+                        writeObjToDirInFile(outname, region+"__"+histname, histUP_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
+                        writeObjToDirInFile(outname, region+"__"+histname, histDOWN_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_quad, "quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_quad, "quad_"+WCname+"__"+sys+"Down", update=True)
                     for WCmix in WCnames_mixed.keys():
                         wc1 = WCnames_mixed[WCmix][0]
                         wc2 = WCnames_mixed[WCmix][1]
-                        histUP_mix = getCombinedSignal(sysdirUP+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
-                        histDOWN_mix = getCombinedSignal(sysdirDOWN+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
+                        histUP_mix = getCombinedSignal_EFT(sysdirUP+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
+                        histDOWN_mix = getCombinedSignal_EFT(sysdirDOWN+inname, histname+"__"+process+"__"+WCmix+"=1.0000", altbinning)
+                        histUP_mix.Add(histUP_eft_sm, -1)
+                        histUP_mix.Add(histUP)
+                        histDOWN_mix.Add(histDOWN_eft_sm, -1)
+                        histDOWN_mix.Add(histDOWN)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
                 elif process == "ggToZZ" and "PDF_" in sys:
@@ -690,17 +724,29 @@ for region in regions:
                 h_obs_tmp = getNonpromptFromCR(dirs[region+"_CR"]+inname, histname, altbinning, processes_CR)
             elif process == "sm":
                 if args.signalInjectionLight:
-                    h_obs_tmp = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re1122=1.0000", altbinning)
+                    h_obs_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re1122=1.0000", altbinning)
+                    h_eft_sm_tmp = getCombinedSignal_EFT(sysdir+inname, histname+"__"+process, altbinning)
+                    h_sm_tmp = getCombinedSignal_SM(sysdir+inname, histname+"__"+process, altbinning)
+                    h_obs_tmp.Add(h_eft_sm_tmp, -1)
+                    h_obs_tmp.Add(h_sm_tmp)
                 elif args.signalInjectionHeavy:
-                    h_obs_tmp = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re33=1.0000", altbinning)
+                    h_obs_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re33=1.0000", altbinning)
+                    h_eft_sm_tmp = getCombinedSignal_EFT(sysdir+inname, histname+"__"+process, altbinning)
+                    h_sm_tmp = getCombinedSignal_SM(sysdir+inname, histname+"__"+process, altbinning)
+                    h_obs_tmp.Add(h_eft_sm_tmp, -1)
+                    h_obs_tmp.Add(h_sm_tmp)
                 elif args.signalInjectionMixed:
-                    h_obs_tmp = getCombinedSignal(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re112233=1.0000", altbinning)
+                    h_obs_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re112233=1.0000", altbinning)
+                    h_eft_sm_tmp = getCombinedSignal_EFT(sysdir+inname, histname+"__"+process, altbinning)
+                    h_sm_tmp = getCombinedSignal_SM(sysdir+inname, histname+"__"+process, altbinning)
+                    h_obs_tmp.Add(h_eft_sm_tmp, -1)
+                    h_obs_tmp.Add(h_sm_tmp)
                 elif args.signalInjectionWZjets:
                     sysdir = dirs[region]
                     sysdir = sysdir.replace('/Run', '_WZnJet'+'/Run').replace('/UL', '_WZnJet'+'/UL')
-                    h_obs_tmp = getCombinedSignal(sysdir+inname, histname+"__"+process, altbinning)
+                    h_obs_tmp = getCombinedSignal_SM(sysdir+inname, histname+"__"+process, altbinning)
                 else:
-                    h_obs_tmp = getCombinedSignal(dirs[region]+inname, histname+"__"+process, altbinning)
+                    h_obs_tmp = getCombinedSignal_SM(dirs[region]+inname, histname+"__"+process, altbinning)
             else:
                 h_obs_tmp = getHist(dirs[region]+inname, histname+"__"+process, altbinning)
 
