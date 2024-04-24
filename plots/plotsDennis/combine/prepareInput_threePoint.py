@@ -340,7 +340,14 @@ sysnames = {
     "LepIDsys_muon":                  ("_LepIDsys_muon_UP", "_LepIDsys_muon_DOWN"),
     "PU":                             ("_PU_UP", "_PU_DOWN"),
     "JES":                            ("_JES_UP", "_JES_DOWN"),
-    "JER":                            ("_JER_UP", "_JER_DOWN"),
+    "JER_2016preVFP":                 ("_JER_2016preVFP_UP", "_JER_2016preVFP_DOWN"),
+    "JER_2016":                       ("_JER_2016_UP", "_JER_2016_DOWN"),
+    "JER_2017":                       ("_JER_2017_UP", "_JER_2017_DOWN"),
+    "JER_2018":                       ("_JER_2018_UP", "_JER_2018_DOWN"),
+    "Unclustered_2016preVFP":         ("_Unclustered_2016preVFP_UP", "_Unclustered_2016preVFP_DOWN"),
+    "Unclustered_2016":               ("_Unclustered_2016_UP", "_Unclustered_2016_DOWN"),
+    "Unclustered_2017":               ("_Unclustered_2017_UP", "_Unclustered_2017_DOWN"),
+    "Unclustered_2018":               ("_Unclustered_2018_UP", "_Unclustered_2018_DOWN"),
     "Lumi_uncorrelated_2016":         ("_Lumi_uncorrelated_2016_UP", "_Lumi_uncorrelated_2016_DOWN"),
     "Lumi_uncorrelated_2017":         ("_Lumi_uncorrelated_2017_UP", "_Lumi_uncorrelated_2017_DOWN"),
     "Lumi_uncorrelated_2018":         ("_Lumi_uncorrelated_2018_UP", "_Lumi_uncorrelated_2018_DOWN"),
@@ -354,14 +361,15 @@ sysnames = {
     "ISR_ttX":                        ("_ISR_UP", "_ISR_DOWN"),
     "ISR_triBoson":                   ("_ISR_UP", "_ISR_DOWN"),
     "ISR_ggToZZ":                     ("_ISR_UP", "_ISR_DOWN"),
-    "FSR_ttZ":                        ("_FSR_UP", "_FSR_DOWN"),
-    "FSR_WZ":                         ("_FSR_UP", "_FSR_DOWN"),
-    "FSR_ZZ":                         ("_FSR_UP", "_FSR_DOWN"),
-    "FSR_tZq":                        ("_FSR_UP", "_FSR_DOWN"),
-    "FSR_tWZ":                        ("_FSR_UP", "_FSR_DOWN"),
-    "FSR_ttX":                        ("_FSR_UP", "_FSR_DOWN"),
-    "FSR_triBoson":                   ("_FSR_UP", "_FSR_DOWN"),
-    "FSR_ggToZZ":                     ("_FSR_UP", "_FSR_DOWN"),
+    "FSR":                            ("_FSR_UP", "_FSR_DOWN"),
+    # "FSR_ttZ":                        ("_FSR_UP", "_FSR_DOWN"),
+    # "FSR_WZ":                         ("_FSR_UP", "_FSR_DOWN"),
+    # "FSR_ZZ":                         ("_FSR_UP", "_FSR_DOWN"),
+    # "FSR_tZq":                        ("_FSR_UP", "_FSR_DOWN"),
+    # "FSR_tWZ":                        ("_FSR_UP", "_FSR_DOWN"),
+    # "FSR_ttX":                        ("_FSR_UP", "_FSR_DOWN"),
+    # "FSR_triBoson":                   ("_FSR_UP", "_FSR_DOWN"),
+    # "FSR_ggToZZ":                     ("_FSR_UP", "_FSR_DOWN"),
     "muR_ttZ":                        ("_Scale_UPNONE", "_Scale_DOWNNONE"),
     "muR_WZ":                         ("_Scale_UPNONE", "_Scale_DOWNNONE"),
     "muR_ZZ":                         ("_Scale_UPNONE", "_Scale_DOWNNONE"),
@@ -383,8 +391,10 @@ sysnames = {
     "rate_ZZ":                        (),
     "WZ_Njet_reweight":               ("_WZnJet", ""),
     "WZ_heavyFlavour":                ("_WZheavy_UP", "_WZheavy_DOWN"),
-    "EWK_mul":                        ("_EWK_mul", ""),
-    "EWK_add":                        ("_EWK_add", ""),
+    "EWK_mul_ZZ":                     ("_EWK_mul", ""),
+    "EWK_mul_WZ":                     ("_EWK_mul", ""),
+    "EWK_add_ZZ":                     ("_EWK_add", ""),
+    "EWK_add_WZ":                     ("_EWK_add", ""),
 }
 
 for i in range(100):
@@ -571,8 +581,8 @@ for region in regions:
                     histDOWN = nominalHists[process].Clone()
                 writeObjToDirInFile(outname, region+"__"+histname, histUP, process+"__"+sys+"Up", update=True)
                 writeObjToDirInFile(outname, region+"__"+histname, histDOWN, process+"__"+sys+"Down", update=True)
-            elif "muR_" in sys or "muF_" in sys or "ISR_" in sys or "FSR_" in sys:
-                # muR, muF, FSR and ISR are divided by process, thus we have to do the variations
+            elif "muR_" in sys or "muF_" in sys or "ISR_" in sys or "EWK_add" is sys or "EWK_mul" in sys:
+                # muR, muF, EWK, and ISR are divided by process, thus we have to do the variations
                 # manually. For the "sm" histogram, the combination of signals is
                 # built such that single processes can be read from a file that
                 # contains the muR/muF variations while for other processes we use

@@ -4,19 +4,20 @@
 ################################################################################
 ## Combined light generations
 
-python runCombine_threePoint.py --year=ULRunII --light --postFit --region=1 --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --light --postFit --region=2 --oneD=cHq1Re1122 --minimizerStrategy
-python runCombine_threePoint.py --year=ULRunII --light --postFit --region=3 --oneD=cHq1Re1122
-
-python runCombine_threePoint.py --year=ULRunII --light --postFit --region=1 --oneD=cHq1Re33 
-python runCombine_threePoint.py --year=ULRunII --light --postFit --region=2 --oneD=cHq1Re33 --minimizerStrategy
-python runCombine_threePoint.py --year=ULRunII --light --postFit --region=3 --oneD=cHq1Re33 
-
-# python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re1122
-# python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re33
-# python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq3Re1122
-# python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq3Re33
+# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=1 --oneD=cHq1Re1122
+# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=2 --oneD=cHq1Re1122 --minimizerStrategy
+# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=3 --oneD=cHq1Re1122
 #
+# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=1 --oneD=cHq1Re33
+# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=2 --oneD=cHq1Re33 --minimizerStrategy
+# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=3 --oneD=cHq1Re33
+
+python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re1122
+python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq3Re1122
+python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq3Re33
+
+
 # python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re1122 --signalInjectionLight
 # python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re33 --signalInjectionLight
 #

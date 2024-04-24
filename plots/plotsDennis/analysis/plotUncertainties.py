@@ -62,6 +62,18 @@ dirs = {
 }
 
 regions = ["ttZ", "WZ", "ZZ"]
+processes = {
+    "ttZ": "ttZ_sm",
+    "WZ": "WZTo3LNu", #WZTo3LNu_powheg
+    "ZZ": "ZZ_powheg"
+}
+
+# processes = {
+#     "ttZ": "ttZ",
+#     "WZ": "WZ",
+#     "ZZ": "ZZ"
+# }
+
 lumi = {
     "UL2016preVFP": "19.5",
     "UL2016":       "16.5",
@@ -72,8 +84,12 @@ lumi = {
 
 colors = {
     "ttZ": ROOT.kAzure+4,
+    "ttZ_sm": ROOT.kAzure+4,
     "WZ": ROOT.kAzure+6,
+    "WZTo3LNu_powheg": ROOT.kAzure+6,
+    "WZTo3LNu": ROOT.kAzure+6,
     "ZZ": ROOT.kGreen+3,
+    "ZZ_powheg": ROOT.kGreen+3,
 }
 
 sysnames = {
@@ -106,7 +122,14 @@ sysnames = {
     "LepIDsys_muon":                  ("LepIDsys_muon_UP", "LepIDsys_muon_DOWN"),
     "PU":                             ("PU_UP", "PU_DOWN"),
     "JES":                            ("JES_UP", "JES_DOWN"),
-    "JER":                            ("JER_UP", "JER_DOWN"),
+    "JER_2016preVFP":                 ("JER_2016preVFP_UP", "JER_2016preVFP_DOWN"),
+    "JER_2016":                       ("JER_2016_UP", "JER_2016_DOWN"),
+    "JER_2017":                       ("JER_2017_UP", "JER_2017_DOWN"),
+    "JER_2018":                       ("JER_2018_UP", "JER_2018_DOWN"),
+    "Unclustered_2016preVFP":         ("Unclustered_2016preVFP_UP", "Unclustered_2016preVFP_DOWN"),
+    "Unclustered_2016":               ("Unclustered_2016_UP", "Unclustered_2016_DOWN"),
+    "Unclustered_2017":               ("Unclustered_2017_UP", "Unclustered_2017_DOWN"),
+    "Unclustered_2018":               ("Unclustered_2018_UP", "Unclustered_2018_DOWN"),
     "Lumi_uncorrelated_2016":         ("Lumi_uncorrelated_2016_UP", "Lumi_uncorrelated_2016_DOWN"),
     "Lumi_uncorrelated_2017":         ("Lumi_uncorrelated_2017_UP", "Lumi_uncorrelated_2017_DOWN"),
     "Lumi_uncorrelated_2018":         ("Lumi_uncorrelated_2018_UP", "Lumi_uncorrelated_2018_DOWN"),
@@ -120,7 +143,7 @@ sysnames = {
 }
 
 for region in regions:
-    process = region # only plot ttZ in ttZ region, WZ in WZ region and ZZ in ZZ region
+    process = processes[region] # only plot ttZ in ttZ region, WZ in WZ region and ZZ in ZZ region
     for sys in sysnames.keys():
         p = Plotter(region+"__"+process+"__"+sys)
         p.plot_dir = plot_directory+"/Uncertainties/"+args.year+"/"

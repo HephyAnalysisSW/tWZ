@@ -75,9 +75,6 @@ argParser.add_argument('--threePoint',     action='store_true', default=False)
 argParser.add_argument('--WZreweight',     action='store_true', default=False)
 argParser.add_argument('--ttWonly',        action='store_true', default=False)
 argParser.add_argument('--moreEFToperators',action='store_true', default=False)
-
-
-
 args = argParser.parse_args()
 
 ################################################################################
@@ -145,7 +142,15 @@ variations = [
     # JEC
     "JES_UP", "JES_DOWN",
     #JER
-    "JER_UP", "JER_DOWN",
+    "JER_2016preVFP_UP", "JER_2016preVFP_DOWN",
+    "JER_2016_UP", "JER_2016_DOWN",
+    "JER_2017_UP", "JER_2017_DOWN",
+    "JER_2018_UP", "JER_2018_DOWN",
+    # MET
+    "Unclustered_2016preVFP_UP", "Unclustered_2016preVFP_DOWN",
+    "Unclustered_2016_UP", "Unclustered_2016_DOWN",
+    "Unclustered_2017_UP", "Unclustered_2017_DOWN",
+    "Unclustered_2018_UP", "Unclustered_2018_DOWN",
     # Lumi
     "Lumi_uncorrelated_2016_UP", "Lumi_uncorrelated_2016_DOWN",
     "Lumi_uncorrelated_2017_UP", "Lumi_uncorrelated_2017_DOWN",
@@ -171,10 +176,27 @@ for i in range(100):
 print variations
 
 jet_variations = {
-    "JES_UP": "jesTotalUp",
-    "JES_DOWN": "jesTotalDown",
-    "JER_UP": "jerUp",
-    "JER_DOWN": "jerDown",
+    "JES_UP":   ("jesTotalUp", "all"),
+    "JES_DOWN": ("jesTotalDown", "all"),
+    "JER_2016preVFP_UP":   ("jerUp",  "UL2016preVFP"),
+    "JER_2016preVFP_DOWN": ("jerDown","UL2016preVFP"),
+    "JER_2016_UP":         ("jerUp",  "UL2016"),
+    "JER_2016_DOWN":       ("jerDown","UL2016"),
+    "JER_2017_UP":         ("jerUp",  "UL2017"),
+    "JER_2017_DOWN":       ("jerDown","UL2017"),
+    "JER_2018_UP":         ("jerUp",  "UL2018"),
+    "JER_2018_DOWN":       ("jerDown","UL2018"),
+}
+
+met_variations = {
+    "Unclustered_2016preVFP_UP" :   ("unclustEnUp",  "UL2016preVFP"),
+    "Unclustered_2016preVFP_DOWN" : ("unclustEnDown","UL2016preVFP"),
+    "Unclustered_2016_UP" :         ("unclustEnUp",  "UL2016"),
+    "Unclustered_2016_DOWN" :       ("unclustEnDown","UL2016"),
+    "Unclustered_2017_UP" :         ("unclustEnUp",  "UL2017"),
+    "Unclustered_2017_DOWN" :       ("unclustEnDown","UL2017"),
+    "Unclustered_2018_UP" :         ("unclustEnUp",  "UL2018"),
+    "Unclustered_2018_DOWN" :       ("unclustEnDown","UL2018"),
 }
 ################################################################################
 # Check if we know the variation else don't use data!
@@ -397,11 +419,17 @@ def getLumiWeight(event, sys):
 
 ################################################################################
 # Add a selection selectionModifier
-
+selectionModifier = None
 if args.sys in jet_variations.keys():
-    selectionModifier = jetSelectionModifier(jet_variations[args.sys])
-else:
-    selectionModifier = None
+    variation = jet_variations[args.sys][0]
+    activeYear = jet_variations[args.sys][1]
+    if args.era == activeYear or activeYear == "all":
+        selectionModifier = jetSelectionModifier(variation)
+elif args.sys in met_variations.keys():
+    variation = met_variations[args.sys][0]
+    activeYear = met_variations[args.sys][1]
+    if args.era == activeYear or activeYear == "all":
+        selectionModifier = metSelectionModifier(variation)
 
 ################################################################################
 # Define the MC samples
@@ -464,22 +492,6 @@ elif args.era == "UL2018":
                 mc = [UL2018.WW, UL2018.Top, UL2018.DY]
             else:
                 mc = [UL2018.nonprompt_3l]
-elif args.era == "ULRunII":
-    mc = [TWZ_NLO_DR, TTX_rare, TZQ, triBoson, nonprompt_3l]
-    mc += [TTZ, WZTo3LNu, WZTo3LNu_powheg, ZZ, ZZ_powheg, WZ]
-    mc += [TTGamma, ZGamma, ggToZZ, HToZZ, TTW_EWK]
-    samples_eft = [TTZ_EFT, WZ_EFT, ZZ_EFT]
-    if args.applyFakerate:
-        samples_eft = []
-        if args.splitTTX:
-            mc += [TTX_rare_noTTW, TTW]
-        if args.nonpromptOnly:
-            samples_eft = []
-            if args.splitnonprompt:
-                mc = [WW, Top, DY]
-            else:
-                mc = [nonprompt_3l]
-
 if args.onlyData:
     mc = []
     samples_eft = []
@@ -646,9 +658,6 @@ elif args.era == "UL2017":
 elif args.era == "UL2018":
     datastring = "Run2018"
     lumistring = "2018"
-elif args.era == "ULRunII":
-    datastring = "RunII"
-    lumistring = "RunII"
 
 try:
   data_sample = eval(datastring)
@@ -1542,6 +1551,23 @@ def changeTriggerSF( event, sample ):
             event.reweightTrigger = event.reweightTrigger + uncert
 sequence.append(changeTriggerSF)
 
+def HEMissue( event, sample ):
+    # 20 % for jets with -1.57 <phi< -0.87 and -2.5<eta<-1.3
+    # 35 % for jets with -1.57 <phi< -0.87 and -3.0<eta<-2.5
+    jet_threshold = 30.
+    NjetsPass = 0
+    for i in range(event.nJetGood):
+        pt = event.JetGood_pt[i]
+        if event.JetGood_phi[i] > -1.57 and event.JetGood_phi[i] < -0.87:
+            if event.JetGood_eta[i] > -2.5 and event.JetGood_eta[i] < -1.3:
+                pt = 0.8 * event.JetGood_pt[i]
+            if event.JetGood_eta[i] > -3.5 and event.JetGood_eta[i] < -2.5:
+                pt = 0.65 * event.JetGood_pt[i]
+        if pt > jet_threshold:
+            NjetsPass += 1
+    event.NjetsPass = NjetsPass
+sequence.append(HEMissue)
+
 ################################################################################
 # Read variables
 
@@ -1631,9 +1657,19 @@ for i_mode, mode in enumerate(allModes):
 
     ###### SYS #################################################################
     if args.sys in jet_variations:
-        new_variables = ['%s/F'%v for v in jetSelectionModifier(jet_variations[args.sys],'list')]
-        read_variables_MC += new_variables
-        read_variables    += new_variables
+        variation = jet_variations[args.sys][0]
+        activeYear = jet_variations[args.sys][1]
+        if args.era == activeYear or activeYear == "all":
+            new_variables_jet = ['%s/F'%v for v in jetSelectionModifier(variation,'list')]
+            read_variables_MC += new_variables_jet
+            read_variables    += new_variables_jet
+    if args.sys in met_variations:
+        variation = met_variations[args.sys][0]
+        activeYear = met_variations[args.sys][1]
+        if args.era == activeYear or activeYear == "all":
+            new_variables_met = ['%s/F'%v for v in metSelectionModifier(variation,'list')]
+            read_variables_MC += new_variables_met
+            read_variables    += new_variables_met
 
     weightnames = ['weight', 'reweightBTag_SF', 'reweightPU', 'reweightL1Prefire' , 'reweightTrigger', 'reweightLeptonFakerate', 'reweightLeptonMVA', 'reweightElectronRecoSF']
     weightnames += ['reweightScale', 'reweightPDF', 'reweightLumi', 'reweightPS']
@@ -1865,6 +1901,14 @@ for i_mode, mode in enumerate(allModes):
         attribute = lambda event, sample: event.nJetGood,
         binning=[16, -0.5, 15.5],
     ))
+
+    plots.append(Plot(
+        name = "N_jets_passHEM",
+        texX = 'Number of jets passing after HEM', texY = 'Number of Events',
+        attribute = lambda event, sample: event.NjetsPass,
+        binning=[16, -0.5, 15.5],
+    ))
+
     plots.append(Plot(
         name = "N_bjets",
         texX = 'Number of b-tagged jets', texY = 'Number of Events',
@@ -1928,13 +1972,6 @@ for i_mode, mode in enumerate(allModes):
             texX = 'm_{lb} (GeV)', texY = 'Number of Events / 20 GeV',
             attribute = lambda event, sample: event.mlb,
             binning=[20, 0, 400],
-        ))
-
-        plots.append(Plot(
-            name = "N_jets",
-            texX = 'Number of jets', texY = 'Number of Events',
-            attribute = lambda event, sample: event.nJetGood,
-            binning=[16, -0.5, 15.5],
         ))
 
         plots.append(Plot(
@@ -2230,7 +2267,7 @@ if args.nicePlots and args.sys == "central":
 
 
 # Write Result Hist in root file
-plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "yield", "FakeCategory", "N_jets", "N_bjets"]
+plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "yield", "FakeCategory", "N_jets", "N_bjets", "N_jets_passHEM"]
 logger.info( "Now write results in root files." )
 for mode in allModes+["all"]:
     logger.info( "Write file for channel: %s", mode )
