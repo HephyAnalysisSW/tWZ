@@ -46,8 +46,8 @@ processinfo = {
     "ttZ_sm":    ("t#bar{t}Z", color.TTZ),
     "WZTo3LNu":  ("WZ",  color.WZ),
     "WZ":        ("WZ",  color.WZ),
-    "ZZ":        ("ZZ", color.ZZ-2),
-    "ZZ_powheg": ("ZZ", color.ZZ-2),
+    "ZZ":        ("ZZ", ROOT.kAzure-8),
+    "ZZ_powheg": ("ZZ", ROOT.kAzure-8),
     "tWZ":       ("tWZ", color.TWZ),
     "ttX":       ("t#bar{t}X", color.TTX_rare),
     "tZq":       ("tZq", color.TZQ),
@@ -57,7 +57,8 @@ processinfo = {
 }
 histname = "Z1_pt"
 
-signals = ["ttZ", "WZ", "ZZ"]
+# signals = ["ttZ", "WZ", "ZZ"]
+signals = ["ttZ_sm", "WZTo3LNu", "ZZ_powheg"]
 backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "ggToZZ", "nonprompt"]
 processes_CR = ["nonprompt", "ttZ_sm", "WZTo3LNu", "ZZ_powheg", "tWZ", "ttX", "tZq", "triBoson", "ggToZZ"]
 

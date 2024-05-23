@@ -5,6 +5,10 @@
 # python prepareInput_threePoint.py --noData --year=UL2016preVFP
 
 python prepareInput_threePoint.py --noData --year=ULRunII --light
+# python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionLight  --fluctuatePseudoData
+# python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionHeavy  --fluctuatePseudoData
+# python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionMixed  --fluctuatePseudoData
+# python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionWZjets --fluctuatePseudoData
 # python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionLight
 # python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionHeavy
 # python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionMixed

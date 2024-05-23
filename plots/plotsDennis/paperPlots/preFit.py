@@ -19,6 +19,7 @@ logger    = logger.get_logger(   "INFO", logFile = None)
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--noData',           action='store_true', default=False)
+argParser.add_argument('--addSignal',           action='store_true', default=False)
 args = argParser.parse_args()
 
 
@@ -55,20 +56,27 @@ processinfo = {
 
 sys = [
     'BTag_b_correlated', 'BTag_b_uncorrelated_2016', 'BTag_b_uncorrelated_2016preVFP', 'BTag_b_uncorrelated_2017', 'BTag_b_uncorrelated_2018', 'BTag_l_correlated', 'BTag_l_uncorrelated_2016', 'BTag_l_uncorrelated_2016preVFP', 'BTag_l_uncorrelated_2017', 'BTag_l_uncorrelated_2018',
-    'FSR_WZ', 'FSR_ZZ', 'FSR_tWZ', 'FSR_tZq', 'FSR_triBoson', 'FSR_ttX', 'FSR_ttZ', 'FSR_ggToZZ',
     'Fakerate', 'FakerateClosure_correlated_both', 'FakerateClosure_correlated_elec', 'FakerateClosure_correlated_muon',
     'FakerateClosure_uncorrelated_both_2016', 'FakerateClosure_uncorrelated_both_2016preVFP', 'FakerateClosure_uncorrelated_both_2017', 'FakerateClosure_uncorrelated_both_2018',
     'FakerateClosure_uncorrelated_elec_2016', 'FakerateClosure_uncorrelated_elec_2016preVFP', 'FakerateClosure_uncorrelated_elec_2017', 'FakerateClosure_uncorrelated_elec_2018',
     'FakerateClosure_uncorrelated_muon_2016', 'FakerateClosure_uncorrelated_muon_2016preVFP', 'FakerateClosure_uncorrelated_muon_2017', 'FakerateClosure_uncorrelated_muon_2018',
     'ISR_WZ', 'ISR_ZZ', 'ISR_tWZ', 'ISR_tZq', 'ISR_triBoson', 'ISR_ttX', 'ISR_ttZ', 'ISR_ggToZZ',
-    'JER', 'JES',
-    'LepIDstat_2016', 'LepIDstat_2016preVFP', 'LepIDstat_2017', 'LepIDstat_2018', 'LepIDsys', 'LepReco',
+    'FSR',
+    'JER_2016preVFP', 'JER_2016',  'JER_2017', 'JER_2018',
+    'Unclustered_2016preVFP', 'Unclustered_2016',  'Unclustered_2017', 'Unclustered_2018',
+    'JES',
+    'LepReco',
+    'LepIDsys_elec',
+    'LepIDstat_elec_2016', 'LepIDstat_elec_2016preVFP', 'LepIDstat_elec_2017', 'LepIDstat_elec_2018',
+    'LepIDsys_muon',
+    'LepIDstat_muon_2016', 'LepIDstat_muon_2016preVFP', 'LepIDstat_muon_2017', 'LepIDstat_muon_2018',
     'Lumi_correlated_161718', 'Lumi_correlated_1718',
     'Lumi_uncorrelated_2016', 'Lumi_uncorrelated_2017', 'Lumi_uncorrelated_2018',
-    'PU', 'Prefire', 'Trigger', 'WZ_Njet_reweight', 'WZ_heavyFlavour',
-    'muF_WZ', 'muF_ZZ', 'muF_tWZ', 'muF_tZq', 'muF_triBoson', 'muF_ttX', 'muF_ttZ', 'muF_ggToZZ',
-    'muR_WZ', 'muR_ZZ', 'muR_tWZ', 'muR_tZq', 'muR_triBoson', 'muR_ttX', 'muR_ttZ', 'muR_ggToZZ',
-    'rate_WZ', 'rate_ZZ', 'rate_ttZ'
+    'Trigger_2016preVFP', 'Trigger_2016', 'Trigger_2017', 'Trigger_2018',
+    'PU', 'Prefire', 'WZ_Njet_reweight', 'WZ_heavyFlavour',
+    'muF_WZ', 'muF_ZZ', 'muF_tWZ', 'muF_tZq', 'muF_triBoson', 'muF_ttX', 'muF_ttZ', #'muF_ggToZZ',
+    'muR_WZ', 'muR_ZZ', 'muR_tWZ', 'muR_tZq', 'muR_triBoson', 'muR_ttX', 'muR_ttZ', #'muR_ggToZZ',
+    # 'rate_WZ', 'rate_ZZ', 'rate_ttZ'
 ]
 
 rates_bkg = {
@@ -80,7 +88,8 @@ rates_bkg = {
 }
 
 for region in regions:
-    p = Plotter("PreFit_ULRunII__"+region+"__"+histname)
+    suffix = "__EFTsignal" if args.addSignal else ""
+    p = Plotter("PreFit_ULRunII__"+region+"__"+histname+suffix)
     p.plot_dir = plotdir
     p.lumi = "138"
     p.xtitle = "Z #it{p}_{T} [GeV]"
@@ -111,6 +120,7 @@ for region in regions:
                 hist_bkg.Add(hist)
         p.addBackground(hist, processinfo[process][0], processinfo[process][1])
         for sname in sys:
+            # print sname
             hist_up = getObjFromFile(combineInput, region+"__"+histname+"/"+process+"__"+sname+"Up")
             hist_down = getObjFromFile(combineInput, region+"__"+histname+"/"+process+"__"+sname+"Down")
             p.addSystematic(hist_up, hist_down, sname, processinfo[process][0])
@@ -118,5 +128,6 @@ for region in regions:
             p.addNormSystematic(processinfo[process][0], rates_bkg[process])
     hist_signal = getObjFromFile(combineInput, region+"__"+histname+"/"+"sm_lin_quad_"+WCs[region])
     hist_signal.Add(hist_bkg)
-    p.addSignal(hist_signal, WClatexNames[WCs[region]].replace("[TeV^{-2}]", "")+" = 1 TeV^{-2}", ROOT.kRed)
+    if args.addSignal:
+        p.addSignal(hist_signal, WClatexNames[WCs[region]].replace("[TeV^{-2}]", "")+" = 1 TeV^{-2}", ROOT.kRed)
     p.draw()

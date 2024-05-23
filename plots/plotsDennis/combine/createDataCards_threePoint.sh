@@ -5,6 +5,10 @@
 # python createDataCards_threePoint.py --year=UL2016preVFP
 #
 python createDataCards_threePoint.py --year=ULRunII --light
+# python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionLight  --fluctuatePseudoData
+# python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionHeavy  --fluctuatePseudoData
+# python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionMixed  --fluctuatePseudoData
+# python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionWZjets --fluctuatePseudoData
 # python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionLight
 # python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionHeavy
 # python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionMixed

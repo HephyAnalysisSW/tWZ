@@ -12,6 +12,7 @@ argParser.add_argument('--signalInjectionLight',  action='store_true', default=F
 argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
+argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
 args = argParser.parse_args()
 
 
@@ -39,7 +40,7 @@ elif NsignalBool > 1:
 
 ################################################################################
 ## Run Combine Harvester
-cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notnjetSplit notscaleCorrelation notsignalInjection"
+cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notnjetSplit notscaleCorrelation notsignalInjection notfluctuate"
 
 dirname_suffix = ""
 if args.light:
@@ -63,6 +64,9 @@ if args.signalInjectionMixed:
 if args.signalInjectionWZjets:
     cmd_harvester = cmd_harvester.replace("notsignalInjection", "signalInjectionWZjets")
     dirname_suffix+="_signalInjectionWZjets"
+if args.fluctuatePseudoData:
+    cmd_harvester = cmd_harvester.replace("notfluctuate", "fluctuate")
+    dirname_suffix+="_fluctuatePseudoData"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"

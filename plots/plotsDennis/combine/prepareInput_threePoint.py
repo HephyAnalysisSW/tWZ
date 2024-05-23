@@ -4,6 +4,7 @@ import ROOT
 import array
 import Analysis.Tools.syncer
 import os
+import numpy as np
 
 from math                                        import sqrt
 from tWZ.Tools.helpers                           import getObjFromFile, writeObjToFile, writeObjToDirInFile
@@ -22,12 +23,11 @@ argParser.add_argument('--signalInjectionLight',  action='store_true', default=F
 argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
+argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
-
-
 args = argParser.parse_args()
 
 ################################################################################
@@ -95,6 +95,25 @@ def setPseudoDataErrors(hist):
         bin = i+1
         content = hist.GetBinContent(bin)
         newhist.SetBinError(bin, sqrt(content))
+    return newhist
+
+def fluctuatePseudoData(hist):
+    newhist = hist.Clone(hist.GetName()+"_fluctuated")
+    Nbins = hist.GetSize()-2
+    for i in range(Nbins):
+        bin = i+1
+        content = hist.GetBinContent(bin)
+        error = hist.GetBinError(bin)
+        new_content = np.random.poisson(content)
+        diff = new_content - content
+        if abs(diff) > 0.5*error:
+            if diff > 0:
+                new_content = content + 0.5*error
+            else:
+                new_content = content - 0.5*error
+        print(content, new_content, error)
+        newhist.SetBinContent(bin, new_content)
+        newhist.SetBinError(bin, sqrt(new_content))
     return newhist
 
 def removeNegative(hist):
@@ -249,6 +268,7 @@ if args.signalInjectionLight:     dirname_suffix+="_signalInjectionLight"
 if args.signalInjectionHeavy:     dirname_suffix+="_signalInjectionHeavy"
 if args.signalInjectionMixed:     dirname_suffix+="_signalInjectionMixed"
 if args.signalInjectionWZjets:     dirname_suffix+="_signalInjectionWZjets"
+if args.fluctuatePseudoData:       dirname_suffix+="_fluctuatePseudoData"
 
 outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dataTag+dirname_suffix+"/"+args.year+"/"
 plotdir = plot_directory+"/PreFit_threePoint"+dirname_suffix+"/"
@@ -339,7 +359,60 @@ sysnames = {
     "LepIDstat_muon_2018":            ("_LepIDstat_muon_2018_UP", "_LepIDstat_muon_2018_DOWN"),
     "LepIDsys_muon":                  ("_LepIDsys_muon_UP", "_LepIDsys_muon_DOWN"),
     "PU":                             ("_PU_UP", "_PU_DOWN"),
-    "JES":                            ("_JES_UP", "_JES_DOWN"),
+    # "JES":                            ("_JES_UP", "_JES_DOWN"),
+    "JES_AbsoluteMPFBias":            ("_AbsoluteMPFBias_UP", "_AbsoluteMPFBias_DOWN"),
+    "JES_AbsoluteScale":              ("_AbsoluteScale_UP", "_AbsoluteScale_DOWN"),
+    "JES_AbsoluteStat_2016preVFP":    ("_AbsoluteStat_2016preVFP_UP", "_AbsoluteStat_2016preVFP_DOWN"),
+    "JES_AbsoluteStat_2016":          ("_AbsoluteStat_2016_UP", "_AbsoluteStat_2016_DOWN"),
+    "JES_AbsoluteStat_2017":          ("_AbsoluteStat_2017_UP", "_AbsoluteStat_2017_DOWN"),
+    "JES_AbsoluteStat_2018":          ("_AbsoluteStat_2018_UP", "_AbsoluteStat_2018_DOWN"),
+    "JES_RelativeBal":                ("_RelativeBal_UP", "_RelativeBal_DOWN"),
+    "JES_RelativeFSR":                ("_RelativeFSR_UP", "_RelativeFSR_DOWN"),
+    "JES_RelativeJEREC1_2016preVFP":  ("_RelativeJEREC1_2016preVFP_UP", "_RelativeJEREC1_2016preVFP_DOWN"),
+    "JES_RelativeJEREC1_2016":        ("_RelativeJEREC1_2016_UP", "_RelativeJEREC1_2016_DOWN"),
+    "JES_RelativeJEREC1_2017":        ("_RelativeJEREC1_2017_UP", "_RelativeJEREC1_2017_DOWN"),
+    "JES_RelativeJEREC1_2018":        ("_RelativeJEREC1_2018_UP", "_RelativeJEREC1_2018_DOWN"),
+    "JES_RelativeJEREC2_2016preVFP":  ("_RelativeJEREC2_2016preVFP_UP", "_RelativeJEREC2_2016preVFP_DOWN"),
+    "JES_RelativeJEREC2_2016":        ("_RelativeJEREC2_2016_UP", "_RelativeJEREC2_2016_DOWN"),
+    "JES_RelativeJEREC2_2017":        ("_RelativeJEREC2_2017_UP", "_RelativeJEREC2_2017_DOWN"),
+    "JES_RelativeJEREC2_2018":        ("_RelativeJEREC2_2018_UP", "_RelativeJEREC2_2018_DOWN"),
+    "JES_RelativeJERHF":              ("_RelativeJERHF_UP", "_RelativeJERHF_DOWN"),
+    "JES_RelativePtBB":               ("_RelativePtBB_UP", "_RelativePtBB_DOWN"),
+    "JES_RelativePtEC1_2016preVFP":   ("_RelativePtEC1_2016preVFP_UP", "_RelativePtEC1_2016preVFP_DOWN"),
+    "JES_RelativePtEC1_2016":         ("_RelativePtEC1_2016_UP", "_RelativePtEC1_2016_DOWN"),
+    "JES_RelativePtEC1_2017":         ("_RelativePtEC1_2017_UP", "_RelativePtEC1_2017_DOWN"),
+    "JES_RelativePtEC1_2018":         ("_RelativePtEC1_2018_UP", "_RelativePtEC1_2018_DOWN"),
+    "JES_RelativePtEC2_2016preVFP":   ("_RelativePtEC2_2016preVFP_UP", "_RelativePtEC2_2016preVFP_DOWN"),
+    "JES_RelativePtEC2_2016":         ("_RelativePtEC2_2016_UP", "_RelativePtEC2_2016_DOWN"),
+    "JES_RelativePtEC2_2017":         ("_RelativePtEC2_2017_UP", "_RelativePtEC2_2017_DOWN"),
+    "JES_RelativePtEC2_2018":         ("_RelativePtEC2_2018_UP", "_RelativePtEC2_2018_DOWN"),
+    "JES_RelativePtHF":               ("_RelativePtHF_UP", "_RelativePtHF_DOWN"),
+    "JES_RelativeStatEC_2016preVFP":  ("_RelativeStatEC_2016preVFP_UP", "_RelativeStatEC_2016preVFP_DOWN"),
+    "JES_RelativeStatEC_2016":        ("_RelativeStatEC_2016_UP", "_RelativeStatEC_2016_DOWN"),
+    "JES_RelativeStatEC_2017":        ("_RelativeStatEC_2017_UP", "_RelativeStatEC_2017_DOWN"),
+    "JES_RelativeStatEC_2018":        ("_RelativeStatEC_2018_UP", "_RelativeStatEC_2018_DOWN"),
+    "JES_RelativeStatFSR_2016preVFP": ("_RelativeStatFSR_2016preVFP_UP", "_RelativeStatFSR_2016preVFP_DOWN"),
+    "JES_RelativeStatFSR_2016":       ("_RelativeStatFSR_2016_UP", "_RelativeStatFSR_2016_DOWN"),
+    "JES_RelativeStatFSR_2017":       ("_RelativeStatFSR_2017_UP", "_RelativeStatFSR_2017_DOWN"),
+    "JES_RelativeStatFSR_2018":       ("_RelativeStatFSR_2018_UP", "_RelativeStatFSR_2018_DOWN"),
+    "JES_RelativeStatHF_2016preVFP":  ("_RelativeStatHF_2016preVFP_UP", "_RelativeStatHF_2016preVFP_DOWN"),
+    "JES_RelativeStatHF_2016":        ("_RelativeStatHF_2016_UP", "_RelativeStatHF_2016_DOWN"),
+    "JES_RelativeStatHF_2017":        ("_RelativeStatHF_2017_UP", "_RelativeStatHF_2017_DOWN"),
+    "JES_RelativeStatHF_2018":        ("_RelativeStatHF_2018_UP", "_RelativeStatHF_2018_DOWN"),
+    "JES_PileUpDataMC":               ("_PileUpDataMC_UP", "_PileUpDataMC_DOWN"),
+    "JES_PileUpPtBB":                 ("_PileUpPtBB_UP", "_PileUpPtBB_DOWN"),
+    "JES_PileUpPtEC1":                ("_PileUpPtEC1_UP", "_PileUpPtEC1_DOWN"),
+    "JES_PileUpPtEC2":                ("_PileUpPtEC2_UP", "_PileUpPtEC2_DOWN"),
+    "JES_PileUpPtHF":                 ("_PileUpPtHF_UP", "_PileUpPtHF_DOWN"),
+    "JES_PileUpPtRef":                ("_PileUpPtRef_UP", "_PileUpPtRef_DOWN"),
+    "JES_FlavorQCD":                  ("_FlavorQCD_UP", "_FlavorQCD_DOWN"),
+    "JES_Fragmentation":              ("_Fragmentation_UP", "_Fragmentation_DOWN"),
+    "JES_SinglePionECAL":             ("_SinglePionECAL_UP", "_SinglePionECAL_DOWN"),
+    "JES_SinglePionHCAL":             ("_SinglePionHCAL_UP", "_SinglePionHCAL_DOWN"),
+    "JES_TimePtEta_2016preVFP":       ("_TimePtEta_2016preVFP_UP", "_TimePtEta_2016preVFP_DOWN"),
+    "JES_TimePtEta_2016":             ("_TimePtEta_2016_UP", "_TimePtEta_2016_DOWN"),
+    "JES_TimePtEta_2017":             ("_TimePtEta_2017_UP", "_TimePtEta_2017_DOWN"),
+    "JES_TimePtEta_2018":             ("_TimePtEta_2018_UP", "_TimePtEta_2018_DOWN"),
     "JER_2016preVFP":                 ("_JER_2016preVFP_UP", "_JER_2016preVFP_DOWN"),
     "JER_2016":                       ("_JER_2016_UP", "_JER_2016_DOWN"),
     "JER_2017":                       ("_JER_2017_UP", "_JER_2017_DOWN"),
@@ -733,24 +806,49 @@ for region in regions:
                 logger.info( '    (estimate from CR)')
                 h_obs_tmp = getNonpromptFromCR(dirs[region+"_CR"]+inname, histname, altbinning, processes_CR)
             elif process == "sm":
-                if args.signalInjectionLight:
-                    h_obs_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re1122=1.0000", altbinning)
-                    h_eft_sm_tmp = getCombinedSignal_EFT(sysdir+inname, histname+"__"+process, altbinning)
-                    h_sm_tmp = getCombinedSignal_SM(sysdir+inname, histname+"__"+process, altbinning)
-                    h_obs_tmp.Add(h_eft_sm_tmp, -1)
-                    h_obs_tmp.Add(h_sm_tmp)
-                elif args.signalInjectionHeavy:
-                    h_obs_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re33=1.0000", altbinning)
-                    h_eft_sm_tmp = getCombinedSignal_EFT(sysdir+inname, histname+"__"+process, altbinning)
-                    h_sm_tmp = getCombinedSignal_SM(sysdir+inname, histname+"__"+process, altbinning)
-                    h_obs_tmp.Add(h_eft_sm_tmp, -1)
-                    h_obs_tmp.Add(h_sm_tmp)
+                if args.signalInjectionLight or args.signalInjectionHeavy:
+                    h_obs_tmp = getCombinedSignal_SM(dirs[region]+inname, histname+"__"+process, altbinning)
+                    h_eft_sm_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process, altbinning)
+                    if args.signalInjectionLight:
+                        WCvalue = 2.0
+                        h_plus_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re1122=1.0000", altbinning)
+                        h_minus_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re1122=-1.0000", altbinning)
+                    elif args.signalInjectionHeavy:
+                        WCvalue = 2.0
+                        h_plus_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re33=1.0000", altbinning)
+                        h_minus_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re33=-1.0000", altbinning)
+                    h_lin_tmp = getLinear(h_plus_tmp, h_minus_tmp)
+                    h_quad_tmp = getQuadratic(h_eft_sm_tmp, h_plus_tmp, h_minus_tmp)
+                    h_obs_tmp.Add(h_lin_tmp, WCvalue)
+                    h_obs_tmp.Add(h_quad_tmp, WCvalue*WCvalue)
                 elif args.signalInjectionMixed:
-                    h_obs_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re112233=1.0000", altbinning)
-                    h_eft_sm_tmp = getCombinedSignal_EFT(sysdir+inname, histname+"__"+process, altbinning)
-                    h_sm_tmp = getCombinedSignal_SM(sysdir+inname, histname+"__"+process, altbinning)
-                    h_obs_tmp.Add(h_eft_sm_tmp, -1)
-                    h_obs_tmp.Add(h_sm_tmp)
+                    h_obs_tmp = getCombinedSignal_SM(dirs[region]+inname, histname+"__"+process, altbinning)
+                    h_eft_sm_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process, altbinning)
+                    WCvalue1 = 2.0
+                    h_plus1_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re1122=1.0000", altbinning)
+                    h_minus1_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re1122=-1.0000", altbinning)
+                    h_lin1_tmp = getLinear(h_plus1_tmp, h_minus1_tmp)
+                    h_quad1_tmp = getQuadratic(h_eft_sm_tmp, h_plus1_tmp, h_minus1_tmp)
+                    WCvalue2 = 2.0
+                    h_plus2_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re33=1.0000", altbinning)
+                    h_minus2_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re33=-1.0000", altbinning)
+                    h_lin2_tmp = getLinear(h_plus2_tmp, h_minus2_tmp)
+                    h_quad2_tmp = getQuadratic(h_eft_sm_tmp, h_plus2_tmp, h_minus2_tmp)
+                    h_sm_lin_quad_mix_tmp = getCombinedSignal_EFT(dirs[region]+inname, histname+"__"+process+"__"+"cHq1Re112233=1.0000", altbinning)
+                    # in order to get the mixed term only, one has to subtract all other contributions
+                    # mixed = sm_lin_quad_mixed - sm - lin1 - quad1 - lin2 - quad2
+                    h_mix_tmp = h_sm_lin_quad_mix_tmp.Clone()
+                    h_mix_tmp.Add(h_eft_sm_tmp, -1)
+                    h_mix_tmp.Add(h_lin1_tmp, -1)
+                    h_mix_tmp.Add(h_quad1_tmp, -1)
+                    h_mix_tmp.Add(h_lin2_tmp, -1)
+                    h_mix_tmp.Add(h_quad2_tmp, -1)
+                    # Now add everything to the SM
+                    h_obs_tmp.Add(h_lin1_tmp, WCvalue1)
+                    h_obs_tmp.Add(h_quad1_tmp, WCvalue1*WCvalue1)
+                    h_obs_tmp.Add(h_lin2_tmp, WCvalue2)
+                    h_obs_tmp.Add(h_quad2_tmp, WCvalue2*WCvalue2)
+                    h_obs_tmp.Add(h_mix_tmp, WCvalue1*WCvalue2)
                 elif args.signalInjectionWZjets:
                     sysdir = dirs[region]
                     sysdir = sysdir.replace('/Run', '_WZnJet'+'/Run').replace('/UL', '_WZnJet'+'/UL')
@@ -767,11 +865,13 @@ for region in regions:
                 observed.Add(h_obs_tmp)
         # Now set sqrt(N) errors
         observed = setPseudoDataErrors(observed)
+        if args.fluctuatePseudoData:
+            observed = fluctuatePseudoData(observed)
     else:
         observed = getHist(dirs[region]+inname, histname+"__data", altbinning)
     writeObjToDirInFile(outname, region+"__"+histname, observed, "data_obs", update=True)
     if args.noData:
-        p.addData(observed, "Asimov data")
+        p.addData(observed, "Pseudo data")
     else:
         p.addData(observed, "Data")
     p.draw()

@@ -196,6 +196,7 @@ argParser.add_argument('--signalInjectionLight',  action='store_true', default=F
 argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
+argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
 argParser.add_argument('--onlyCombined',  action='store_true', default=False)
 args = argParser.parse_args()
 
@@ -247,7 +248,8 @@ if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
 if args.signalInjectionLight:     dirname_suffix+="_signalInjectionLight"
 if args.signalInjectionHeavy:     dirname_suffix+="_signalInjectionHeavy"
 if args.signalInjectionMixed:     dirname_suffix+="_signalInjectionMixed"
-if args.signalInjectionWZjets:     dirname_suffix+="_signalInjectionWZjets"
+if args.signalInjectionWZjets:    dirname_suffix+="_signalInjectionWZjets"
+if args.fluctuatePseudoData:      dirname_suffix+="_fluctuatePseudoData"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
