@@ -180,6 +180,10 @@ variations = [
     "RelativeStatHF_2016_UP", "RelativeStatHF_2016_DOWN",
     "RelativeStatHF_2017_UP", "RelativeStatHF_2017_DOWN",
     "RelativeStatHF_2018_UP", "RelativeStatHF_2018_DOWN",
+    "RelativeSample_2016preVFP_UP", "RelativeSample_2016preVFP_DOWN",
+    "RelativeSample_2016_UP", "RelativeSample_2016_DOWN",
+    "RelativeSample_2017_UP", "RelativeSample_2017_DOWN",
+    "RelativeSample_2018_UP", "RelativeSample_2018_DOWN",
     "PileUpDataMC_UP", "PileUpDataMC_DOWN",
     "PileUpPtBB_UP", "PileUpPtBB_DOWN",
     "PileUpPtEC1_UP", "PileUpPtEC1_DOWN",
@@ -317,6 +321,14 @@ jet_variations = {
     "RelativeStatHF_2017_DOWN":        ("jesRelativeStatHFDown",  "UL2017"),
     "RelativeStatHF_2018_UP":          ("jesRelativeStatHFUp",  "UL2018"),
     "RelativeStatHF_2018_DOWN":        ("jesRelativeStatHFDown",  "UL2018"),
+    "RelativeSample_2016preVFP_UP":    ("jesRelativeSampleUp",  "UL2016preVFP"),
+    "RelativeSample_2016preVFP_DOWN":  ("jesRelativeSampleDown",  "UL2016preVFP"),
+    "RelativeSample_2016_UP":          ("jesRelativeSampleUp",  "UL2016"),
+    "RelativeSample_2016_DOWN":        ("jesRelativeSampleDown",  "UL2016"),
+    "RelativeSample_2017_UP":          ("jesRelativeSampleUp",  "UL2017"),
+    "RelativeSample_2017_DOWN":        ("jesRelativeSampleDown",  "UL2017"),
+    "RelativeSample_2018_UP":          ("jesRelativeSampleUp",  "UL2018"),
+    "RelativeSample_2018_DOWN":        ("jesRelativeSampleDown",  "UL2018"),
     "PileUpDataMC_UP":     ("jesPileUpDataMCUp", "all"),
     "PileUpDataMC_DOWN":   ("jesPileUpDataMCDown", "all"),
     "PileUpPtBB_UP":     ("jesPileUpPtBBUp", "all"),
@@ -689,20 +701,27 @@ if args.nicePlots:
 
 WCs = []
 WC_setup = [
-    ('cHq1Re11',     ROOT.kRed),
-    ('cHq1Re22',     ROOT.kRed),
+    # ('cHq1Re11',     ROOT.kRed),
+    # ('cHq1Re22',     ROOT.kRed),
     ('cHq1Re33',     ROOT.kRed),
     ('cHq1Re1122',   ROOT.kRed),
-    ('cHq1Re1133',   ROOT.kRed),
-    ('cHq1Re2233',   ROOT.kRed),
     ('cHq1Re112233', ROOT.kRed),
-    ('cHq3Re11',     ROOT.kBlue),
-    ('cHq3Re22',     ROOT.kBlue),
+    # ('cHq3Re11',     ROOT.kBlue),
+    # ('cHq3Re22',     ROOT.kBlue),
     ('cHq3Re33',     ROOT.kBlue),
     ('cHq3Re1122',   ROOT.kBlue),
-    ('cHq3Re1133',   ROOT.kBlue),
-    ('cHq3Re2233',   ROOT.kBlue),
     ('cHq3Re112233', ROOT.kBlue),
+    # cHq minus representaiom
+    # ('cHqMRe11',     ROOT.kBlue),
+    # ('cHqMRe22',     ROOT.kBlue),
+    ('cHqMRe33',     ROOT.kBlue),
+    ('cHqMRe1122',   ROOT.kBlue),
+    ('cHqMRe112233', ROOT.kBlue),
+    # ('cHq3MRe11',     ROOT.kBlue),
+    # ('cHq3MRe22',     ROOT.kBlue),
+    ('cHq3MRe33',     ROOT.kBlue),
+    ('cHq3MRe1122',   ROOT.kBlue),
+    ('cHq3MRe112233', ROOT.kBlue),
 ]
 
 if args.moreEFToperators:
@@ -751,6 +770,26 @@ for i_sample, sample in enumerate(samples_eft):
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re22':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
         elif WC=="cHq3Re112233":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re22':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe11":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe22":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re22':0.0, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe112233":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cHq3Re33':0.0, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe11":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe22":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re22':WCval, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe112233":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval, 'cHq3Re33':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
         else:
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{WC:WCval} , 'sample': sample, 'i_sample': i_sample})
 

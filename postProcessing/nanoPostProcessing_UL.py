@@ -498,6 +498,7 @@ jesUncertainties = [
     "RelativePtEC1",
     "RelativePtEC2",
     "RelativePtHF",
+    "RelativeSample",
     "RelativeStatEC",
     "RelativeStatFSR",
     "RelativeStatHF",

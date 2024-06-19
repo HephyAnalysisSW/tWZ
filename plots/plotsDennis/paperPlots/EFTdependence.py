@@ -67,6 +67,7 @@ for region in ["ttZ", "WZ", "ZZ"]:
         p.legshift = (0.1, -0.3, 0.0, 0.0)
         p.ratiorange = 0.7, 1.3
         p.NcolumnsLegend = 1
+        p.totalUncText = "#mu_{R}/#mu_{F} uncertainties"
         regiontext = "SR"
         if region == "ttZ":
             regiontext+="_{t#bar{t}Z}"
