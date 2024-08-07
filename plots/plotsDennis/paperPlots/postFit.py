@@ -11,6 +11,7 @@ from tWZ.samples.color                           import color
 from tWZ.Tools.histogramHelper                   import WClatexNames
 from MyRootTools.plotter.Plotter                 import Plotter
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
+from tWZ.Tools.CMScolors import CMScolors
 
 import tWZ.Tools.logger as logger
 logger    = logger.get_logger(   "INFO", logFile = None)
@@ -59,16 +60,16 @@ backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "ggToZZ", "nonprompt"]
 
 processinfo = {
     "total_signal": ("t#bar{t}Z + WZ + ZZ", ROOT.kAzure+7),
-    "sm":        ("t#bar{t}Z + WZ + ZZ", ROOT.kAzure+7),
-    "ttZ":       ("t#bar{t}Z", color.TTZ),
-    "WZ":        ("WZ",  color.WZ),
-    "ZZ":        ("ZZ", color.ZZ),
-    "tWZ":       ("tWZ", color.TWZ),
-    "ttX":       ("t#bar{t}X", color.TTX_rare),
-    "tZq":       ("tZq", color.TZQ),
-    "triBoson":  ("Triboson", color.triBoson),
-    "ggToZZ":    ("gg #rightarrow ZZ", color.ZZ),
-    "nonprompt": ("Nonprompt", color.nonprompt),
+    "sm":        ("t#bar{t}Z + WZ + ZZ", CMScolors["sm"]),
+    "ttZ"  :    ("t#bar{t}Z", CMScolors["ttZ"]),
+    "WZ":        ("WZ",  CMScolors["WZ"]),
+    "ZZ":        ("ZZ", CMScolors["ZZ"]),
+    "tWZ":       ("tWZ", CMScolors["tWZ"]),
+    "ttX":       ("t#bar{t}X", CMScolors["ttX"]),
+    "tZq":       ("tZq", CMScolors["tZq"]),
+    "triBoson":  ("Triboson", CMScolors["triboson"]),
+    "nonprompt": ("Nonprompt", CMScolors["nonprompt"]),
+    "ggToZZ":    ("gg #rightarrow ZZ", CMScolors["ggZZ"]),
 }
 
 

@@ -77,11 +77,11 @@ for region in ["ttZ", "WZ", "ZZ"]:
             regiontext+="_{ZZ}"
         p.addText(0.22, 0.65, regiontext, font=43, size=16)
         signalName = region.replace("ttZ", "t#bar{t}Z")+" (SM)"
-        p.addBackground(h_sm, signalName, 15)
+        p.addBackground(h_sm, signalName, 17)
         for s in sys:
             h_up = getObjFromFile(combineInput, region+"__"+histname+"/sm__"+s+"Up")
             h_down = getObjFromFile(combineInput, region+"__"+histname+"/sm__"+s+"Down")
             p.addSystematic(h_up, h_down, s, signalName)
-        p.addSignal(h_eftUp,   signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueUp)+")", ROOT.kRed-2, 2)
-        p.addSignal(h_eftDown, signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueDown)+")", ROOT.kAzure+7)
+        p.addSignal(h_eftUp,   signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueUp)+")", ROOT.kRed, lineStyle=2, lineWidth=2)
+        p.addSignal(h_eftDown, signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueDown)+")", ROOT.kAzure+7, lineWidth=2)
         p.draw()

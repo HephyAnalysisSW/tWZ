@@ -10,6 +10,8 @@ from tWZ.Tools.helpers                           import getObjFromFile
 from tWZ.samples.color                           import color
 from MyRootTools.plotter.Plotter                 import Plotter
 
+from tWZ.Tools.CMScolors import CMScolors
+
 
 def getHist(fname, hname, altbinning=False):
     bins  = [0, 60, 120, 180, 240, 300, 400, 1000]
@@ -42,18 +44,18 @@ path_WZ_CR  = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_
 path_ttZ_CR = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v14_threePoint/ULRunII/all/trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p/Results.root"
 
 processinfo = {
-    "ttZ":       ("t#bar{t}Z", color.TTZ),
-    "ttZ_sm":    ("t#bar{t}Z", color.TTZ),
-    "WZTo3LNu":  ("WZ",  color.WZ),
-    "WZ":        ("WZ",  color.WZ),
-    "ZZ":        ("ZZ", ROOT.kAzure-8),
-    "ZZ_powheg": ("ZZ", ROOT.kAzure-8),
-    "tWZ":       ("tWZ", color.TWZ),
-    "ttX":       ("t#bar{t}X", color.TTX_rare),
-    "tZq":       ("tZq", color.TZQ),
-    "triBoson":  ("Triboson", color.triBoson),
-    "nonprompt": ("Nonprompt", color.nonprompt),
-    "ggToZZ":    ("gg #rightarrow ZZ", color.ZZ),
+    "ttZ":       ("t#bar{t}Z", CMScolors["ttZ"]),
+    "ttZ_sm":    ("t#bar{t}Z", CMScolors["ttZ"]),
+    "WZTo3LNu":  ("WZ",  CMScolors["WZ"]),
+    "WZ":        ("WZ",  CMScolors["WZ"]),
+    "ZZ":        ("ZZ", CMScolors["ZZ"]),
+    "ZZ_powheg": ("ZZ", CMScolors["ZZ"]),
+    "tWZ":       ("tWZ", CMScolors["tWZ"]),
+    "ttX":       ("t#bar{t}X", CMScolors["ttX"]),
+    "tZq":       ("tZq", CMScolors["tZq"]),
+    "triBoson":  ("Triboson", CMScolors["triboson"]),
+    "nonprompt": ("Nonprompt", CMScolors["nonprompt"]),
+    "ggToZZ":    ("gg #rightarrow ZZ", CMScolors["ggZZ"]),
 }
 histname = "Z1_pt"
 

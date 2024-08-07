@@ -3,12 +3,11 @@
 import ROOT
 import Analysis.Tools.syncer
 import os
+import array
 
 from math                                        import sqrt
 from tWZ.Tools.helpers                           import getObjFromFile, writeObjToFile, writeObjToDirInFile
 from tWZ.Tools.user                              import plot_directory
-from tWZ.Tools.CMScolors import CMScolors
-
 from tWZ.samples.color                           import color
 from tWZ.Tools.histogramHelper                   import WClatexNames
 from MyRootTools.plotter.Plotter                 import Plotter
@@ -18,10 +17,30 @@ import tWZ.Tools.logger as logger
 
 logger    = logger.get_logger(   "INFO", logFile = None)
 
+def getHist(fname, hname, altbinning=False):
+    # print fname, hname
+    bins  = [0, 60, 120, 180, 240, 300, 400, 1000]
+    if altbinning:
+        bins  = [0, 60, 120, 180, 1000]
+    if "ULRunII" in fname:
+        # Get histograms from each era
+        hist_18 = getObjFromFile(fname.replace("/ULRunII/", "/UL2018/"), hname)
+        hist_17 = getObjFromFile(fname.replace("/ULRunII/", "/UL2017/"), hname)
+        hist_16 = getObjFromFile(fname.replace("/ULRunII/", "/UL2016/"), hname)
+        hist_16preVFP = getObjFromFile(fname.replace("/ULRunII/", "/UL2016preVFP/"), hname)
+        # add them
+        hist = hist_18.Clone(hist_18.GetName()+"_RunIIcombination")
+        hist.Add(hist_17)
+        hist.Add(hist_16)
+        hist.Add(hist_16preVFP)
+    else:
+        hist = getObjFromFile(fname, hname)
+    hist = hist.Rebin(len(bins)-1, hist.GetName()+"_rebin", array.array('d',bins))
+    return hist
+
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--noData',           action='store_true', default=False)
-argParser.add_argument('--addSignal',           action='store_true', default=False)
 args = argParser.parse_args()
 
 
@@ -35,7 +54,7 @@ if not os.path.exists( plotdir ): os.makedirs( plotdir )
 regions = ["WZ", "ZZ", "ttZ"]
 histname = "Z1_pt"
 signals = ["sm"]
-backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "ggToZZ", "nonprompt"]
+backgrounds = ["tWZ", "ttX", "tZq", "triBoson", "nonprompt", "ggToZZ"]
 WCs = {
     "WZ" : "cHq3Re1122",
     "ZZ" : "cHq1Re1122",
@@ -43,52 +62,34 @@ WCs = {
 }
 
 processinfo = {
-    "sm":        ("t#bar{t}Z + WZ + ZZ", CMScolors["sm"]),
-    "ttZ"  :    ("t#bar{t}Z", CMScolors["ttZ"]),
-    "WZ":        ("WZ",  CMScolors["WZ"]),
-    "ZZ":        ("ZZ", CMScolors["ZZ"]),
-    "tWZ":       ("tWZ", CMScolors["tWZ"]),
-    "ttX":       ("t#bar{t}X", CMScolors["ttX"]),
-    "tZq":       ("tZq", CMScolors["tZq"]),
-    "triBoson":  ("Triboson", CMScolors["triboson"]),
-    "nonprompt": ("Nonprompt", CMScolors["nonprompt"]),
-    "ggToZZ":    ("gg #rightarrow ZZ", CMScolors["ggZZ"]),
+    "sm":        ("t#bar{t}Z + WZ + ZZ", ROOT.kAzure+7),
+    "ttZ":       ("t#bar{t}Z", color.TTZ),
+    "WZ":        ("WZ",  color.WZ),
+    "ggToZZ":    ("gg #rightarrow ZZ", color.ZZ),
+    "tWZ":       ("tWZ", color.TWZ),
+    "ttX":       ("t#bar{t}X", color.TTX_rare),
+    "tZq":       ("tZq", color.TZQ),
+    "triBoson":  ("Triboson", color.triBoson),
+    "nonprompt": ("Nonprompt", color.nonprompt),
 }
 
 
 sys = [
     'BTag_b_correlated', 'BTag_b_uncorrelated_2016', 'BTag_b_uncorrelated_2016preVFP', 'BTag_b_uncorrelated_2017', 'BTag_b_uncorrelated_2018', 'BTag_l_correlated', 'BTag_l_uncorrelated_2016', 'BTag_l_uncorrelated_2016preVFP', 'BTag_l_uncorrelated_2017', 'BTag_l_uncorrelated_2018',
+    'FSR_WZ', 'FSR_ZZ', 'FSR_tWZ', 'FSR_tZq', 'FSR_triBoson', 'FSR_ttX', 'FSR_ttZ', 'FSR_ggToZZ',
     'Fakerate', 'FakerateClosure_correlated_both', 'FakerateClosure_correlated_elec', 'FakerateClosure_correlated_muon',
     'FakerateClosure_uncorrelated_both_2016', 'FakerateClosure_uncorrelated_both_2016preVFP', 'FakerateClosure_uncorrelated_both_2017', 'FakerateClosure_uncorrelated_both_2018',
     'FakerateClosure_uncorrelated_elec_2016', 'FakerateClosure_uncorrelated_elec_2016preVFP', 'FakerateClosure_uncorrelated_elec_2017', 'FakerateClosure_uncorrelated_elec_2018',
     'FakerateClosure_uncorrelated_muon_2016', 'FakerateClosure_uncorrelated_muon_2016preVFP', 'FakerateClosure_uncorrelated_muon_2017', 'FakerateClosure_uncorrelated_muon_2018',
     'ISR_WZ', 'ISR_ZZ', 'ISR_tWZ', 'ISR_tZq', 'ISR_triBoson', 'ISR_ttX', 'ISR_ttZ', 'ISR_ggToZZ',
-    'FSR',
-    "JES_AbsoluteMPFBias","JES_AbsoluteScale","JES_AbsoluteStat_2016preVFP","JES_AbsoluteStat_2016","JES_AbsoluteStat_2017","JES_AbsoluteStat_2018",
-    "JES_RelativeBal","JES_RelativeFSR","JES_RelativeJEREC1_2016preVFP","JES_RelativeJEREC1_2016","JES_RelativeJEREC1_2017","JES_RelativeJEREC1_2018",
-    "JES_RelativeJEREC2_2016preVFP","JES_RelativeJEREC2_2016","JES_RelativeJEREC2_2017","JES_RelativeJEREC2_2018","JES_RelativeJERHF",
-    "JES_RelativePtBB","JES_RelativePtEC1_2016preVFP","JES_RelativePtEC1_2016","JES_RelativePtEC1_2017","JES_RelativePtEC1_2018",
-    "JES_RelativePtEC2_2016preVFP","JES_RelativePtEC2_2016","JES_RelativePtEC2_2017","JES_RelativePtEC2_2018","JES_RelativePtHF",
-    "JES_RelativeStatEC_2016preVFP","JES_RelativeStatEC_2016","JES_RelativeStatEC_2017","JES_RelativeStatEC_2018",
-    "JES_RelativeStatFSR_2016preVFP","JES_RelativeStatFSR_2016","JES_RelativeStatFSR_2017","JES_RelativeStatFSR_2018",
-    "JES_RelativeStatHF_2016preVFP","JES_RelativeStatHF_2016","JES_RelativeStatHF_2017","JES_RelativeStatHF_2018",
-    "JES_RelativeSample_2016preVFP","JES_RelativeSample_2016","JES_RelativeSample_2017","JES_RelativeSample_2018",
-    "JES_PileUpDataMC","JES_PileUpPtBB","JES_PileUpPtEC1","JES_PileUpPtEC2","JES_PileUpPtHF","JES_PileUpPtRef","JES_FlavorQCD","JES_Fragmentation",
-    "JES_SinglePionECAL","JES_SinglePionHCAL","JES_TimePtEta_2016preVFP","JES_TimePtEta_2016","JES_TimePtEta_2017","JES_TimePtEta_2018",
-    'JER_2016preVFP', 'JER_2016',  'JER_2017', 'JER_2018',
-    'Unclustered_2016preVFP', 'Unclustered_2016',  'Unclustered_2017', 'Unclustered_2018',
-    'LepReco',
-    'LepIDsys_elec',
-    'LepIDstat_elec_2016', 'LepIDstat_elec_2016preVFP', 'LepIDstat_elec_2017', 'LepIDstat_elec_2018',
-    'LepIDsys_muon',
-    'LepIDstat_muon_2016', 'LepIDstat_muon_2016preVFP', 'LepIDstat_muon_2017', 'LepIDstat_muon_2018',
+    'JER', 'JES',
+    'LepIDstat_2016', 'LepIDstat_2016preVFP', 'LepIDstat_2017', 'LepIDstat_2018', 'LepIDsys', 'LepReco',
     'Lumi_correlated_161718', 'Lumi_correlated_1718',
     'Lumi_uncorrelated_2016', 'Lumi_uncorrelated_2017', 'Lumi_uncorrelated_2018',
-    'Trigger_2016preVFP', 'Trigger_2016', 'Trigger_2017', 'Trigger_2018',
-    'PU', 'Prefire', 'WZ_Njet_reweight', 'WZ_heavyFlavour',
-    'muF_WZ', 'muF_ZZ', 'muF_tWZ', 'muF_tZq', 'muF_triBoson', 'muF_ttX', 'muF_ttZ', #'muF_ggToZZ',
-    'muR_WZ', 'muR_ZZ', 'muR_tWZ', 'muR_tZq', 'muR_triBoson', 'muR_ttX', 'muR_ttZ', #'muR_ggToZZ',
-    # 'rate_WZ', 'rate_ZZ', 'rate_ttZ'
+    'PU', 'Prefire', 'Trigger', 'WZ_Njet_reweight', 'WZ_heavyFlavour',
+    'muF_WZ', 'muF_ZZ', 'muF_tWZ', 'muF_tZq', 'muF_triBoson', 'muF_ttX', 'muF_ttZ', 'muF_ggToZZ',
+    'muR_WZ', 'muR_ZZ', 'muR_tWZ', 'muR_tZq', 'muR_triBoson', 'muR_ttX', 'muR_ttZ', 'muR_ggToZZ',
+    'rate_WZ', 'rate_ZZ', 'rate_ttZ'
 ]
 
 rates_bkg = {
@@ -100,8 +101,7 @@ rates_bkg = {
 }
 
 for region in regions:
-    suffix = "__EFTsignal" if args.addSignal else ""
-    p = Plotter("PreFit_ULRunII__"+region+"__"+histname+suffix)
+    p = Plotter("PreFit_ULRunII__"+region+"__"+histname)
     p.plot_dir = plotdir
     p.lumi = "138"
     p.xtitle = "Z #it{p}_{T} [GeV]"
@@ -132,7 +132,6 @@ for region in regions:
                 hist_bkg.Add(hist)
         p.addBackground(hist, processinfo[process][0], processinfo[process][1])
         for sname in sys:
-            # print sname
             hist_up = getObjFromFile(combineInput, region+"__"+histname+"/"+process+"__"+sname+"Up")
             hist_down = getObjFromFile(combineInput, region+"__"+histname+"/"+process+"__"+sname+"Down")
             p.addSystematic(hist_up, hist_down, sname, processinfo[process][0])
@@ -140,6 +139,18 @@ for region in regions:
             p.addNormSystematic(processinfo[process][0], rates_bkg[process])
     hist_signal = getObjFromFile(combineInput, region+"__"+histname+"/"+"sm_lin_quad_"+WCs[region])
     hist_signal.Add(hist_bkg)
-    if args.addSignal:
-        p.addSignal(hist_signal, WClatexNames[WCs[region]].replace("[TeV^{-2}]", "")+" = 1 TeV^{-2}", ROOT.kRed)
+    p.addSignal(hist_signal, WClatexNames[WCs[region]].replace("[TeV^{-2}]", "")+" = 1 TeV^{-2}", ROOT.kRed)
+
+
+    #############################################
+    f_data = {
+        "ZZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v12_reduceEFT_threePoint_onlyData/ULRunII/all/qualepT-minDLmass12-onZ1-onZ2/",
+        "WZ":     "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v12_reduceEFT_threePoint_onlyData/ULRunII/all/trilepT-minDLmass12-onZ1-btag0-met60/",
+        "ttZ":    "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v12_reduceEFT_threePoint_onlyData/ULRunII/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/",
+    }
+    altbinning = True if region == "ZZ" else False
+    h_data = getHist(f_data[region]+"/Results.root", "Z1_pt__data", altbinning)
+    p.addData(h_data)
+    #############################################
+
     p.draw()
