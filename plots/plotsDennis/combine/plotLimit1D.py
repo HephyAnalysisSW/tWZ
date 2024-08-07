@@ -111,12 +111,15 @@ argParser.add_argument('--freeze',           action='store', type=str, default=N
 argParser.add_argument('--statOnly',         action='store_true', default=False)
 argParser.add_argument('--addStatOnly',      action='store_true', default=False)
 argParser.add_argument('--light',            action='store_true', default=False)
+argParser.add_argument('--minus',            action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
+argParser.add_argument('--unblind',          action='store_true', default=False)
+argParser.add_argument('--noBB',          action='store_true', default=False)
 argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
 args = argParser.parse_args()
 
@@ -125,6 +128,8 @@ logger.info( "Make 1D limit plot")
 WCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33"]
 if args.light:
     WCnames = ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]
+    if args.minus:
+        WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"]
 
 if args.year not in ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]:
     raise RuntimeError( "Year %s is not knwon", args.year)
@@ -154,6 +159,7 @@ logger.info( "Number of regions: %s", nRegions)
 
 dirname_suffix = ""
 if args.light:               dirname_suffix+="_light"
+if args.minus:               dirname_suffix+="_minus"
 if args.NjetSplit:           dirname_suffix+="_NjetSplit"
 if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
 if args.signalInjectionLight:     dirname_suffix+="_signalInjectionLight"
@@ -161,6 +167,8 @@ if args.signalInjectionHeavy:     dirname_suffix+="_signalInjectionHeavy"
 if args.signalInjectionMixed:     dirname_suffix+="_signalInjectionMixed"
 if args.signalInjectionWZjets:    dirname_suffix+="_signalInjectionWZjets"
 if args.fluctuatePseudoData:      dirname_suffix+="_fluctuatePseudoData"
+if args.unblind:                  dirname_suffix+="_UNBLINDED"
+if args.noBB:                  dirname_suffix+="_noBB"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
@@ -200,7 +208,7 @@ for r in range(nRegions)+["combined"]:
     if args.statOnly:
         outname = outname.replace(".pdf", "_statOnly.pdf")
     xmin, xmax = -5, 7
-    if args.wc in ["cHq3Re11", "cHq3Re1122"]:
+    if args.wc in ["cHq3Re11", "cHq3Re1122", "cHq3MRe11", "cHq3MRe1122"]:
         xmin, xmax = -1, 2
     if args.addStatOnly:
         filename_stat = filename.replace(".MultiDimFit", "_statOnly.MultiDimFit")

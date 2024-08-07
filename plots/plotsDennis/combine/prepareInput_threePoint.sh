@@ -4,7 +4,14 @@
 # python prepareInput_threePoint.py --noData --year=UL2016
 # python prepareInput_threePoint.py --noData --year=UL2016preVFP
 
+# python prepareInput_threePoint.py --noData --year=ULRunII --light
+# python prepareInput_threePoint.py --noData --year=ULRunII --light --minus
+
 python prepareInput_threePoint.py --noData --year=ULRunII --light
+python prepareInput_threePoint.py --noData --year=ULRunII --light --minus
+python prepareInput_threePoint.py --pluginData --year=ULRunII --light
+python prepareInput_threePoint.py --pluginData --year=ULRunII --light --minus
+
 # python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionLight  --fluctuatePseudoData
 # python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionHeavy  --fluctuatePseudoData
 # python prepareInput_threePoint.py --noData --year=ULRunII --light --signalInjectionMixed  --fluctuatePseudoData

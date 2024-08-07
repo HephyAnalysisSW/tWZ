@@ -10,6 +10,39 @@
 # python plotLimit1D.py --year=ULRunII --wc=cHq1Re33   --addStatOnly --light
 # python plotLimit1D.py --year=ULRunII --wc=cHq3Re1122 --addStatOnly --light
 # python plotLimit1D.py --year=ULRunII --wc=cHq3Re33   --addStatOnly --light
+#
+# python plotLimit1D.py --year=ULRunII --wc=cHqMRe1122  --addStatOnly --light --minus
+# python plotLimit1D.py --year=ULRunII --wc=cHqMRe33    --addStatOnly --light --minus
+# python plotLimit1D.py --year=ULRunII --wc=cHq3MRe1122 --addStatOnly --light --minus
+# python plotLimit1D.py --year=ULRunII --wc=cHq3MRe33   --addStatOnly --light --minus
+
+
+#################################################################################
+## DATA
+# python plotLimit1D.py --year=ULRunII --wc=cHq1Re1122 --addStatOnly --light --unblind
+# python plotLimit1D.py --year=ULRunII --wc=cHq1Re33   --addStatOnly --light --unblind
+# python plotLimit1D.py --year=ULRunII --wc=cHq3Re1122 --addStatOnly --light --unblind
+# python plotLimit1D.py --year=ULRunII --wc=cHq3Re33   --addStatOnly --light --unblind
+
+python plotLimit1D.py --year=ULRunII --wc=cHq1Re1122 --addStatOnly --light  --unblind
+python plotLimit1D.py --year=ULRunII --wc=cHq1Re33   --addStatOnly --light  --unblind
+python plotLimit1D.py --year=ULRunII --wc=cHq3Re1122 --addStatOnly --light  --unblind
+python plotLimit1D.py --year=ULRunII --wc=cHq3Re33   --addStatOnly --light  --unblind
+
+python plotLimit1D.py --year=ULRunII --wc=cHq1Re1122 --addStatOnly --light  --unblind --noBB
+python plotLimit1D.py --year=ULRunII --wc=cHq1Re33   --addStatOnly --light  --unblind --noBB
+python plotLimit1D.py --year=ULRunII --wc=cHq3Re1122 --addStatOnly --light  --unblind --noBB
+python plotLimit1D.py --year=ULRunII --wc=cHq3Re33   --addStatOnly --light  --unblind --noBB
+
+python plotLimit1D.py --year=ULRunII --wc=cHqMRe1122  --addStatOnly --light --minus --unblind
+python plotLimit1D.py --year=ULRunII --wc=cHqMRe33    --addStatOnly --light --minus --unblind
+python plotLimit1D.py --year=ULRunII --wc=cHq3MRe1122 --addStatOnly --light --minus --unblind
+python plotLimit1D.py --year=ULRunII --wc=cHq3MRe33   --addStatOnly --light --minus --unblind
+
+python plotLimit1D.py --year=ULRunII --wc=cHqMRe1122  --addStatOnly --light --minus --unblind --noBB
+python plotLimit1D.py --year=ULRunII --wc=cHqMRe33    --addStatOnly --light --minus --unblind --noBB
+python plotLimit1D.py --year=ULRunII --wc=cHq3MRe1122 --addStatOnly --light --minus --unblind --noBB
+python plotLimit1D.py --year=ULRunII --wc=cHq3MRe33   --addStatOnly --light --minus --unblind --noBB
 
 # python plotLimit1D.py --year=ULRunII --wc=cHq1Re1122 --light --signalInjectionLight
 # python plotLimit1D.py --year=ULRunII --wc=cHq1Re33   --light --signalInjectionLight

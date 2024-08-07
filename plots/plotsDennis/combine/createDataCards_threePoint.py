@@ -6,6 +6,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 argParser.add_argument('--light',            action='store_true', default=False)
+argParser.add_argument('--minus',            action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
@@ -13,6 +14,9 @@ argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=F
 argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
 argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
+argParser.add_argument('--unblind',          action='store_true', default=False)
+argParser.add_argument('--noBB',             action='store_true', default=False)
+argParser.add_argument('--SM',             action='store_true', default=False)
 args = argParser.parse_args()
 
 
@@ -28,6 +32,9 @@ logger.info( "Number of regions: %s", nRegions)
 if args.light:
     logger.info( "Use combined wilson coefficients for 1st and 2nd generation" )
 
+if args.minus:
+    logger.info( "Use parametrization with cHq Minus" )
+
 if args.scaleCorrelation:
     logger.info( "Correlate scales of Diboson" )
 
@@ -40,12 +47,15 @@ elif NsignalBool > 1:
 
 ################################################################################
 ## Run Combine Harvester
-cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notnjetSplit notscaleCorrelation notsignalInjection notfluctuate"
+cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notminus notnjetSplit notscaleCorrelation notsignalInjection notfluctuate blind"
 
 dirname_suffix = ""
 if args.light:
     cmd_harvester = cmd_harvester.replace("notlight", "light")
     dirname_suffix+="_light"
+if args.minus:
+    cmd_harvester = cmd_harvester.replace("notminus", "minus")
+    dirname_suffix+="_minus"
 if args.NjetSplit:
     cmd_harvester = cmd_harvester.replace("notnjetSplit", "njetSplit")
     dirname_suffix+="_NjetSplit"
@@ -67,6 +77,13 @@ if args.signalInjectionWZjets:
 if args.fluctuatePseudoData:
     cmd_harvester = cmd_harvester.replace("notfluctuate", "fluctuate")
     dirname_suffix+="_fluctuatePseudoData"
+if args.unblind:
+    cmd_harvester = cmd_harvester.replace("blind", "unblind")
+    dirname_suffix+="_UNBLINDED"
+if args.noBB:
+    dirname_suffix+="_noBB"
+if args.SM:
+    dirname_suffix+="_SM"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
@@ -129,7 +146,8 @@ for r in range(nRegions)+["combined"]:
     cardname = "topEFT_%s_%s_13TeV_%s.txt"%(args.year,str(region),args.year)
     with open(cardname, 'a') as file:
         file.write('\n')
-        file.write(lineToAdd)
+        if not args.noBB:
+            file.write(lineToAdd)
 os.chdir(this_dir)
 
 ################################################################################
@@ -145,7 +163,10 @@ for r in range(nRegions)+["combined"]:
     cmd_workspace += "-o "+cardname.replace(".txt", ".root")+" "
     cmd_workspace += "--X-allow-no-signal "
     if args.light:
-        cmd_workspace += "--PO eftOperators=cHq1Re1122,cHq1Re33,cHq3Re1122,cHq3Re33"
+        if args.minus:
+            cmd_workspace += "--PO eftOperators=cHqMRe1122,cHqMRe33,cHq3MRe1122,cHq3MRe33"
+        else:
+            cmd_workspace += "--PO eftOperators=cHq1Re1122,cHq1Re33,cHq3Re1122,cHq3Re33"
     else:
         cmd_workspace += "--PO eftOperators=cHq1Re11,cHq1Re22,cHq1Re33,cHq3Re11,cHq3Re22,cHq3Re33"
     os.system(cmd_workspace)

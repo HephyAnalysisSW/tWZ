@@ -1,10 +1,25 @@
+################################################################################
+## ASIMOV
+python createDataCards_threePoint.py --year=ULRunII --light
+python createDataCards_threePoint.py --year=ULRunII --light --noBB
+python createDataCards_threePoint.py --year=ULRunII --light --minus
+python createDataCards_threePoint.py --year=ULRunII --light --minus --noBB
+
+################################################################################
+## DATA
+python createDataCards_threePoint.py --unblind --year=ULRunII --light
+python createDataCards_threePoint.py --unblind --year=ULRunII --light --noBB
+python createDataCards_threePoint.py --unblind --year=ULRunII --light --minus
+python createDataCards_threePoint.py --unblind --year=ULRunII --light --minus --noBB
+
+
 # python createDataCards_threePoint.py --year=ULRunII
 # python createDataCards_threePoint.py --year=UL2018
 # python createDataCards_threePoint.py --year=UL2017
 # python createDataCards_threePoint.py --year=UL2016
 # python createDataCards_threePoint.py --year=UL2016preVFP
 #
-python createDataCards_threePoint.py --year=ULRunII --light
+
 # python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionLight  --fluctuatePseudoData
 # python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionHeavy  --fluctuatePseudoData
 # python createDataCards_threePoint.py --year=ULRunII --light --signalInjectionMixed  --fluctuatePseudoData

@@ -6,6 +6,11 @@ python plotLimit1D.py --statOnly  --year=ULRunII --wc=cHq1Re33   --light
 python plotLimit1D.py --statOnly  --year=ULRunII --wc=cHq3Re1122 --light
 python plotLimit1D.py --statOnly  --year=ULRunII --wc=cHq3Re33   --light
 
+python plotLimit1D.py --statOnly  --year=ULRunII --wc=cHqMRe1122 --light --minus
+python plotLimit1D.py --statOnly  --year=ULRunII --wc=cHqMRe33   --light --minus
+python plotLimit1D.py --statOnly  --year=ULRunII --wc=cHq3MRe1122 --light --minus
+python plotLimit1D.py --statOnly  --year=ULRunII --wc=cHq3MRe33   --light --minus
+
 # python plotLimit1D.py --statOnly  --year=ULRunII --wc=cHq1Re1122 --light --signalInjectionLight
 # python plotLimit1D.py --statOnly  --year=ULRunII --wc=cHq1Re33   --light --signalInjectionLight
 #

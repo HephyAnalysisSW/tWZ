@@ -19,6 +19,7 @@ logger    = logger.get_logger(   "INFO", logFile = None)
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--noData',           action='store_true', default=False)
+argParser.add_argument('--pluginData',           action='store_true', default=False)
 argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
@@ -26,6 +27,7 @@ argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=
 argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 argParser.add_argument('--light',            action='store_true', default=False)
+argParser.add_argument('--minus',            action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 args = argParser.parse_args()
@@ -56,6 +58,14 @@ def getRMS(nominal, variations):
         down.SetBinContent(bin, nominal.GetBinContent(bin)-rmsdown)
     return (up, down)
 
+def setBinErrorZero(hist):
+    hist_zero = hist.Clone(hist.GetName()+"_zero")
+    Nbins = hist_zero.GetSize()-2
+    for i in range(Nbins):
+        bin = i+1
+        hist_zero.SetBinError(bin, 0.0)
+    return hist_zero
+
 def getLinear(hist_plus, hist_minus):
     # Since the quadratic term does not change sign, we can get it from the
     # histograms where c = +1, c = 0, and c = -1
@@ -66,7 +76,7 @@ def getLinear(hist_plus, hist_minus):
     # (1)-(2) = SM + LIN + QUAD - SM + LIN - QUAD
     #         = 2* LIN     | /2
     # ((1)-(2))/2 = LIN
-    hist_lin = hist_plus.Clone(hist_plus.GetName()+"_quad")
+    hist_lin = hist_plus.Clone(hist_plus.GetName()+"_linquad")
     hist_lin.Add(hist_minus, -1)
     hist_lin.Scale(0.5)
     return hist_lin
@@ -237,7 +247,7 @@ if args.NjetSplit:
 # histname
 histname = "Z1_pt"
 
-version = "v14"
+version = "v15"
 logger.info( "Version = %s", version )
 
 if args.noData:
@@ -245,7 +255,7 @@ if args.noData:
 else:
     logger.info( "Use data (unblinded)" )
 
-dataTag = "_noData" if args.noData else ""
+dataTag = "_noData" if args.noData or args.pluginData else ""
 
 # Directories
 dirs = {
@@ -262,6 +272,7 @@ dirs = {
 
 dirname_suffix = ""
 if args.light:               dirname_suffix+="_light"
+if args.minus:               dirname_suffix+="_minus"
 if args.NjetSplit:           dirname_suffix+="_NjetSplit"
 if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
 if args.signalInjectionLight:     dirname_suffix+="_signalInjectionLight"
@@ -272,6 +283,9 @@ if args.fluctuatePseudoData:       dirname_suffix+="_fluctuatePseudoData"
 
 outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dataTag+dirname_suffix+"/"+args.year+"/"
 plotdir = plot_directory+"/PreFit_threePoint"+dirname_suffix+"/"
+if args.pluginData:
+    outdir = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dirname_suffix+"/"+args.year+"/"
+    plotdir = plot_directory+"/PreFit_threePoint"+dirname_suffix+"/"
 
 if not os.path.exists( outdir ): os.makedirs( outdir )
 if not os.path.exists( plotdir ): os.makedirs( plotdir )
@@ -289,9 +303,23 @@ WCnames_mixed = {}
 if args.light:
     WCnames = ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]
     WCnames_mixed = {
-        "cHq1Re112233": ("cHq1Re1122", "cHq1Re33"),
-        "cHq3Re112233": ("cHq3Re1122", "cHq3Re33"),
+        "cHq1Re1122_cHq1Re33"    :("cHq1Re1122", "cHq1Re33"),
+        "cHq1Re1122_cHq3Re1122"  :("cHq1Re1122", "cHq3Re1122"),
+        "cHq1Re1122_cHq3Re33"    :("cHq1Re1122", "cHq3Re33"),
+        "cHq1Re33_cHq3Re1122"    :("cHq1Re33",   "cHq3Re1122"),
+        "cHq1Re33_cHq3Re33"      :("cHq1Re33",   "cHq3Re33"),
+        "cHq3Re1122_cHq3Re33"    :("cHq3Re1122", "cHq3Re33"),
     }
+    if args.minus:
+        WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"]
+        WCnames_mixed = {
+            "cHqMRe1122_cHqMRe33"    :("cHqMRe1122", "cHqMRe33"),
+            "cHqMRe1122_cHq3MRe1122" :("cHqMRe1122", "cHq3MRe1122"),
+            "cHqMRe1122_cHq3MRe33"   :("cHqMRe1122", "cHq3MRe33"),
+            "cHqMRe33_cHq3MRe1122"   :("cHqMRe33", "cHq3MRe1122"),
+            "cHqMRe33_cHq3MRe33"     :("cHqMRe33", "cHq3MRe33"),
+            "cHq3MRe1122_cHq3MRe33"  :("cHq3MRe1122", "cHq3MRe33"),
+        }
 
 processinfo = {
     "sm":        ("ttZ+WZ+ZZ", ROOT.kAzure+7),
@@ -543,7 +571,9 @@ for region in regions:
                     nominalHists["sm_lin_quad_"+WCname] = nominalHists[process].Clone()
                     nominalHists["sm_lin_quad_"+WCname].Add(hist_lin)
                     nominalHists["sm_lin_quad_"+WCname].Add(hist_quad)
+                    nominalHists["sm_lin_quad_"+WCname] = setBinErrorZero(nominalHists["sm_lin_quad_"+WCname])
                     nominalHists["quad_"+WCname] = hist_quad.Clone()
+                    nominalHists["quad_"+WCname] = setBinErrorZero(nominalHists["quad_"+WCname])
                     writeObjToDirInFile(outname, region+"__"+histname, nominalHists["sm_lin_quad_"+WCname], "sm_lin_quad_"+WCname, update=True)
                     writeObjToDirInFile(outname, region+"__"+histname, nominalHists["quad_"+WCname], "quad_"+WCname, update=True)
                 for WCmix in WCnames_mixed.keys():
@@ -554,6 +584,7 @@ for region in regions:
                     # Subtract SM part from EFT samples and add SM from SM samples
                     nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Add(hist_eft_sm, -1)
                     nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Add(nominalHists["sm"])
+                    nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2] = setBinErrorZero(nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2])
                     writeObjToDirInFile(outname, region+"__"+histname, nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2], "sm_lin_quad_mixed_"+wc1+"_"+wc2, update=True)
             else:
                 name = histname+"__"+process
@@ -578,10 +609,10 @@ for region in regions:
                     h_nonprompt_up = nominalHists[process].Clone()
                     h_nonprompt_down = nominalHists[process].Clone()
                     for WCname in WCnames:
-                        h_nonprompt_up_lin_quad = nominalHists["sm_lin_quad_"+WCname].Clone()
-                        h_nonprompt_down_lin_quad = nominalHists["sm_lin_quad_"+WCname].Clone()
-                        h_nonprompt_up_quad = nominalHists["quad_"+WCname].Clone()
-                        h_nonprompt_down_quad = nominalHists["quad_"+WCname].Clone()
+                        h_nonprompt_up_lin_quad = nominalHists["sm_lin_quad_"+WCname].Clone()   # The bin error is already set to 0 earlier
+                        h_nonprompt_down_lin_quad = nominalHists["sm_lin_quad_"+WCname].Clone() # The bin error is already set to 0 earlier
+                        h_nonprompt_up_quad = nominalHists["quad_"+WCname].Clone()              # The bin error is already set to 0 earlier
+                        h_nonprompt_down_quad = nominalHists["quad_"+WCname].Clone()            # The bin error is already set to 0 earlier
                         writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_up_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_down_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_up_quad, "quad_"+WCname+"__"+sys+"Up", update=True)
@@ -589,8 +620,8 @@ for region in regions:
                     for WCmix in WCnames_mixed.keys():
                         wc1 = WCnames_mixed[WCmix][0]
                         wc2 = WCnames_mixed[WCmix][1]
-                        h_nonprompt_up_lin_quad_mix = nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Clone()
-                        h_nonprompt_down_lin_quad_mix = nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Clone()
+                        h_nonprompt_up_lin_quad_mix = nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Clone()   # The bin error is already set to 0 earlier
+                        h_nonprompt_down_lin_quad_mix = nominalHists["sm_lin_quad_mixed_"+wc1+"_"+wc2].Clone() # The bin error is already set to 0 earlier
                         writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_up_lin_quad_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, h_nonprompt_down_lin_quad_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
 
@@ -638,6 +669,10 @@ for region in regions:
                         histDOWN_lin_quad = histDOWN.Clone()
                         histDOWN_lin_quad.Add(histDOWN_lin)
                         histDOWN_lin_quad.Add(histDOWN_quad)
+                        histUP_lin_quad = setBinErrorZero(histUP_lin_quad)
+                        histDOWN_lin_quad = setBinErrorZero(histDOWN_lin_quad)
+                        histUP_quad = setBinErrorZero(histUP_quad)
+                        histDOWN_quad = setBinErrorZero(histDOWN_quad)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_quad, "quad_"+WCname+"__"+sys+"Up", update=True)
@@ -651,6 +686,8 @@ for region in regions:
                         histUP_mix.Add(histUP)
                         histDOWN_mix.Add(histDOWN_eft_sm, -1)
                         histDOWN_mix.Add(histDOWN)
+                        histUP_mix = setBinErrorZero(histUP_mix)
+                        histDOWN_mix = setBinErrorZero(histDOWN_mix)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
                 else:
@@ -712,6 +749,10 @@ for region in regions:
                         histDOWN_lin_quad = histDOWN.Clone()
                         histDOWN_lin_quad.Add(histDOWN_lin)
                         histDOWN_lin_quad.Add(histDOWN_quad)
+                        histUP_lin_quad = setBinErrorZero(histUP_lin_quad)
+                        histDOWN_lin_quad = setBinErrorZero(histDOWN_lin_quad)
+                        histUP_quad = setBinErrorZero(histUP_quad)
+                        histDOWN_quad = setBinErrorZero(histDOWN_quad)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_quad, "quad_"+WCname+"__"+sys+"Up", update=True)
@@ -725,6 +766,8 @@ for region in regions:
                         histUP_mix.Add(histUP)
                         histDOWN_mix.Add(histDOWN_eft_sm, -1)
                         histDOWN_mix.Add(histDOWN)
+                        histUP_mix = setBinErrorZero(histUP_mix)
+                        histDOWN_mix = setBinErrorZero(histDOWN_mix)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
 
@@ -771,6 +814,10 @@ for region in regions:
                         histDOWN_lin_quad = histDOWN.Clone()
                         histDOWN_lin_quad.Add(histDOWN_lin)
                         histDOWN_lin_quad.Add(histDOWN_quad)
+                        histUP_lin_quad = setBinErrorZero(histUP_lin_quad)
+                        histDOWN_lin_quad = setBinErrorZero(histDOWN_lin_quad)
+                        histUP_quad = setBinErrorZero(histUP_quad)
+                        histDOWN_quad = setBinErrorZero(histDOWN_quad)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_lin_quad, "sm_lin_quad_"+WCname+"__"+sys+"Down", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_quad, "quad_"+WCname+"__"+sys+"Up", update=True)
@@ -784,6 +831,8 @@ for region in regions:
                         histUP_mix.Add(histUP)
                         histDOWN_mix.Add(histDOWN_eft_sm, -1)
                         histDOWN_mix.Add(histDOWN)
+                        histUP_mix = setBinErrorZero(histUP_mix)
+                        histDOWN_mix = setBinErrorZero(histDOWN_mix)
                         writeObjToDirInFile(outname, region+"__"+histname, histUP_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Up", update=True)
                         writeObjToDirInFile(outname, region+"__"+histname, histDOWN_mix, "sm_lin_quad_mixed_"+wc1+"_"+wc2+"__"+sys+"Down", update=True)
                 elif process == "ggToZZ" and "PDF_" in sys:
@@ -872,7 +921,10 @@ for region in regions:
         if args.fluctuatePseudoData:
             observed = fluctuatePseudoData(observed)
     else:
-        observed = getHist(dirs[region]+inname, histname+"__data", altbinning)
+        filename = dirs[region]+inname
+        if args.pluginData:
+            filename = filename.replace("_noData", "_onlyData")
+        observed = getHist(filename, histname+"__data", altbinning)
     writeObjToDirInFile(outname, region+"__"+histname, observed, "data_obs", update=True)
     if args.noData:
         p.addData(observed, "Pseudo data")
