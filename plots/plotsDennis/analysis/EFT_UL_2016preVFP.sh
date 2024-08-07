@@ -628,8 +628,8 @@ python EFT_UL.py --reduceEFT --noData --threePoint --selection=trilepT-minDLmass
 
 ################################################################################
 # ZZ
-python EFT_UL.py --reduceEFT --noData --nicePlots --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016
-python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016
+python EFT_UL.py --reduceEFT --noData --nicePlots --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP
+python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=EWK_add
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=EWK_mul
 python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass12-onZ1-onZ2 --era=UL2016preVFP --sys=WZnJet
@@ -942,7 +942,7 @@ python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass
 
 ################################################################################
 # TTZ CR
-python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP
 python EFT_UL.py --nicePlots --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --applyFakerate --useDataSF --sys=Fakerate_UP
@@ -979,7 +979,7 @@ python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-bt
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2016preVFP --applyFakerate --useDataSF --sys=FakerateClosure_uncorrelated_both_2018_DOWN
 ################################################################################
 # WZ CR
-python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP
 python EFT_UL.py --nicePlots --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2016preVFP --applyFakerate --useDataSF --sys=Fakerate_UP

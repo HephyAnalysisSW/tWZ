@@ -136,10 +136,10 @@ TTZ_EFT.reweight_pkl = "/groups/hephy/cms/dennis.schwarz/www/gridpacks/ttZ01j-ve
 
 
 
-dirs['TTZ_ctZ'] = ['TTZ_ctZ']
-TTZ_ctZ  = Sample.fromDirectory(name="TTZ_ctZ", treeName="Events", isData=False, color=color.TTZ, texName="t#bar{t}Z", directory=make_dirs(dirs['TTZ_ctZ']))
-TTZ_ctZ.reweight_pkl = "/groups/hephy/cms/dennis.schwarz/gridpack_ctZ/ttZ01jctZ_reweight_card.pkl"
-
-dirs['TTZ_ctZ_final'] = ['TTZ_ctZ_final']
-TTZ_ctZ_final  = Sample.fromDirectory(name="TTZ_ctZ_final", treeName="Events", isData=False, color=color.TTZ, texName="t#bar{t}Z", directory=make_dirs(dirs['TTZ_ctZ_final']))
-TTZ_ctZ_final.reweight_pkl = "/groups/hephy/cms/dennis.schwarz/gridpack_ctZ_final/ttZ01jctZ_reweight_card.pkl"
+# dirs['TTZ_ctZ'] = ['TTZ_ctZ']
+# TTZ_ctZ  = Sample.fromDirectory(name="TTZ_ctZ", treeName="Events", isData=False, color=color.TTZ, texName="t#bar{t}Z", directory=make_dirs(dirs['TTZ_ctZ']))
+# TTZ_ctZ.reweight_pkl = "/groups/hephy/cms/dennis.schwarz/gridpack_ctZ/ttZ01jctZ_reweight_card.pkl"
+#
+# dirs['TTZ_ctZ_final'] = ['TTZ_ctZ_final']
+# TTZ_ctZ_final  = Sample.fromDirectory(name="TTZ_ctZ_final", treeName="Events", isData=False, color=color.TTZ, texName="t#bar{t}Z", directory=make_dirs(dirs['TTZ_ctZ_final']))
+# TTZ_ctZ_final.reweight_pkl = "/groups/hephy/cms/dennis.schwarz/gridpack_ctZ_final/ttZ01jctZ_reweight_card.pkl"

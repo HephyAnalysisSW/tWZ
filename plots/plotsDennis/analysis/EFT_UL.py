@@ -53,7 +53,7 @@ argParser.add_argument('--onlyData',       action='store_true', default=False)
 argParser.add_argument('--small',          action='store_true', help='Run only on a small subset of the data?', )
 #argParser.add_argument('--sorting',       action='store', default=None, choices=[None, "forDYMB"],  help='Sort histos?', )
 argParser.add_argument('--dataMCScaling',  action='store_true', help='Data MC scaling?', )
-argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v14')
+argParser.add_argument('--plot_directory', action='store', default='EFT_UL_v15')
 argParser.add_argument('--era',            action='store', type=str, default="UL2018")
 argParser.add_argument('--selection',      action='store', default='trilepT-minDLmass12-onZ1-njet4p-btag1p')
 argParser.add_argument('--sys',            action='store', default='central')
@@ -701,27 +701,31 @@ if args.nicePlots:
 
 WCs = []
 WC_setup = [
-    # ('cHq1Re11',     ROOT.kRed),
-    # ('cHq1Re22',     ROOT.kRed),
-    ('cHq1Re33',     ROOT.kRed),
-    ('cHq1Re1122',   ROOT.kRed),
-    ('cHq1Re112233', ROOT.kRed),
-    # ('cHq3Re11',     ROOT.kBlue),
-    # ('cHq3Re22',     ROOT.kBlue),
-    ('cHq3Re33',     ROOT.kBlue),
+    # cHq singlet/triplet representaiom
+    ('cHq1Re1122',   ROOT.kBlue),
+    ('cHq1Re33',     ROOT.kBlue),
     ('cHq3Re1122',   ROOT.kBlue),
-    ('cHq3Re112233', ROOT.kBlue),
+    ('cHq3Re33',     ROOT.kBlue),
+    # cHq singlet/triplet mixed terms
+    ('cHq1Re1122_cHq1Re33', ROOT.kBlue),
+    ('cHq1Re1122_cHq3Re1122', ROOT.kBlue),
+    ('cHq1Re1122_cHq3Re33', ROOT.kBlue),
+    ('cHq1Re33_cHq3Re1122', ROOT.kBlue),
+    ('cHq1Re33_cHq3Re33', ROOT.kBlue),
+    ('cHq3Re1122_cHq3Re33', ROOT.kBlue),
+    ########################################
     # cHq minus representaiom
-    # ('cHqMRe11',     ROOT.kBlue),
-    # ('cHqMRe22',     ROOT.kBlue),
-    ('cHqMRe33',     ROOT.kBlue),
     ('cHqMRe1122',   ROOT.kBlue),
-    ('cHqMRe112233', ROOT.kBlue),
-    # ('cHq3MRe11',     ROOT.kBlue),
-    # ('cHq3MRe22',     ROOT.kBlue),
-    ('cHq3MRe33',     ROOT.kBlue),
+    ('cHqMRe33',     ROOT.kBlue),
     ('cHq3MRe1122',   ROOT.kBlue),
-    ('cHq3MRe112233', ROOT.kBlue),
+    ('cHq3MRe33',     ROOT.kBlue),
+    # cHq minus mixed terms
+    ('cHqMRe1122_cHqMRe33', ROOT.kBlue),
+    ('cHqMRe1122_cHq3MRe1122', ROOT.kBlue),
+    ('cHqMRe1122_cHq3MRe33', ROOT.kBlue),
+    ('cHqMRe33_cHq3MRe1122', ROOT.kBlue),
+    ('cHqMRe33_cHq3MRe33', ROOT.kBlue),
+    ('cHq3MRe1122_cHq3MRe33', ROOT.kBlue),
 ]
 
 if args.moreEFToperators:
@@ -754,42 +758,47 @@ for i_wc, (WCname, color) in enumerate(WC_setup):
 params =  []
 for i_sample, sample in enumerate(samples_eft):
     for i_wc, (WC, WCval, color) in enumerate(WCs):
+        ########################################################################
+        # cHq singlet/triplet
         if WC=="cHq1Re1122":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq1Re1133":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq1Re2233":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re22':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq1Re112233":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re22':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
         elif WC=="cHq3Re1122":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq3Re1133":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq3Re2233":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re22':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq3Re112233":
+        elif WC=="cHq1Re1122_cHq1Re33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re22':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq1Re1122_cHq3Re1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re22':WCval, 'cHq3Re11':WCval, 'cHq3Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq1Re1122_cHq3Re33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re11':WCval, 'cHq1Re22':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq1Re33_cHq3Re1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re33':WCval, 'cHq3Re11':WCval, 'cHq3Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq1Re33_cHq3Re33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq1Re33':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3Re1122_cHq3Re33":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq3Re22':WCval, 'cHq3Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHqMRe11":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHqMRe22":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re22':0.0, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHqMRe33":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        ########################################################################
+        # cHq minus
         elif WC=="cHqMRe1122":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHqMRe112233":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cHq3Re33':0.0, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq3MRe11":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq3MRe22":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re22':WCval, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq3MRe33":
-            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
         elif WC=="cHq3MRe1122":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
-        elif WC=="cHq3MRe112233":
+        elif WC=="cHq3MRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122_cHqMRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cHq3Re33':0.0, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122_cHq3MRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':2*WCval, 'cHq3Re22':WCval, 'cHq1Re22':2*WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe1122_cHq3MRe33":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval, 'cHq3Re33':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122_cHq3MRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cHq3Re33':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33_cHq3MRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval, 'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33_cHq3MRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':2*WCval}, 'sample': sample, 'i_sample': i_sample})
+        ########################################################################
         else:
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{WC:WCval} , 'sample': sample, 'i_sample': i_sample})
 
@@ -1473,22 +1482,22 @@ def getEFTnormweight(sample, event):
     event.EFTnormweight = normweight
 sequence.append( getEFTnormweight )
 
-def getMlb(sample, event):
-    lepton = ROOT.TLorentzVector()
-    if not 'qualep' in args.selection:
-        lepton.SetPtEtaPhiM(event.lep_pt[event.nonZ1_l1_index], event.lep_eta[event.nonZ1_l1_index], event.lep_phi[event.nonZ1_l1_index], 0)
-    else:
-        lepton.SetPtEtaPhiM(0,0,0,0)
-
-    # Get closest tight b:
-    minBtagValue = 0.7221
-    if   event.year == 2017: minBtagValue = 0.7489
-    elif event.year == 2018: minBtagValue = 0.7264
-    closestjet = ROOT.TLorentzVector()
-    closestjet = getClosestBJetindex( event, lepton, minBtagValue )
-    combination = closestjet + lepton
-    event.mlb = combination.M()
-sequence.append( getMlb )
+# def getMlb(sample, event):
+#     lepton = ROOT.TLorentzVector()
+#     if not 'qualep' in args.selection:
+#         lepton.SetPtEtaPhiM(event.lep_pt[event.nonZ1_l1_index], event.lep_eta[event.nonZ1_l1_index], event.lep_phi[event.nonZ1_l1_index], 0)
+#     else:
+#         lepton.SetPtEtaPhiM(0,0,0,0)
+#
+#     # Get closest tight b:
+#     minBtagValue = 0.7221
+#     if   event.year == 2017: minBtagValue = 0.7489
+#     elif event.year == 2018: minBtagValue = 0.7264
+#     closestjet = ROOT.TLorentzVector()
+#     closestjet = getClosestBJetindex( event, lepton, minBtagValue )
+#     combination = closestjet + lepton
+#     event.mlb = combination.M()
+# sequence.append( getMlb )
 
 def getCosThetaStar(sample, event):
     lepton = ROOT.TLorentzVector()
@@ -2161,12 +2170,12 @@ for i_mode, mode in enumerate(allModes):
             binning=[10, 0, 1000],
         ))
 
-        plots.append(Plot(
-            name = "M_lb",
-            texX = 'm_{lb} (GeV)', texY = 'Number of Events / 20 GeV',
-            attribute = lambda event, sample: event.mlb,
-            binning=[20, 0, 400],
-        ))
+        # plots.append(Plot(
+        #     name = "M_lb",
+        #     texX = 'm_{lb} (GeV)', texY = 'Number of Events / 20 GeV',
+        #     attribute = lambda event, sample: event.mlb,
+        #     binning=[20, 0, 400],
+        # ))
 
         plots.append(Plot(
             name = "JetIds",
