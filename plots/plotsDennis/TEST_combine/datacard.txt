@@ -1,0 +1,10 @@
+bin          bin1
+observation  110
+
+bin          bin1    bin1    bin1
+process      sig     bkg1    bkg2
+process      0       1       2
+rate         10      40      60
+
+rate_bkg1  lnN  -    1.25    -
+rate_bkg2  lnN  -    -       1.167

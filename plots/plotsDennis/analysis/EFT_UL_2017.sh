@@ -945,8 +945,22 @@ python EFT_UL.py --reduceEFT --noData --threePoint --selection=qualepT-minDLmass
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017
 python EFT_UL.py --nicePlots --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017  --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017  --applyFakerate --useDataSF
-python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017  --applyFakerate --useDataSF --sys=Fakerate_UP
-python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017  --applyFakerate --useDataSF --sys=Fakerate_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2016preVFP_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2016preVFP_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2016_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2016_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2017_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2017_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2018_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2018_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2016preVFP_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2016preVFP_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2016_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2016_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2017_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2017_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2018_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2018_DOWN
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017  --applyFakerate --useDataSF --sys=FakerateClosure_correlated_elec_UP
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017  --applyFakerate --useDataSF --sys=FakerateClosure_correlated_elec_DOWN
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-btag1p --era=UL2017  --applyFakerate --useDataSF --sys=FakerateClosure_uncorrelated_elec_2016preVFP_UP
@@ -982,8 +996,22 @@ python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-njet3p-bt
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017
 python EFT_UL.py --nicePlots --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017  --applyFakerate --useDataSF
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017  --applyFakerate --useDataSF
-python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017  --applyFakerate --useDataSF --sys=Fakerate_UP
-python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017  --applyFakerate --useDataSF --sys=Fakerate_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2016preVFP_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2016preVFP_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2016_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2016_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2017_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2017_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2018_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_elec_2018_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2016preVFP_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2016preVFP_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2016_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2016_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2017_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2017_DOWN
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2018_UP
+python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017 --applyFakerate --useDataSF --sys=Fakerate_muon_2018_DOWN
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017  --applyFakerate --useDataSF --sys=FakerateClosure_correlated_elec_UP
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017  --applyFakerate --useDataSF --sys=FakerateClosure_correlated_elec_DOWN
 python EFT_UL.py --threePoint --selection=trilepFOnoT-minDLmass12-onZ1-btag0-met60 --era=UL2017  --applyFakerate --useDataSF --sys=FakerateClosure_uncorrelated_elec_2016preVFP_UP

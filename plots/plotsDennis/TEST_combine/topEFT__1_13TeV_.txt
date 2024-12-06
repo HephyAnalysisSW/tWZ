@@ -1,0 +1,15 @@
+imax    1 number of bins
+jmax    2 number of processes minus 1
+kmax    * number of nuisance parameters
+--------------------------------------------------------------------------------
+shapes * topEFT__1_13TeV topEFT.input.root topEFT__1_13TeV/$PROCESS topEFT__1_13TeV/$PROCESS_$SYSTEMATIC
+--------------------------------------------------------------------------------
+bin          topEFT__1_13TeV 
+observation  205.0           
+--------------------------------------------------------------------------------
+bin                    topEFT__1_13TeV topEFT__1_13TeV topEFT__1_13TeV 
+process                bkg1            bkg2            signal          
+process                1               2               0               
+rate                   115             50              105             
+--------------------------------------------------------------------------------
+bkg2_rate      lnN     -               1.2             -               

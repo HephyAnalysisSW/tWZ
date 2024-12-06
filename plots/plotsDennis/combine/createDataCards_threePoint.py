@@ -7,6 +7,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--year',             action='store', type=str, default="UL2018")
 argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--minus',            action='store_true', default=False)
+argParser.add_argument('--excludeTriplet',   action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
@@ -15,8 +16,15 @@ argParser.add_argument('--signalInjectionMixed',  action='store_true', default=F
 argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
 argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
 argParser.add_argument('--unblind',          action='store_true', default=False)
-argParser.add_argument('--noBB',             action='store_true', default=False)
+argParser.add_argument('--noQuad',             action='store_true', default=False)
+argParser.add_argument('--BBmode',         action='store', default="default")
 argParser.add_argument('--SM',             action='store_true', default=False)
+argParser.add_argument('--binning', action='store', default="default")
+argParser.add_argument('--sysMode', action='store', default="default")
+argParser.add_argument('--noZero', action='store_true', default=False)
+argParser.add_argument('--SMZero', action='store_true', default=False)
+argParser.add_argument('--half', action='store_true', default=False)
+
 args = argParser.parse_args()
 
 
@@ -34,6 +42,9 @@ if args.light:
 
 if args.minus:
     logger.info( "Use parametrization with cHq Minus" )
+    if args.excludeTriplet:
+        logger.info( "Exclude cHq3MRe33 operator" )
+
 
 if args.scaleCorrelation:
     logger.info( "Correlate scales of Diboson" )
@@ -44,18 +55,25 @@ if NsignalBool == 1:
 elif NsignalBool > 1:
     raise RuntimeError( "Cannot perform more than one signal injection test at once")
 
+if args.BBmode not in ["default", "noBB", "fullNoSignal", "liteNoSignal", "full"]:
+    raise RuntimeError( "BBmode %s not known", args.BBmode )
+
+
 
 ################################################################################
 ## Run Combine Harvester
-cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notminus notnjetSplit notscaleCorrelation notsignalInjection notfluctuate blind"
+cmd_harvester = "CreateCards_topEFT_threePoint "+args.year+" notlight notminus notnjetSplit notscaleCorrelation notsignalInjection notfluctuate blind defaultBinning useQuad defaultSys defaultZero nohalf"
 
 dirname_suffix = ""
 if args.light:
     cmd_harvester = cmd_harvester.replace("notlight", "light")
     dirname_suffix+="_light"
-if args.minus:
+if args.minus and not args.excludeTriplet:
     cmd_harvester = cmd_harvester.replace("notminus", "minus")
     dirname_suffix+="_minus"
+if args.minus and args.excludeTriplet:
+    cmd_harvester = cmd_harvester.replace("notminus", "excludeTriplet")
+    dirname_suffix+="_minus_excludeTriplet"
 if args.NjetSplit:
     cmd_harvester = cmd_harvester.replace("notnjetSplit", "njetSplit")
     dirname_suffix+="_NjetSplit"
@@ -80,10 +98,28 @@ if args.fluctuatePseudoData:
 if args.unblind:
     cmd_harvester = cmd_harvester.replace("blind", "unblind")
     dirname_suffix+="_UNBLINDED"
-if args.noBB:
-    dirname_suffix+="_noBB"
+if args.noQuad:
+    cmd_harvester = cmd_harvester.replace("useQuad", "noQuad")
+    dirname_suffix+="_noQuad"
+if args.BBmode != "default":
+    dirname_suffix+="_"+args.BBmode
 if args.SM:
     dirname_suffix+="_SM"
+if args.binning != "default":
+    cmd_harvester = cmd_harvester.replace("defaultBinning", args.binning)
+    dirname_suffix+="_binning-"+args.binning
+if args.sysMode != "default":
+    cmd_harvester = cmd_harvester.replace("defaultSys", args.sysMode)
+    dirname_suffix+="_"+args.sysMode
+if args.noZero:
+    cmd_harvester = cmd_harvester.replace("defaultZero", "noZero")
+    dirname_suffix+="_noZero"
+if args.SMZero:
+    cmd_harvester = cmd_harvester.replace("defaultZero", "SMZero")
+    dirname_suffix+="_SMZero"
+if args.half:
+    cmd_harvester = cmd_harvester.replace("nohalf", "half")
+    dirname_suffix+="_HALF"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
@@ -127,34 +163,59 @@ os.chdir(this_dir)
 ## Combine cards of the regions
 logger.info( "Combine regions" )
 os.chdir(dataCard_dir)
-cmd_regions = "combineCards.py "
-for r in range(nRegions):
-    region = r+1
-    cardname = "topEFT_%s_%s_13TeV_%s.txt"%(args.year,str(region),args.year)
-    cmd_regions += cardname+" "
-cmd_regions += "> topEFT_%s_combined_13TeV_%s.txt"%(args.year,args.year)
-os.system(cmd_regions)
+combinations = {}
+if nRegions == 3:
+    combinations = {
+        "combined": [1,2,3],
+        "ZZ-WZ":    [1,2],
+        "ZZ-ttZ":   [1,3],
+        "WZ-ttZ":   [2,3],
+    }
+else:
+    combinations = {
+        "combined": [1,2,3,4],
+    }
+
+for combinationName in combinations.keys():
+    logger.info( "Make combination %s", combinationName )
+    cmd_regions = "combineCards.py "
+    for region in combinations[combinationName]:
+        cardname = "topEFT_%s_%s_13TeV_%s.txt"%(args.year,str(region),args.year)
+        cmd_regions += cardname+" "
+    cmd_regions += "> topEFT_%s_%s_13TeV_%s.txt"%(args.year, combinationName, args.year)
+    os.system(cmd_regions)
 os.chdir(this_dir)
 
 ################################################################################
 ## Include MC stat uncertainty
-logger.info( "Add line in order to include MC stat uncertainty" )
-os.chdir(dataCard_dir)
-lineToAdd = "* autoMCStats 0 1"
-for r in range(nRegions)+["combined"]:
-    region = r+1 if isinstance(r, int) else r
-    cardname = "topEFT_%s_%s_13TeV_%s.txt"%(args.year,str(region),args.year)
-    with open(cardname, 'a') as file:
-        file.write('\n')
-        if not args.noBB:
+
+if args.BBmode == "noBB":
+    logger.info( "No Stat uncert for MC" )
+else:
+    logger.info( "Add line in order to include MC stat uncertainty" )
+    os.chdir(dataCard_dir)
+    if args.BBmode == "default":
+        lineToAdd = "* autoMCStats 0 1"
+    elif args.BBmode == "liteNoSignal":
+        lineToAdd = "* autoMCStats 0 0"
+    elif args.BBmode == "full":
+        lineToAdd = "* autoMCStats 10 1"
+    elif args.BBmode == "fullNoSignal":
+        lineToAdd = "* autoMCStats 10 0"
+
+    for r in range(nRegions)+combinations.keys():
+        region = r+1 if isinstance(r, int) else r
+        cardname = "topEFT_%s_%s_13TeV_%s.txt"%(args.year,str(region),args.year)
+        with open(cardname, 'a') as file:
+            file.write('\n')
             file.write(lineToAdd)
-os.chdir(this_dir)
+    os.chdir(this_dir)
 
 ################################################################################
 ## Convert to workspace
 logger.info( "Convert cards to workspace using AnalyticAnomalousCoupling model" )
 os.chdir(dataCard_dir)
-for r in range(nRegions)+["combined"]:
+for r in range(nRegions)+combinations.keys():
     region = r+1 if isinstance(r, int) else r
     cmd_workspace = "text2workspace.py "
     cardname = "topEFT_%s_%s_13TeV_%s.txt"%(args.year,str(region),args.year)
@@ -163,8 +224,10 @@ for r in range(nRegions)+["combined"]:
     cmd_workspace += "-o "+cardname.replace(".txt", ".root")+" "
     cmd_workspace += "--X-allow-no-signal "
     if args.light:
-        if args.minus:
-            cmd_workspace += "--PO eftOperators=cHqMRe1122,cHqMRe33,cHq3MRe1122,cHq3MRe33"
+        if args.minus and not args.excludeTriplet:
+            cmd_workspace += "--PO eftOperators=cHqMRe1122,cHqMRe33,cHq3MRe1122,cHq3MRe33,cHuRe1122,cHuRe33,cHdRe1122,cHdRe33,cW,cWtil"
+        elif args.minus and args.excludeTriplet:
+            cmd_workspace += "--PO eftOperators=cHqMRe1122,cHqMRe33,cHq3MRe1122"
         else:
             cmd_workspace += "--PO eftOperators=cHq1Re1122,cHq1Re33,cHq3Re1122,cHq3Re33"
     else:

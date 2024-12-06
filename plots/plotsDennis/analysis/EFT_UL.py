@@ -70,6 +70,7 @@ argParser.add_argument('--useBRILSF',      action='store_true', default=False)
 argParser.add_argument('--tunePtCone',     action='store_true', default=False)
 argParser.add_argument('--noLeptonSF',     action='store_true', default=False)
 argParser.add_argument('--reduceEFT',      action='store_true', default=False)
+argParser.add_argument('--reduceEFThalf',  action='store_true', default=False)
 argParser.add_argument('--SMpoint',        action='store_true', default=False)
 argParser.add_argument('--threePoint',     action='store_true', default=False)
 argParser.add_argument('--WZreweight',     action='store_true', default=False)
@@ -88,7 +89,15 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 # Possible SYS variations
 variations = [
     # Fakerate
-    "Fakerate_UP", "Fakerate_DOWN",
+    # "Fakerate_UP", "Fakerate_DOWN",
+    "Fakerate_elec_2016preVFP_UP", "Fakerate_elec_2016preVFP_DOWN",
+    "Fakerate_elec_2016_UP", "Fakerate_elec_2016_DOWN",
+    "Fakerate_elec_2017_UP", "Fakerate_elec_2017_DOWN",
+    "Fakerate_elec_2018_UP", "Fakerate_elec_2018_DOWN",
+    "Fakerate_muon_2016preVFP_UP", "Fakerate_muon_2016preVFP_DOWN",
+    "Fakerate_muon_2016_UP", "Fakerate_muon_2016_DOWN",
+    "Fakerate_muon_2017_UP", "Fakerate_muon_2017_DOWN",
+    "Fakerate_muon_2018_UP", "Fakerate_muon_2018_DOWN",
     "FakerateClosure_correlated_elec_UP", "FakerateClosure_correlated_elec_DOWN",
     "FakerateClosure_uncorrelated_elec_2016preVFP_UP", "FakerateClosure_uncorrelated_elec_2016preVFP_DOWN",
     "FakerateClosure_uncorrelated_elec_2016_UP", "FakerateClosure_uncorrelated_elec_2016_DOWN",
@@ -388,6 +397,7 @@ else:
 # Some info messages
 if args.small:                        args.plot_directory += "_small"
 if args.reduceEFT:                    args.plot_directory += "_reduceEFT"
+if args.reduceEFThalf:                args.plot_directory += "_reduceEFThalf"
 if args.threePoint:                   args.plot_directory += "_threePoint"
 if args.SMpoint:                      args.plot_directory += "_SMpoint"
 if args.noData:                       args.plot_directory += "_noData"
@@ -675,6 +685,11 @@ for sample in mc+samples_eft:
             sample.normalization = 1.
             sample.reduceFiles( factor = 5 )
             sample.scale /= sample.normalization
+    elif args.reduceEFThalf:
+        if "_EFT" in sample.name:
+            sample.normalization = 1.
+            sample.reduceFiles( factor = 10 )
+            sample.scale /= sample.normalization
 if args.nicePlots:
     mc += samples_eft
 ################################################################################
@@ -702,30 +717,75 @@ if args.nicePlots:
 WCs = []
 WC_setup = [
     # cHq singlet/triplet representaiom
-    ('cHq1Re1122',   ROOT.kBlue),
-    ('cHq1Re33',     ROOT.kBlue),
-    ('cHq3Re1122',   ROOT.kBlue),
-    ('cHq3Re33',     ROOT.kBlue),
+    # ('cHq1Re1122',   ROOT.kBlue),
+    # ('cHq1Re33',     ROOT.kBlue),
+    # ('cHq3Re1122',   ROOT.kBlue),
+    # ('cHq3Re33',     ROOT.kBlue),
     # cHq singlet/triplet mixed terms
-    ('cHq1Re1122_cHq1Re33', ROOT.kBlue),
-    ('cHq1Re1122_cHq3Re1122', ROOT.kBlue),
-    ('cHq1Re1122_cHq3Re33', ROOT.kBlue),
-    ('cHq1Re33_cHq3Re1122', ROOT.kBlue),
-    ('cHq1Re33_cHq3Re33', ROOT.kBlue),
-    ('cHq3Re1122_cHq3Re33', ROOT.kBlue),
+    # ('cHq1Re1122_cHq1Re33', ROOT.kBlue),
+    # ('cHq1Re1122_cHq3Re1122', ROOT.kBlue),
+    # ('cHq1Re1122_cHq3Re33', ROOT.kBlue),
+    # ('cHq1Re33_cHq3Re1122', ROOT.kBlue),
+    # ('cHq1Re33_cHq3Re33', ROOT.kBlue),
+    # ('cHq3Re1122_cHq3Re33', ROOT.kBlue),
     ########################################
     # cHq minus representaiom
     ('cHqMRe1122',   ROOT.kBlue),
     ('cHqMRe33',     ROOT.kBlue),
     ('cHq3MRe1122',   ROOT.kBlue),
     ('cHq3MRe33',     ROOT.kBlue),
+    ('cHuRe1122',     ROOT.kBlue),
+    ('cHuRe33',     ROOT.kBlue),
+    ('cHdRe1122',     ROOT.kBlue),
+    ('cHdRe33',     ROOT.kBlue),
+    ('cW',        ROOT.kBlue),
+    ('cWtil',     ROOT.kBlue),
     # cHq minus mixed terms
     ('cHqMRe1122_cHqMRe33', ROOT.kBlue),
     ('cHqMRe1122_cHq3MRe1122', ROOT.kBlue),
     ('cHqMRe1122_cHq3MRe33', ROOT.kBlue),
+    ('cHqMRe1122_cHuRe1122', ROOT.kBlue),
+    ('cHqMRe1122_cHuRe33', ROOT.kBlue),
+    ('cHqMRe1122_cHdRe1122', ROOT.kBlue),
+    ('cHqMRe1122_cHdRe33', ROOT.kBlue),
+    ('cHqMRe1122_cW', ROOT.kBlue),
+    ('cHqMRe1122_cWtil', ROOT.kBlue),
     ('cHqMRe33_cHq3MRe1122', ROOT.kBlue),
     ('cHqMRe33_cHq3MRe33', ROOT.kBlue),
+    ('cHqMRe33_cHuRe1122', ROOT.kBlue),
+    ('cHqMRe33_cHuRe33', ROOT.kBlue),
+    ('cHqMRe33_cHdRe1122', ROOT.kBlue),
+    ('cHqMRe33_cHdRe33', ROOT.kBlue),
+    ('cHqMRe33_cW', ROOT.kBlue),
+    ('cHqMRe33_cWtil', ROOT.kBlue),
     ('cHq3MRe1122_cHq3MRe33', ROOT.kBlue),
+    ('cHq3MRe1122_cHuRe1122', ROOT.kBlue),
+    ('cHq3MRe1122_cHuRe33', ROOT.kBlue),
+    ('cHq3MRe1122_cHdRe1122', ROOT.kBlue),
+    ('cHq3MRe1122_cHdRe33', ROOT.kBlue),
+    ('cHq3MRe1122_cW', ROOT.kBlue),
+    ('cHq3MRe1122_cWtil', ROOT.kBlue),
+    ('cHq3MRe33_cHuRe1122', ROOT.kBlue),
+    ('cHq3MRe33_cHuRe33', ROOT.kBlue),
+    ('cHq3MRe33_cHdRe1122', ROOT.kBlue),
+    ('cHq3MRe33_cHdRe33', ROOT.kBlue),
+    ('cHq3MRe33_cW', ROOT.kBlue),
+    ('cHq3MRe33_cWtil', ROOT.kBlue),
+    ('cHuRe1122_cHuRe33', ROOT.kBlue),
+    ('cHuRe1122_cHdRe1122', ROOT.kBlue),
+    ('cHuRe1122_cHdRe33', ROOT.kBlue),
+    ('cHuRe1122_cW', ROOT.kBlue),
+    ('cHuRe1122_cWtil', ROOT.kBlue),
+    ('cHuRe33_cHdRe1122', ROOT.kBlue),
+    ('cHuRe33_cHdRe33', ROOT.kBlue),
+    ('cHuRe33_cW', ROOT.kBlue),
+    ('cHuRe33_cWtil', ROOT.kBlue),
+    ('cHdRe1122_cHdRe33', ROOT.kBlue),
+    ('cHdRe1122_cW', ROOT.kBlue),
+    ('cHdRe1122_cWtil', ROOT.kBlue),
+    ('cHdRe33_cW', ROOT.kBlue),
+    ('cHdRe33_cWtil', ROOT.kBlue),
+    ('cW_cWtil', ROOT.kBlue),
 ]
 
 if args.moreEFToperators:
@@ -735,10 +795,6 @@ if args.moreEFToperators:
     WC_setup.append(('cHdRe11',     ROOT.kRed))
     WC_setup.append(('cHdRe22',     ROOT.kRed))
     WC_setup.append(('cHdRe33',     ROOT.kRed))
-    WC_setup.append(('cW',        ROOT.kRed))
-    WC_setup.append(('cWtil',     ROOT.kRed))
-
-
 
 
 for i_wc, (WCname, color) in enumerate(WC_setup):
@@ -786,6 +842,10 @@ for i_sample, sample in enumerate(samples_eft):
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
         elif WC=="cHq3MRe33":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe11':WCval, 'cHuRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHdRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHdRe11':WCval, 'cHdRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
         elif WC=="cHqMRe1122_cHqMRe33":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cHq3Re33':0.0, 'cHq1Re33':WCval}, 'sample': sample, 'i_sample': i_sample})
         elif WC=="cHqMRe1122_cHq3MRe1122":
@@ -798,6 +858,84 @@ for i_sample, sample in enumerate(samples_eft):
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval, 'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval}, 'sample': sample, 'i_sample': i_sample})
         elif WC=="cHqMRe33_cHq3MRe33":
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':2*WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122_cW":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cW':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122_cWtil":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cWtil':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33_cW":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval, 'cW':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33_cWtil":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval, 'cWtil':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe1122_cW":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval, 'cW':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe1122_cWtil":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval, 'cWtil':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe33_cW":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval, 'cW':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe33_cWtil":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval, 'cWtil':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cW_cWtil":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cW':WCval, 'cWtil':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122_cHuRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cHuRe11':WCval, 'cHuRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122_cHuRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cHuRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122_cHdRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cHdRe11':WCval, 'cHdRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe1122_cHdRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':0.0, 'cHq1Re11':WCval, 'cHq3Re22':0.0, 'cHq1Re22':WCval, 'cHdRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33_cHuRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval, 'cHuRe11':WCval, 'cHuRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33_cHuRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval, 'cHuRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33_cHdRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval, 'cHdRe11':WCval, 'cHdRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHqMRe33_cHdRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':0.0, 'cHq1Re33':WCval, 'cHdRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe1122_cHuRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval, 'cHuRe11':WCval, 'cHuRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe1122_cHuRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval, 'cHuRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe1122_cHdRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval, 'cHdRe11':WCval, 'cHdRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe1122_cHdRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re11':WCval, 'cHq1Re11':WCval, 'cHq3Re22':WCval, 'cHq1Re22':WCval, 'cHdRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe33_cHuRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval, 'cHuRe11':WCval, 'cHuRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe33_cHuRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval, 'cHuRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe33_cHdRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval, 'cHdRe11':WCval, 'cHdRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHq3MRe33_cHdRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHq3Re33':WCval, 'cHq1Re33':WCval, 'cHdRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe1122_cHuRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe11':WCval, 'cHuRe22':WCval, 'cHuRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe1122_cHdRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe11':WCval, 'cHuRe22':WCval, 'cHdRe11':WCval, 'cHdRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe1122_cHdRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe11':WCval, 'cHuRe22':WCval, 'cHdRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe1122_cW":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe11':WCval, 'cHuRe22':WCval, 'cW':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe1122_cWtil":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe11':WCval, 'cHuRe22':WCval, 'cWtil':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe33_cHdRe1122":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe33':WCval, 'cHdRe11':WCval, 'cHdRe22':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe33_cHdRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe33':WCval, 'cHdRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe33_cW":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe33':WCval, 'cW':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHuRe33_cWtil":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHuRe33':WCval, 'cWtil':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHdRe1122_cHdRe33":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHdRe11':WCval, 'cHdRe22':WCval, 'cHdRe33':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHdRe1122_cW":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHdRe11':WCval, 'cHdRe22':WCval, 'cW':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHdRe1122_cWtil":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHdRe11':WCval, 'cHdRe22':WCval, 'cWtil':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHdRe33_cW":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHdRe33':WCval, 'cW':WCval}, 'sample': sample, 'i_sample': i_sample})
+        elif WC=="cHdRe33_cWtil":
+            params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{'cHdRe33':WCval, 'cWtil':WCval}, 'sample': sample, 'i_sample': i_sample})
         ########################################################################
         else:
             params.append({'legendText':'%s=%3.4f'%(WC, WCval), 'color':color,  'WC':{WC:WCval} , 'sample': sample, 'i_sample': i_sample})
@@ -1321,11 +1459,6 @@ def getElectronRecoSF(sample, event):
 sequence.append( getElectronRecoSF )
 
 def getLeptonFakeRate( sample, event ):
-    sigma = 0
-    if args.sys == "Fakerate_UP":
-        sigma = 1.0
-    if args.sys == "Fakerate_DOWN":
-        sigma = -1.0
     SF = 1.0
     Nfakes = 0
     # if args.useDataSF and not sample.isData:
@@ -1342,15 +1475,48 @@ def getLeptonFakeRate( sample, event ):
                 eta = event.lep_eta[i]
                 pt = event.lep_ptConeGhent[i] if event.lep_passFO[i] and not event.lep_passTight[i] else event.lep_pt[i]
                 # Get year
+                sigma = 0
                 if event.year == 2016:
                     if event.preVFP:
                         yearstring = "UL2016preVFP"
+                        if abs(pdgId) == 11 and args.sys == "Fakerate_elec_2016preVFP_UP":
+                            sigma = 1.0
+                        elif abs(pdgId) == 11 and args.sys == "Fakerate_elec_2016preVFP_DOWN":
+                            sigma = -1.0
+                        elif abs(pdgId) == 13 and args.sys == "Fakerate_muon_2016preVFP_UP":
+                            sigma = 1.0
+                        elif abs(pdgId) == 13 and args.sys == "Fakerate_muon_2016preVFP_DOWN":
+                            sigma = -1.0
                     else:
                         yearstring = "UL2016"
+                        if abs(pdgId) == 11 and args.sys == "Fakerate_elec_2016_UP":
+                            sigma = 1.0
+                        elif abs(pdgId) == 11 and args.sys == "Fakerate_elec_2016_DOWN":
+                            sigma = -1.0
+                        elif abs(pdgId) == 13 and args.sys == "Fakerate_muon_2016_UP":
+                            sigma = 1.0
+                        elif abs(pdgId) == 13 and args.sys == "Fakerate_muon_2016_DOWN":
+                            sigma = -1.0
                 elif event.year == 2017:
                     yearstring = "UL2017"
+                    if abs(pdgId) == 11 and args.sys == "Fakerate_elec_2017_UP":
+                        sigma = 1.0
+                    elif abs(pdgId) == 11 and args.sys == "Fakerate_elec_2017_DOWN":
+                        sigma = -1.0
+                    elif abs(pdgId) == 13 and args.sys == "Fakerate_muon_2017_UP":
+                        sigma = 1.0
+                    elif abs(pdgId) == 13 and args.sys == "Fakerate_muon_2017_DOWN":
+                        sigma = -1.0
                 elif event.year == 2018:
                     yearstring = "UL2018"
+                    if abs(pdgId) == 11 and args.sys == "Fakerate_elec_2018_UP":
+                        sigma = 1.0
+                    elif abs(pdgId) == 11 and args.sys == "Fakerate_elec_2018_DOWN":
+                        sigma = -1.0
+                    elif abs(pdgId) == 13 and args.sys == "Fakerate_muon_2018_UP":
+                        sigma = 1.0
+                    elif abs(pdgId) == 13 and args.sys == "Fakerate_muon_2018_DOWN":
+                        sigma = -1.0
                 # Get fake rate from map
                 fakerate = leptonFakerates[yearstring].getFactor(pdgId, pt, eta, "stat", sigma )
 
@@ -2119,6 +2285,21 @@ for i_mode, mode in enumerate(allModes):
         binning=[16, -0.5, 15.5],
     ))
 
+    plots.append(Plot(
+        name = "l1_eta",
+        texX = 'Leading lepton #eta', texY = 'Number of Events',
+        addOverFlowBin='both',
+        attribute = TreeVariable.fromString( "l1_eta/F" ),
+        binning=[30, -3, 3],
+    ))
+
+    plots.append(Plot(
+        name = "l1_phi",
+        texX = 'Leading lepton #phi', texY = 'Number of Events',
+        addOverFlowBin='both',
+        attribute = TreeVariable.fromString( "l1_phi/F" ),
+        binning=[30, -3, 3],
+    ))
 
     if args.doTTbarReco:
         plots.append(Plot(
@@ -2131,13 +2312,6 @@ for i_mode, mode in enumerate(allModes):
 
     if args.nicePlots:
 
-        plots.append(Plot(
-            name = "l1_eta",
-            texX = 'Leading lepton #eta', texY = 'Number of Events',
-            addOverFlowBin='both',
-            attribute = TreeVariable.fromString( "l1_eta/F" ),
-            binning=[30, -3, 3],
-        ))
 
         plots.append(Plot(
             name = "l2_eta",
@@ -2470,7 +2644,7 @@ if args.nicePlots and args.sys == "central":
 
 
 # Write Result Hist in root file
-plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "yield", "FakeCategory", "N_jets", "N_bjets", "N_jets_passHEM"]
+plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "yield", "FakeCategory", "N_jets", "N_bjets", "N_jets_passHEM", "l1_eta", "l1_phi"]
 logger.info( "Now write results in root files." )
 for mode in allModes+["all"]:
     logger.info( "Write file for channel: %s", mode )

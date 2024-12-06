@@ -57,6 +57,7 @@ def getCMS(x,y,x2,y2,prelim=False):
 #         print x, y, g.Interpolate(x, y)
 
 def getHist2DFromTree(filename, wcname1, wcname2):
+    logger.info( "Reading file = %s", filename )
     wc1values, wc2values, twodeltaNLLs = array.array( 'd' ), array.array( 'd' ), array.array( 'd' )
     branchname1 = "k_"+wcname1
     branchname2 = "k_"+wcname2
@@ -64,15 +65,31 @@ def getHist2DFromTree(filename, wcname1, wcname2):
     tree = getattr(rf, "limit")
     if tree.GetEntry(0)<=0:
         raise RuntimeError( "Tree of file %s is empty", filename)
+
+
+    bestFit_wc1 = 0
+    bestFit_wc2 = 0
+    # First find minimum
+    minDeltaNLL = 10000000000000000
     for point in tree:
-        if point.deltaNLL > 0.000000001:
-            # first value is the best fit with deltaNLL=0, jump this one
-            wc1values.append(eval("point."+branchname1))
-            wc2values.append(eval("point."+branchname2))
-            twodeltaNLLs.append(2*point.deltaNLL)
-        else:
+        if args.ignoreNegative and point.deltaNLL < 0:
+            continue
+        if point.deltaNLL < minDeltaNLL:
+            minDeltaNLL = point.deltaNLL
             bestFit_wc1 = eval("point."+branchname1)
             bestFit_wc2 = eval("point."+branchname2)
+
+
+    print "min(deltaNLL) = %.3f"%(minDeltaNLL)
+
+    # Now fill hist
+    for i, point in enumerate(tree):
+        if args.ignoreNegative and point.deltaNLL < 0:
+            continue
+        wc1values.append(eval("point."+branchname1))
+        wc2values.append(eval("point."+branchname2))
+        twodeltaNLLs.append(2*(point.deltaNLL-minDeltaNLL))
+
     rf.Close()
     graph = ROOT.TGraph2D( len(twodeltaNLLs), wc1values, wc2values, twodeltaNLLs)
     NpointsOneAxis = int(sqrt(len(twodeltaNLLs)))
@@ -80,8 +97,9 @@ def getHist2DFromTree(filename, wcname1, wcname2):
     graph.SetNpx(NpointsOneAxis)
     graph.SetNpy(NpointsOneAxis)
     hist = graph.GetHistogram().Clone()
-    # hist.Smooth()
+    hist.Smooth()
     hist = setDrawStyle(hist, wcname1, wcname2)
+    print "Best fit:", wcname1, "=", bestFit_wc1, "---" , wcname2, "=", bestFit_wc2
     return hist, bestFit_wc1, bestFit_wc2
 
 def setDrawStyle(h, wcname1, wcname2):
@@ -112,7 +130,11 @@ def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_w
 
     h.GetXaxis().SetRangeUser(xmin, xmax)
     h.GetYaxis().SetRangeUser(ymin, ymax)
-    # h.GetZaxis().SetRangeUser(0.01, 100)
+    zmax = h.GetMaximum()
+    h.GetZaxis().SetRangeUser(0.01, zmax)
+    if not args.unblind:
+        h.GetZaxis().SetRangeUser(0.000000001, zmax)
+
     ROOT.gPad.SetLogz()
 
 
@@ -159,13 +181,13 @@ def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_w
     BFpoint.SetMarkerColor(ROOT.kCyan-3)
     BFpoint.Draw("p same")
     # legend
-    leg = ROOT.TLegend(.55, .7, 1.0-rightmargin-0.03, 1.0-topmargin-0.03)
+    leg = ROOT.TLegend(.53, .7, 1.0-rightmargin-0.03, 1.0-topmargin-0.03)
     leg.SetTextSize(.035)
     leg.SetHeader(legname)
     leg.AddEntry( BFpoint, "Best fit","p")
     leg.AddEntry( SMpoint, "SM","p")
-    leg.AddEntry( cont_p1.At(0), "68%s CL"%"%", "l")
-    leg.AddEntry( cont_p2.At(0), "95%s CL"%"%", "l")
+    leg.AddEntry( cont_p1.At(0), "-2 #Delta ln L < 2.28", "l")
+    leg.AddEntry( cont_p2.At(0), "-2 #Delta ln L < 5.99", "l")
     leg.Draw()
     # CMSlabel
     x_CMS = leftmargin
@@ -198,9 +220,18 @@ argParser.add_argument('--signalInjectionHeavy',  action='store_true', default=F
 argParser.add_argument('--signalInjectionMixed',  action='store_true', default=False)
 argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
 argParser.add_argument('--unblind',          action='store_true', default=False)
-argParser.add_argument('--noBB',          action='store_true', default=False)
+argParser.add_argument('--BBmode',         action='store', default="default")
+argParser.add_argument('--noQuad',               action='store_true', default=False)
 argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
 argParser.add_argument('--onlyCombined',  action='store_true', default=False)
+argParser.add_argument('--binning',          action='store', default="default")
+argParser.add_argument('--sysMode',          action='store', default="default")
+argParser.add_argument('--onlyRegion',          action='store', default=None)
+argParser.add_argument('--ignoreNegative',  action='store_true', default=False)
+argParser.add_argument('--noZero', action='store_true', default=False)
+argParser.add_argument('--SMZero', action='store_true', default=False)
+
+
 args = argParser.parse_args()
 
 logger.info( "Make 2D limit plot")
@@ -209,7 +240,7 @@ WCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33
 if args.light:
     WCnames = ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]
     if args.minus:
-        WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"]
+        WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cHuRe1122", "cHuRe33", "cHdRe1122", "cHdRe33", "cW", "cWtil"]
 
 if args.year not in ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]:
     raise RuntimeError( "Year %s is not knwon", args.year)
@@ -230,7 +261,7 @@ if wcname2 not in WCnames:
     raise RuntimeError( "Wilson coefficient %s is not knwon", wcname2)
 logger.info( "Wilson coefficients = %s and %s", wcname1, wcname2 )
 
-uncertaintyGroups = ["btag","jet","lepton","lumi","nonprompt","other_exp","rate_bkg","rate_sig","theory"]
+uncertaintyGroups = ["autoMCStats","btag","ewk","jet","lepton","lumi","nonprompt","other_exp","pdf","ps","rate_bkg","rate_sig","scale_bkg","scale_sig","wz"]
 if args.freeze is not None:
     if args.statOnly:
         raise RuntimeError( "Cannot run statOnly AND freeze nuisance groups" )
@@ -243,8 +274,14 @@ nRegions = 4 if args.NjetSplit else 3
 if args.onlyCombined:
     nRegions = 0 # combined region is added later
     logger.info( "Only plot combined region")
+    extraRegion = ["combined"]
+elif args.onlyRegion is not None:
+    nRegions = 0 # combined region is added later
+    logger.info( "Only plot %s region", args.onlyRegion)
+    extraRegion = [args.onlyRegion]
 else:
     logger.info( "Number of regions: %s", nRegions)
+    extraRegion = ["combined"]
 
 dirname_suffix = ""
 if args.light:               dirname_suffix+="_light"
@@ -257,7 +294,13 @@ if args.signalInjectionMixed:     dirname_suffix+="_signalInjectionMixed"
 if args.signalInjectionWZjets:    dirname_suffix+="_signalInjectionWZjets"
 if args.fluctuatePseudoData:      dirname_suffix+="_fluctuatePseudoData"
 if args.unblind:                  dirname_suffix+="_UNBLINDED"
-if args.noBB:                  dirname_suffix+="_noBB"
+if args.noQuad:                  dirname_suffix+="_noQuad"
+if args.BBmode != "default":
+    dirname_suffix+="_"+args.BBmode
+if args.binning != "default":    dirname_suffix+="_binning-"+args.binning
+if args.sysMode != "default":    dirname_suffix+="_"+args.sysMode
+if args.noZero:                  dirname_suffix+="_noZero"
+if args.SMZero:                  dirname_suffix+="_SMZero"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
@@ -270,6 +313,9 @@ plotstyle = {
     2: ("WZ region", ROOT.kRed-2),
     3: ("ttZ region", ROOT.kAzure+4),
     "combined": ("Combination", 1),
+    "ZZ-WZ": ("ZZ+WZ regions", 1),
+    "ZZ-ttZ": ("ZZ+ttZ regions", 1),
+    "WZ-ttZ": ("WZ+ttZ regions", 1),
 }
 if args.NjetSplit:
     plotstyle = {
@@ -280,7 +326,7 @@ if args.NjetSplit:
         "combined": ("Combination", 1),
     }
 
-for r in range(nRegions)+["combined"]:
+for r in range(nRegions)+extraRegion:
     region = r+1 if isinstance(r, int) else r
     marginfloat = "float" if args.float else "margin"
     filename = "higgsCombine.topEFT_%s_%s_13TeV_%s_2D-%s_%s.MultiDimFit.mH125.123456.root"%(args.year, str(region), args.year, args.wc, marginfloat)
@@ -294,10 +340,12 @@ for r in range(nRegions)+["combined"]:
         outname = outname.replace(".pdf", "_freeze-"+args.freeze+".pdf")
     if args.statOnly:
         outname = outname.replace(".pdf", "_statOnly.pdf")
-    xmin, xmax = -6.5, 6.5
-    if wcname1 in ["cHq3Re11","cHq3Re1122", "cHq3MRe11","cHq3MRe1122"]:
-        xmin, xmax = -0.45, 0.45
-    ymin, ymax = -6.5, 6.5
-    if wcname2 in ["cHq3Re11","cHq3Re1122", "cHq3MRe11","cHq3MRe1122"]:
-        ymin, ymax = -0.45, 0.45
+    if args.ignoreNegative:
+        outname = outname.replace(".pdf", "_ignoreNegative.pdf")
+    xmin, xmax = -7.5, 7.5
+    if wcname1 in ["cHq3Re11","cHq3Re1122", "cHq3MRe11","cHq3MRe1122", "cW", "cWtil"]:
+        xmin, xmax = -0.4, 0.4
+    ymin, ymax = -7.5, 7.5
+    if wcname2 in ["cHq3Re11","cHq3Re1122", "cHq3MRe11","cHq3MRe1122", "cW", "cWtil"]:
+        ymin, ymax = -0.4, 0.4
     plot2Dlimit(hist, plotstyle[region][0], plotdir+outname, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2)

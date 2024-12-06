@@ -25,9 +25,11 @@ argParser.add_argument('--addSignal',           action='store_true', default=Fal
 args = argParser.parse_args()
 
 
-dataTag = "_noData" if args.noData else ""
-dirname_suffix = "_light"
-combineInput = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dataTag+dirname_suffix+"/ULRunII/CombineInput.root"
+# dataTag = "_noData" if args.noData else ""
+# dirname_suffix = "_light"
+# combineInput = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dataTag+dirname_suffix+"/ULRunII/CombineInput.root"
+
+combineInput = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_light_minus_binning-A_SMZero/ULRunII/CombineInput.root"
 
 plotdir = plot_directory+"/PaperPlots/"
 if not os.path.exists( plotdir ): os.makedirs( plotdir )
@@ -88,7 +90,8 @@ sys = [
     'PU', 'Prefire', 'WZ_Njet_reweight', 'WZ_heavyFlavour',
     'muF_WZ', 'muF_ZZ', 'muF_tWZ', 'muF_tZq', 'muF_triBoson', 'muF_ttX', 'muF_ttZ', #'muF_ggToZZ',
     'muR_WZ', 'muR_ZZ', 'muR_tWZ', 'muR_tZq', 'muR_triBoson', 'muR_ttX', 'muR_ttZ', #'muR_ggToZZ',
-    # 'rate_WZ', 'rate_ZZ', 'rate_ttZ'
+    'rate_WZ', 'rate_ZZ', 'rate_ttZ',
+    'EWK_add_WZ', 'EWK_add_ZZ','EWK_mul_WZ', 'EWK_mul_ZZ',
 ]
 
 rates_bkg = {
@@ -100,46 +103,62 @@ rates_bkg = {
 }
 
 for region in regions:
-    suffix = "__EFTsignal" if args.addSignal else ""
-    p = Plotter("PreFit_ULRunII__"+region+"__"+histname+suffix)
-    p.plot_dir = plotdir
-    p.lumi = "138"
-    p.xtitle = "Z #it{p}_{T} [GeV]"
-    p.drawRatio = True
-    p.ratiotitle = "#splitline{Ratio}{to SM}"
-    p.subtext = "Preliminary"
-    p.legshift = (-0.1, -0.1, 0.0, 0.0)
-    regiontext = "SR"
-    if region == "ttZ":
-        regiontext+="_{t#bar{t}Z}"
-    elif region == "WZ":
-        regiontext+="_{WZ}"
-    elif region == "ZZ":
-        regiontext+="_{ZZ}"
-    regiontext+=", PreFit"
-    p.addText(0.22, 0.7, regiontext, font=43, size=16)
-    if region == "WZ":
-        p.ratiorange = 0.1, 2.4
-    isFirstProcess = True
-    hist_bkg = ROOT.TH1F()
-    for process in signals+backgrounds:
-        hist = getObjFromFile(combineInput, region+"__"+histname+"/"+process)
-        if process in backgrounds:
-            if isFirstProcess:
-                hist_bkg = hist.Clone("allBKGs")
-                isFirstProcess = False
-            else:
-                hist_bkg.Add(hist)
-        p.addBackground(hist, processinfo[process][0], processinfo[process][1])
-        for sname in sys:
-            # print sname
-            hist_up = getObjFromFile(combineInput, region+"__"+histname+"/"+process+"__"+sname+"Up")
-            hist_down = getObjFromFile(combineInput, region+"__"+histname+"/"+process+"__"+sname+"Down")
-            p.addSystematic(hist_up, hist_down, sname, processinfo[process][0])
-        if process in backgrounds and process != "nonprompt":
-            p.addNormSystematic(processinfo[process][0], rates_bkg[process])
-    hist_signal = getObjFromFile(combineInput, region+"__"+histname+"/"+"sm_lin_quad_"+WCs[region])
-    hist_signal.Add(hist_bkg)
-    if args.addSignal:
-        p.addSignal(hist_signal, WClatexNames[WCs[region]].replace("[TeV^{-2}]", "")+" = 1 TeV^{-2}", ROOT.kRed)
-    p.draw()
+    for log in [False, True]:
+        suffix = "__EFTsignal" if args.addSignal else ""
+        if log:
+            suffix+="_log"
+        p = Plotter("PreFit_ULRunII__"+region+"__"+histname+suffix)
+        p.plot_dir = plotdir
+        p.lumi = "138"
+        p.xtitle = "Z boson candidate #it{p}_{T} [GeV]"
+        p.ytitle = "Events / GeV [ GeV^{-1} ]"
+        p.divideByWidth = True
+        p.drawRatio = True
+        p.ratiotitle = "#splitline{Ratio}{to SM}"
+        p.subtext = "Preliminary"
+        p.legshift = (-0.1, -0.1, 0.0, 0.0)
+        if log:
+            p.log = True
+            if region == "WZ":
+                p.setCustomYRange(0.001, 10000)
+            elif region == "ZZ":
+                p.setCustomYRange(0.001, 1000)
+            elif region == "ttZ":
+                p.setCustomYRange(0.001, 1000)
+
+        regiontext = "SR"
+        if region == "ttZ":
+            regiontext+="_{t#bar{t}Z}"
+        elif region == "WZ":
+            regiontext+="_{WZ}"
+        elif region == "ZZ":
+            regiontext+="_{ZZ}"
+        regiontext+=", PreFit"
+        p.addText(0.22, 0.7, regiontext, font=43, size=16)
+        # if region == "WZ":
+        #     p.ratiorange = 0.1, 2.4
+        isFirstProcess = True
+        hist_bkg = ROOT.TH1F()
+        for process in signals+backgrounds:
+            hist = getObjFromFile(combineInput, region+"__"+histname+"/"+process)
+            if process in backgrounds:
+                if isFirstProcess:
+                    hist_bkg = hist.Clone("allBKGs")
+                    isFirstProcess = False
+                else:
+                    hist_bkg.Add(hist)
+            p.addBackground(hist, processinfo[process][0], processinfo[process][1])
+            for sname in sys:
+                # print sname
+                hist_up = getObjFromFile(combineInput, region+"__"+histname+"/"+process+"__"+sname+"Up")
+                hist_down = getObjFromFile(combineInput, region+"__"+histname+"/"+process+"__"+sname+"Down")
+                p.addSystematic(hist_up, hist_down, sname, processinfo[process][0])
+            if process in backgrounds and process != "nonprompt":
+                p.addNormSystematic(processinfo[process][0], rates_bkg[process])
+        h_data = getObjFromFile(combineInput, region+"__"+histname+"/data_obs")
+        p.addData(h_data)
+        if args.addSignal:
+            hist_signal = getObjFromFile(combineInput, region+"__"+histname+"/"+"sm_lin_quad_"+WCs[region])
+            hist_signal.Add(hist_bkg)
+            p.addSignal(hist_signal, WClatexNames[WCs[region]].replace("[TeV^{-2}]", "")+" = 1 TeV^{-2}", ROOT.kRed)
+        p.draw()

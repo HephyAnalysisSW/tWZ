@@ -35,7 +35,7 @@ args = argParser.parse_args()
 
 
 dataTag = "_noData" if args.noData else ""
-dirname_suffix = "_light"
+dirname_suffix = "_light_minus_binning-A_SMZero"
 combineInput = "/groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dataTag+dirname_suffix+"/ULRunII/CombineInput.root"
 
 plotdir = plot_directory+"/PaperPlots/"
@@ -47,41 +47,55 @@ sys = [
 ]
 histname = "Z1_pt"
 for region in ["ttZ", "WZ", "ZZ"]:
-    for wc in ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]:
+    for wc in ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cW", "cWtil"]:
         h_sm = getObjFromFile(combineInput, region+"__"+histname+"/sm")
         wcvalueUp = 1
         wcvalueDown = -1
-        if region == "WZ" and wc == "cHq3Re1122":
-            wcvalueUp = 0.2
-            wcvalueDown = -0.2
+        if region == "WZ" and wc in ["cHq3Re1122","cHq3MRe1122", "cW", "cWtil"]:
+            wcvalueUp = 0.1
+            wcvalueDown = -0.1
         h_eftUp   = getEFTatWCpoint(combineInput, region, histname, wc, wcvalueUp)
         h_eftDown = getEFTatWCpoint(combineInput, region, histname, wc, wcvalueDown)
-        p = Plotter("EFT_ULRunII__"+region+"__"+histname+"__"+wc)
-        p.plot_dir = plotdir
-        p.lumi = "138"
-        p.xtitle = "Z boson candidate #it{p}_{T} [GeV]"
-        p.drawRatio = True
-        p.ratiotitle = "#splitline{Ratio}{to SM}"
-        p.simtext = "Simulation"
-        p.subtext = "Preliminary"
-        p.legshift = (0.1, -0.3, 0.0, 0.0)
-        p.ratiorange = 0.7, 1.3
-        p.NcolumnsLegend = 1
-        p.totalUncText = "#mu_{R}/#mu_{F} uncertainties"
-        regiontext = "SR"
-        if region == "ttZ":
-            regiontext+="_{t#bar{t}Z}"
-        elif region == "WZ":
-            regiontext+="_{WZ}"
-        elif region == "ZZ":
-            regiontext+="_{ZZ}"
-        p.addText(0.22, 0.65, regiontext, font=43, size=16)
-        signalName = region.replace("ttZ", "t#bar{t}Z")+" (SM)"
-        p.addBackground(h_sm, signalName, 17)
-        for s in sys:
-            h_up = getObjFromFile(combineInput, region+"__"+histname+"/sm__"+s+"Up")
-            h_down = getObjFromFile(combineInput, region+"__"+histname+"/sm__"+s+"Down")
-            p.addSystematic(h_up, h_down, s, signalName)
-        p.addSignal(h_eftUp,   signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueUp)+")", ROOT.kRed, lineStyle=2, lineWidth=2)
-        p.addSignal(h_eftDown, signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueDown)+")", ROOT.kAzure+7, lineWidth=2)
-        p.draw()
+        for log in [False, True]:
+            suffix = ""
+            if log:
+                suffix+="_log"
+            p = Plotter("EFT_ULRunII__"+region+"__"+histname+"__"+wc+suffix)
+            p.plot_dir = plotdir
+            p.lumi = "138"
+            p.xtitle = "Z boson candidate #it{p}_{T} [GeV]"
+            p.ytitle = "Events / GeV"
+            p.divideByWidth = True
+            p.drawRatio = True
+            p.ratiotitle = "#splitline{Ratio}{to SM}"
+            p.simtext = "Simulation"
+            p.subtext = "Preliminary"
+            p.legshift = (0.1, -0.3, 0.0, 0.0)
+            p.ratiorange = 0.7, 1.3
+            p.NcolumnsLegend = 1
+            p.totalUncText = "#mu_{R}/#mu_{F} uncertainties"
+            regiontext = "SR"
+            if region == "ttZ":
+                regiontext+="_{t#bar{t}Z}"
+            elif region == "WZ":
+                regiontext+="_{WZ}"
+            elif region == "ZZ":
+                regiontext+="_{ZZ}"
+            p.addText(0.22, 0.65, regiontext, font=43, size=16)
+            if log:
+                p.log = True
+                if region == "WZ":
+                    p.setCustomYRange(0.02, 20000)
+                elif region == "ZZ":
+                    p.setCustomYRange(0.02, 900)
+                elif region == "ttZ":
+                    p.setCustomYRange(0.02, 300)
+            signalName = region.replace("ttZ", "t#bar{t}Z")+" (SM)"
+            p.addBackground(h_sm, signalName, 17)
+            for s in sys:
+                h_up = getObjFromFile(combineInput, region+"__"+histname+"/sm__"+s+"Up")
+                h_down = getObjFromFile(combineInput, region+"__"+histname+"/sm__"+s+"Down")
+                p.addSystematic(h_up, h_down, s, signalName)
+            p.addSignal(h_eftUp,   signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueUp)+")", ROOT.kRed, lineStyle=2, lineWidth=2)
+            p.addSignal(h_eftDown, signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueDown)+")", ROOT.kAzure+7, lineWidth=2)
+            p.draw()

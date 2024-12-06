@@ -54,7 +54,7 @@ special_cuts = {
     "onZ1"   :             "abs(Z1_mass-91.2)<10",
     "onZ2"   :             "abs(Z2_mass-91.2)<10",
     "offZ1"    :           "(abs(Z1_mass-91.2)>10)",
-    "offZ2"  :             "(!(abs(Z2_mass-91.2)<20))",
+    "offZ2"  :             "(abs(Z2_mass-91.2)>10)",
     "vetoMET" :            "met_pt<20",
     "vetoMET60" :          "met_pt<60&&met_pt>20",
     "vetoMET60v2" :        "met_pt<60",

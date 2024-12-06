@@ -1,259 +1,203 @@
 ################################################################################
 ## ASIMOV
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHqMRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHqMRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHqMRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHqMRe1122
 
-# light with BB
-python runCombine_threePoint.py --year=ULRunII --light --region=1        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --light --region=2        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --light --region=3        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --light --region=combined --oneD=cHq1Re1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHqMRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHqMRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHqMRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHqMRe33
 
-python runCombine_threePoint.py --year=ULRunII --light --region=1        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=2        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=3        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=combined --oneD=cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHq3MRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHq3MRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHq3MRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHq3MRe1122
 
-python runCombine_threePoint.py --year=ULRunII --light --region=1        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --light --region=2        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --light --region=3        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --light --region=combined --oneD=cHq3Re1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHq3MRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHq3MRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHq3MRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHq3MRe33
 
-python runCombine_threePoint.py --year=ULRunII --light --region=1        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=2        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=3        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=combined --oneD=cHq3Re33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cW
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cW
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cW
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cW
 
-python runCombine_threePoint.py --year=ULRunII --light --region=1        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=2        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=3        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=combined --twoD=cHq1Re1122-cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cWtil
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cWtil
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cWtil
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cWtil
 
-python runCombine_threePoint.py --year=ULRunII --light --region=1        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=2        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=3        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --region=combined --twoD=cHq3Re1122-cHq3Re33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHuRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHuRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHuRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHuRe1122
 
-# light without BB
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=1        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=2        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=3        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=combined --oneD=cHq1Re1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHuRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHuRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHuRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHuRe33
 
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=1        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=2        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=3        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=combined --oneD=cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHdRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHdRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHdRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHdRe1122
 
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=1        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=2        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=3        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=combined --oneD=cHq3Re1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHdRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHdRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHdRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHdRe33
 
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=1        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=2        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=3        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=combined --oneD=cHq3Re33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHqMRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHqMRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHqMRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHqMRe1122 --float
 
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=1        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=2        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=3        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=combined --twoD=cHq1Re1122-cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHqMRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHqMRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHqMRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHqMRe33 --float
 
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=1        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=2        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=3        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --light --noBB --region=combined --twoD=cHq3Re1122-cHq3Re33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHq3MRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHq3MRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHq3MRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHq3MRe1122 --float
 
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHq3MRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHq3MRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHq3MRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHq3MRe33 --float
 
-# minus with BB
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=1        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=2        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=3        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=combined --oneD=cHqMRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cW --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cW --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cW --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cW --float
 
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=1        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=2        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=3        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=combined --oneD=cHqMRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cWtil --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cWtil --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cWtil --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cWtil --float
 
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=1        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=2        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=3        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=combined --oneD=cHq3MRe1122
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHuRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHuRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHuRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHuRe1122 --float
 
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=1        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=2        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=3        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=combined --oneD=cHq3MRe33
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHuRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHuRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHuRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHuRe33 --float
+#
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHdRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHdRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHdRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHdRe1122 --float
 
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=1        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=2        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=3        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=combined --twoD=cHqMRe1122-cHqMRe33
-
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=1        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=2        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=3        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --region=combined --twoD=cHq3MRe1122-cHq3MRe33
-
-# minus without BB
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=1        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=2        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=3        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=combined --oneD=cHqMRe1122
-
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=1        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=2        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=3        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=combined --oneD=cHqMRe33
-
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=1        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=2        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=3        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=combined --oneD=cHq3MRe1122
-
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=1        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=2        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=3        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=combined --oneD=cHq3MRe33
-
-
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=1        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=2        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=3        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=combined --twoD=cHqMRe1122-cHqMRe33
-
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=1        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=2        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=3        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --noBB --region=combined --twoD=cHq3MRe1122-cHq3MRe33
-
-
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=1        --oneD=cHdRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=2        --oneD=cHdRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=3        --oneD=cHdRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --oneD=cHdRe33 --float
 
 ################################################################################
 ## DATA
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHqMRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHqMRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHqMRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHqMRe1122
 
-# light with BB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=1        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=2        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=3        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=combined --oneD=cHq1Re1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHqMRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHqMRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHqMRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHqMRe33
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=1        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=2        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=3        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=combined --oneD=cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHq3MRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHq3MRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHq3MRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHq3MRe1122
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=1        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=2        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=3        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=combined --oneD=cHq3Re1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHq3MRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHq3MRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHq3MRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHq3MRe33
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=1        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=2        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=3        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=combined --oneD=cHq3Re33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cW
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cW
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cW
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cW
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=1        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=2        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=3        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=combined --twoD=cHq1Re1122-cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cWtil
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cWtil
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cWtil
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cWtil
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=1        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=2        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=3        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --region=combined --twoD=cHq3Re1122-cHq3Re33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHuRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHuRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHuRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHuRe1122
 
-# light without BB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=1        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=2        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=3        --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=combined --oneD=cHq1Re1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHuRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHuRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHuRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHuRe33
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=1        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=2        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=3        --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=combined --oneD=cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHdRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHdRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHdRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHdRe1122
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=1        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=2        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=3        --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=combined --oneD=cHq3Re1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHdRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHdRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHdRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHdRe33
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=1        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=2        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=3        --oneD=cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=combined --oneD=cHq3Re33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHqMRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHqMRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHqMRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHqMRe1122 --float
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=1        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=2        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=3        --twoD=cHq1Re1122-cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=combined --twoD=cHq1Re1122-cHq1Re33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHqMRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHqMRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHqMRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHqMRe33 --float
+#
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHq3MRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHq3MRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHq3MRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHq3MRe1122 --float
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=1        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=2        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=3        --twoD=cHq3Re1122-cHq3Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --noBB --region=combined --twoD=cHq3Re1122-cHq3Re33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHq3MRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHq3MRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHq3MRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHq3MRe33 --float
 
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cW --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cW --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cW --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cW --float
 
-# minus with BB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=1        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=2        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=3        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=combined --oneD=cHqMRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cWtil --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cWtil --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cWtil --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cWtil --float
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=1        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=2        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=3        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=combined --oneD=cHqMRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHuRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHuRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHuRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHuRe1122 --float
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=1        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=2        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=3        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=combined --oneD=cHq3MRe1122
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHuRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHuRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHuRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHuRe33 --float
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=1        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=2        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=3        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=combined --oneD=cHq3MRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHdRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHdRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHdRe1122 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHdRe1122 --float
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=1        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=2        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=3        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=combined --twoD=cHqMRe1122-cHqMRe33
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=1        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=2        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=3        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --region=combined --twoD=cHq3MRe1122-cHq3MRe33
-
-# minus without BB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=1        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=2        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=3        --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=combined --oneD=cHqMRe1122
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=1        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=2        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=3        --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=combined --oneD=cHqMRe33
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=1        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=2        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=3        --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=combined --oneD=cHq3MRe1122
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=1        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=2        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=3        --oneD=cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=combined --oneD=cHq3MRe33
-
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=1        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=2        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=3        --twoD=cHqMRe1122-cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=combined --twoD=cHqMRe1122-cHqMRe33
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=1        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=2        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=3        --twoD=cHq3MRe1122-cHq3MRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --noBB --region=combined --twoD=cHq3MRe1122-cHq3MRe33
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=1        --oneD=cHdRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=2        --oneD=cHdRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=3        --oneD=cHdRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --oneD=cHdRe33 --float

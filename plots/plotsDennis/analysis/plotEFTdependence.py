@@ -47,8 +47,10 @@ def getHist(fname, hname, altbinning=False):
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 regions = ["WZ", "ZZ", "ttZ"]
 years = ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]
-WCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33", "cHq1Re1122", "cHq3Re1122"]
-version = "v11"
+# WCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33", "cHq1Re1122", "cHq3Re1122"]
+WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"]
+
+version = "v15"
 histname = "Z1_pt"
 dataTag = "_noData"
 

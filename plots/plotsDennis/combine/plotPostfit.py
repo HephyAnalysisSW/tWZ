@@ -18,13 +18,10 @@ logger    = logger.get_logger(   "INFO", logFile = None)
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 
-def getHist(fname, hname, altbinning=False, isData=False):
+def getHist(fname, hname, bins, isData=False):
     # print("-----------------------")
     # print(fname)
     # print(hname)
-    bins  = [0, 60, 120, 180, 240, 300, 400, 1000]
-    if altbinning:
-        bins  = [0, 60, 120, 180, 1000]
     Nbins = len(bins)-1
     hist_oldbins = getObjFromFile(fname, hname)
     hist_newbins = ROOT.TH1F(hist_oldbins.GetName()+"_rebin", hist_oldbins.GetTitle()+"_rebin", Nbins, array.array('d',bins))
@@ -56,6 +53,13 @@ argParser.add_argument('--unblind',          action='store_true', default=False)
 argParser.add_argument('--noBB',             action='store_true', default=False)
 argParser.add_argument('--SM',               action='store_true', default=False)
 argParser.add_argument('--region',           action='store', type=str, default="combined")
+argParser.add_argument('--binning',          action='store', default="default")
+argParser.add_argument('--sysMode',          action='store', default="default")
+argParser.add_argument('--noZero', action='store_true', default=False)
+argParser.add_argument('--SMZero', action='store_true', default=False)
+argParser.add_argument('--float', action='store_true', default=False)
+argParser.add_argument('--noScan', action='store_true', default=False)
+argParser.add_argument('--fullFit', action='store_true', default=None)
 args = argParser.parse_args()
 
 logger.info( "Make PostFit plot")
@@ -66,11 +70,32 @@ if args.minus:               dirname_suffix+="_minus"
 if args.unblind:             dirname_suffix+="_UNBLINDED"
 if args.noBB:                dirname_suffix+="_noBB"
 if args.SM:                  dirname_suffix+="_SM"
+if args.binning != "default":
+    dirname_suffix+="_binning-"+args.binning
+if args.sysMode != "default":    dirname_suffix+="_"+args.sysMode
+if args.noZero:                  dirname_suffix+="_noZero"
+if args.SMZero:                  dirname_suffix+="_SMZero"
+
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
 plotdir = plot_directory+"/PostFit_UL_threePoint"+dirname_suffix+"/"+args.year+"/"
 if not os.path.exists( plotdir ): os.makedirs( plotdir )
+
+
+################################################################################
+# bins_ttZ  = [0, 60, 120, 180, 240, 300, 400, 1000]
+# bins_WZ  = [0, 60, 120, 180, 240, 300, 400, 1000]
+# bins_ZZ  = [0, 60, 120, 180, 1000]
+bins_ttZ  = [0, 40, 80, 120, 160, 200, 260, 340, 1000]
+bins_WZ  = [0, 20, 40, 60, 80, 100, 120, 140, 180, 220, 260, 300, 340, 380, 420, 500, 1000]
+bins_ZZ  = [0, 20, 40, 60, 80, 120, 200, 1000]
+if args.binning == "A":
+    bins_ttZ  = [40, 80, 120, 160, 200, 260, 340, 1000]
+    bins_WZ  = [40, 60, 80, 100, 120, 140, 180, 220, 260, 300, 340, 380, 420, 500, 1000]
+    bins_ZZ  = [40, 60, 80, 120, 200, 1000]
+################################################################################
+
 
 processinfo = {
     "total_signal":("t#bar{t}Z + WZ + ZZ", CMScolors["sm"]),
@@ -90,10 +115,27 @@ lumi = {
     "ULRunII":      "138",
 }
 
+twoD = False
+if "-" in args.wc:
+    twoD = True
+    wc1 = args.wc.split("-")[0]
+    wc2 = args.wc.split("-")[1]
+
 if args.SM:
     fname = dataCard_dir+"/fitDiagnostics.topEFT_ULRunII_"+args.region+"_13TeV_"+args.year+"_SHAPES.root"
+elif args.fullFit:
+    fname = dataCard_dir+"/fitDiagnostics.topEFT_ULRunII_"+args.region+"_13TeV_"+args.year+"_fullFit_SHAPES.root"
 else:
-    fname = dataCard_dir+"/fitDiagnostics.topEFT_ULRunII_"+args.region+"_13TeV_"+args.year+"_1D-"+args.wc+"_margin_SHAPES.root"
+    if not twoD:
+        fname = dataCard_dir+"/fitDiagnostics.topEFT_ULRunII_"+args.region+"_13TeV_"+args.year+"_1D-"+args.wc+"_margin_SHAPES.root"
+    else:
+        fname = dataCard_dir+"/fitDiagnostics.topEFT_ULRunII_"+args.region+"_13TeV_"+args.year+"_2D-"+wc1+"-"+wc2+"_margin_SHAPES.root"
+
+if args.float:
+    fname = fname.replace("margin", "float")
+
+if args.noScan:
+    fname = fname.replace("SHAPES", "noScan_SHAPES")
 
 if args.region == "combined":
     regions = ["ttZ", "WZ", "ZZ"]
@@ -101,30 +143,64 @@ else:
     regions = ["topEFT_ULRunII_"+args.region+"_13TeV"]
 
 for region in regions:
-    if args.SM:
-        plotname = "PostFit__"+region
-    else:
-        plotname = "PostFit__"+region+"__"+args.wc
-    p = Plotter(plotname)
-    p.plot_dir = plotdir
-    p.lumi = lumi[args.year]
-    p.xtitle = "Z boson candidate #it{p}_{T} [GeV]"
-    p.drawRatio = True
-    p.ratiorange = (0.2, 1.8)
-    for process in processinfo.keys():
-        if region in ["ZZ", "topEFT_ULRunII_1_13TeV"] and process == "nonprompt":
-            continue
-        dir = region
-        if region == "ttZ":
-            dir = "ch3"
-        elif region == "WZ":
-            dir = "ch2"
-        elif region == "ZZ":
-            dir = "ch1"
+    for doLog in [True,False]:
+        bins=[]
+        if region in ["ttZ", "topEFT_ULRunII_3_13TeV"]:
+            bins = bins_ttZ
+        elif region in ["WZ", "topEFT_ULRunII_2_13TeV"]:
+            bins = bins_WZ
+        elif region in ["ZZ", "topEFT_ULRunII_1_13TeV"]:
+            bins = bins_ZZ
 
-        ZZbinning = True if region in ["ZZ", "topEFT_ULRunII_1_13TeV"] else False
-        hist = getHist(fname, "shapes_fit_s/"+dir+"/"+process, ZZbinning)
-        p.addBackground(hist, processinfo[process][0], processinfo[process][1])
-    h_data = getHist(fname, "shapes_fit_s/"+dir+"/data", ZZbinning, True)
-    p.addData(h_data)
-    p.draw()
+        if args.SM or args.fullFit:
+            plotname = "PostFit__"+region
+        else:
+            plotname = "PostFit__"+region+"__"+args.wc
+
+        if doLog:
+            plotname+="__log"
+        p = Plotter(plotname)
+        p.plot_dir = plotdir
+        p.lumi = lumi[args.year]
+        p.xtitle = "Z boson candidate #it{p}_{T} [GeV]"
+        p.ytitle = "Events / GeV"
+        p.ratiotitle = "#frac{Data}{Pred.}"
+        p.drawRatio = True
+        p.ratiorange = (0.2, 1.8)
+        p.divideByWidth = True
+        p.subtext = "Preliminary"
+        p.legshift = (-0.1, 0., 0., 0.)
+        if doLog:
+            p.log = True
+            if region in ["WZ", "topEFT_ULRunII_2_13TeV"]:
+                p.setCustomYRange(0.001, 10000)
+            elif region in ["ZZ", "topEFT_ULRunII_1_13TeV"]:
+                p.setCustomYRange(0.001, 1000)
+            elif region in ["ttZ", "topEFT_ULRunII_3_13TeV"]:
+                p.setCustomYRange(0.001, 1000)
+        for process in processinfo.keys():
+            if region in ["ZZ", "topEFT_ULRunII_1_13TeV"] and process == "nonprompt":
+                continue
+            dir = region
+            if region == "ttZ":
+                dir = "ch3"
+            elif region == "WZ":
+                dir = "ch2"
+            elif region == "ZZ":
+                dir = "ch1"
+            hist = getHist(fname, "shapes_fit_s/"+dir+"/"+process, bins)
+            p.addBackground(hist, processinfo[process][0], processinfo[process][1])
+        h_data = getHist(fname, "shapes_fit_s/"+dir+"/data", bins, True)
+        p.addData(h_data)
+        h_prefit_total = getHist(fname, "shapes_prefit/"+dir+"/total", bins)
+        p.addSignal(h_prefit_total, "PreFit", ROOT.kRed)
+        regiontext = "SR"
+        if region == "ttZ":
+            regiontext+="_{t#bar{t}Z}"
+        elif region == "WZ":
+            regiontext+="_{WZ}"
+        elif region == "ZZ":
+            regiontext+="_{ZZ}"
+        regiontext+=", PostFit"
+        p.addText(0.22, 0.7, regiontext, font=43, size=16)
+        p.draw()

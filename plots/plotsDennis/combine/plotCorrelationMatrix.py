@@ -82,7 +82,8 @@ light = "_light" if args.light else ""
 region = "combined"
 fname = "DataCards_threePoint"+light+"/"+args.year+"/fitDiagnostics.topEFT_ULRunII_"+region+"_13TeV_"+args.year+"_1D-"+args.wc+"_margin_SHAPES.root"
 
-cor = getObjFromFile(fname, "covariance_fit_s")
+
+fname = "DataCards_threePoint"+light+"/"+args.year+"/fitDiagnostics.topEFT_ULRunII_"+region+"_13TeV_"+args.year+"_1D-"+args.wc+"_margin_SHAPES.root"
 
 
 parameters = ["k_"+args.wc]

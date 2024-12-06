@@ -25,6 +25,10 @@ def getGraphFromTree(filename, wcname):
             wcvalues.append(eval("point."+branchname))
             twodeltaNLLs.append(2*point.deltaNLL)
     rf.Close()
+    # print len(wcvalues)
+    if len(wcvalues) == 0:
+        wcvalues.append(0)
+        twodeltaNLLs.append(0)
     graph = ROOT.TGraph(len(wcvalues), wcvalues, twodeltaNLLs)
     graph = setDrawStyle(graph, wcname)
     return graph
@@ -97,7 +101,70 @@ def getLines(xmin, xmax):
     line_2sigma.SetLineStyle(2)
     return line_1sigma, line_2sigma
 
+def getInterval(graph, xmin, xmax):
+    bestFit = None
+    minimum = 1000
+    stepsize = 0.001
+    x = xmin
+    lower68 = []
+    upper68 = []
+    lower95 = []
+    upper95 = []
+    print "------------"
+    while x < xmax:
+        value_before = graph.Eval(x-stepsize)
+        value = graph.Eval(x)
+        value_after = graph.Eval(x+stepsize)
 
+        if value < minimum:
+            minimum = value
+            bestFit = x
+
+        if value_before > 1.00 and value_after < 1.00:
+            lower68.append(x)
+        elif value_before < 1.00 and value_after > 1.00:
+            upper68.append(x)
+
+        if value_before > 3.84 and value_after < 3.84:
+            lower95.append(x)
+        elif value_before < 3.84 and value_after > 3.84:
+            upper95.append(x)
+        x += stepsize
+
+    for l in [lower68,upper68,lower95,upper95]:
+        if len(l) > 1:
+            if abs(max(l)-min(l)) < 0.1:
+                average = float(sum(l) / len(l))
+                l[:] = [average] # this modifies the original list and not just the new object l
+
+    # l68, u68, l95, u95 = None, None, None, None
+    # if len(lower68) == 1:
+    #     l68 = lower68[0]
+    # if len(upper68) == 1:
+    #     u68 = upper68[0]
+    # if len(lower95) == 1:
+    #     l95 = lower95[0]
+    # if len(upper95) == 1:
+    #     u95 = upper95[0]
+    #
+    # print "Best fit =", bestFit, "| 68%: (",l68,",",u68,")", "95%: (",l95,",",u95,")"
+    # return bestFit, l68, u68, l95, u95
+    print "Best fit =", bestFit
+    if len(lower68) != len(upper68):
+        print("[ERROR] Found %i lower bounds but %i upper bounds for 68CL"%(len(lower68),len(upper68)))
+        lower68 = None
+        upper68 = None
+    else:
+        for i,l68 in enumerate(lower68):
+            print "68CL: (",lower68[i],",", upper68[i],")"
+    if len(lower95) != len(upper95):
+        print("[ERROR] Found %i lower bounds but %i upper bounds for 95CL"%(len(lower95),len(upper95)))
+        lower95 = None
+        upper95 = None
+    else:
+        for i,l95 in enumerate(lower95):
+            print "95CL: (",lower95[i],",", upper95[i],")"
+    return bestFit, lower68, upper68, lower95, upper95
 
 ################################################################################
 ################################################################################
@@ -112,6 +179,7 @@ argParser.add_argument('--statOnly',         action='store_true', default=False)
 argParser.add_argument('--addStatOnly',      action='store_true', default=False)
 argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--minus',            action='store_true', default=False)
+argParser.add_argument('--excludeTriplet',   action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
@@ -121,6 +189,13 @@ argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=
 argParser.add_argument('--unblind',          action='store_true', default=False)
 argParser.add_argument('--noBB',          action='store_true', default=False)
 argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
+argParser.add_argument('--binning',          action='store', default="default")
+argParser.add_argument('--sysMode',          action='store', default="default")
+argParser.add_argument('--noZero', action='store_true', default=False)
+argParser.add_argument('--SMZero', action='store_true', default=False)
+argParser.add_argument('--half', action='store_true', default=False)
+argParser.add_argument('--noQuad',               action='store_true', default=False)
+
 args = argParser.parse_args()
 
 logger.info( "Make 1D limit plot")
@@ -129,7 +204,10 @@ WCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33
 if args.light:
     WCnames = ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]
     if args.minus:
-        WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"]
+        WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cHuRe1122", "cHuRe33", "cHdRe1122", "cHdRe33", "cW", "cWtil"]
+        if args.excludeTriplet:
+            WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122"]
+
 
 if args.year not in ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]:
     raise RuntimeError( "Year %s is not knwon", args.year)
@@ -139,7 +217,7 @@ if args.wc not in WCnames:
     raise RuntimeError( "Wilson coefficient "+args.wc+" is not knwon. Did you run with light option?")
 logger.info( "Wilson coefficient = %s", args.wc )
 
-uncertaintyGroups = ["btag","jet","lepton","lumi","nonprompt","other_exp","rate_bkg","rate_sig","theory"]
+uncertaintyGroups = ["autoMCStats","btag","ewk","jet","lepton","lumi","nonprompt","other_exp","pdf","ps","rate_bkg","rate_sig","scale_bkg","scale_sig","wz"]
 if args.freeze is not None:
     if args.statOnly:
         raise RuntimeError( "Cannot run statOnly AND freeze nuisance groups" )
@@ -160,6 +238,7 @@ logger.info( "Number of regions: %s", nRegions)
 dirname_suffix = ""
 if args.light:               dirname_suffix+="_light"
 if args.minus:               dirname_suffix+="_minus"
+if args.excludeTriplet:      dirname_suffix+="_excludeTriplet"
 if args.NjetSplit:           dirname_suffix+="_NjetSplit"
 if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
 if args.signalInjectionLight:     dirname_suffix+="_signalInjectionLight"
@@ -168,7 +247,13 @@ if args.signalInjectionMixed:     dirname_suffix+="_signalInjectionMixed"
 if args.signalInjectionWZjets:    dirname_suffix+="_signalInjectionWZjets"
 if args.fluctuatePseudoData:      dirname_suffix+="_fluctuatePseudoData"
 if args.unblind:                  dirname_suffix+="_UNBLINDED"
+if args.noQuad:                  dirname_suffix+="_noQuad"
 if args.noBB:                  dirname_suffix+="_noBB"
+if args.binning != "default":  dirname_suffix+="_binning-"+args.binning
+if args.sysMode != "default":    dirname_suffix+="_"+args.sysMode
+if args.noZero:                  dirname_suffix+="_noZero"
+if args.SMZero:                  dirname_suffix+="_SMZero"
+if args.half:                  dirname_suffix+="_HALF"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
@@ -194,6 +279,7 @@ if args.NjetSplit:
     }
 
 for r in range(nRegions)+["combined"]:
+    # for r in [2]:
     region = r+1 if isinstance(r, int) else r
     marginfloat = "float" if args.float else "margin"
     filename = "higgsCombine.topEFT_%s_%s_13TeV_%s_1D-%s_%s.MultiDimFit.mH125.123456.root"%(args.year, str(region), args.year, args.wc, marginfloat)
@@ -208,10 +294,44 @@ for r in range(nRegions)+["combined"]:
     if args.statOnly:
         outname = outname.replace(".pdf", "_statOnly.pdf")
     xmin, xmax = -5, 7
-    if args.wc in ["cHq3Re11", "cHq3Re1122", "cHq3MRe11", "cHq3MRe1122"]:
+    if args.wc in ["cHq3Re11", "cHq3Re1122", "cHq3MRe11", "cHq3MRe1122", "cW", "cWtil"]:
         xmin, xmax = -1, 2
+        if args.wc in ["cW", "cWtil"] and args.noQuad:
+            xmin, xmax = -4.8, 10.0
+    if args.wc in ["cHq3MRe33"]:
+        xmin, xmax = -8, 7
+        if args.float:
+            xmin, xmax = -13.9, 13.9
+        if args.noQuad:
+            xmin, xmax = -15, 24
+    if args.wc in ["cHdRe33"]:
+        xmin, xmax = -39.9, 39.9
+    if args.wc in ["cHqMRe33"] and args.float:
+        xmin, xmax = -9.9, 29.9
+    if args.wc in ["cHuRe33"] and args.float:
+        xmin, xmax = -29.9, 29.9
+
+
+    bestFit,lower68,upper68,lower95,upper95 = getInterval(graphs[region], xmin, xmax)
+    txtfilename = plotdir+outname.replace(".pdf", ".txt")
+    with open(txtfilename, "w") as file:
+        if None in [bestFit,lower68,upper68,lower95,upper95]:
+            print "Not all intervals defined, do not store txt file."
+        else:
+            file.write("%.2f\n"%(bestFit))
+            if lower68 is not None:
+                for i, l68 in enumerate(lower68):
+                    file.write("%.2f,%.2f;"%(lower68[i],upper68[i]))
+                file.write("\n")
+            if lower95 is not None:
+                for i, l95 in enumerate(lower95):
+                    file.write("%.2f,%.2f;"%(lower95[i],upper95[i]))
+                file.write("\n")
+    print "Wrote values to %s"%(txtfilename)
     if args.addStatOnly:
         filename_stat = filename.replace(".MultiDimFit", "_statOnly.MultiDimFit")
+        if args.freeze is not None:
+            filename_stat = filename_stat.replace("_freeze-"+args.freeze, "")
         graphs_statonly[region] = getGraphFromTree(dataCard_dir+filename_stat, args.wc)
         plotGraph(graphs[region], plotstyle[region][0], plotdir+outname, xmin, xmax, graphs_statonly[region])
     else:

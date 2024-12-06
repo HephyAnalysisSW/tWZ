@@ -1,84 +1,36 @@
 # --impacts
 # --postFit
 
-################################################################################
-## Combined light generations
-
-# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=1 --oneD=cHq1Re1122
-# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=2 --oneD=cHq1Re1122 --minimizerStrategy
-# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=3 --oneD=cHq1Re1122
-#
-# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=1 --oneD=cHq1Re33
-# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=2 --oneD=cHq1Re33 --minimizerStrategy
-# python runCombine_threePoint.py --year=ULRunII --light --postFit --region=3 --oneD=cHq1Re33
-#
-# python runCombine_threePoint.py --year=ULRunII --light --minus --postFit --region=1 --oneD=cHqMRe1122
-# python runCombine_threePoint.py --year=ULRunII --light --minus --postFit --region=2 --oneD=cHqMRe1122 --minimizerStrategy
-# python runCombine_threePoint.py --year=ULRunII --light --minus --postFit --region=3 --oneD=cHqMRe1122
-#
 
 ################################################################################
-## POSTFIT
-python runCombine_threePoint.py --year=ULRunII --unblind --light --postFit --region=combined --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --postFit --region=combined --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --postFit --region=combined --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --postFit --region=combined --oneD=cHq3Re33
+## DATA POSTFIT
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --postFit --noScan --twoD=cHqMRe1122-cHqMRe33
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --postFit --noScan --twoD=cHq3MRe1122-cHq3MRe33
+#
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --postFit --noScan --twoD=cHqMRe1122-cHqMRe33 --float
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --postFit --noScan --twoD=cHq3MRe1122-cHq3MRe33 --float
+#
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --postFit --noScan --SM
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --postFit --region=combined --oneD=cHq1Re1122 --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --postFit --region=combined --oneD=cHq1Re33   --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --postFit --region=combined --oneD=cHq3Re1122 --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --postFit --region=combined --oneD=cHq3Re33   --noBB
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --postFit --region=combined --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --postFit --region=combined --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --postFit --region=combined --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --postFit --region=combined --oneD=cHq3MRe33
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --postFit --region=combined --oneD=cHqMRe1122  --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --postFit --region=combined --oneD=cHqMRe33    --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --postFit --region=combined --oneD=cHq3MRe1122 --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --postFit --region=combined --oneD=cHq3MRe33   --noBB
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --postFit --noScan --fullFit
 
 ################################################################################
-## IMPACTS
-python runCombine_threePoint.py --year=ULRunII --unblind --light --impacts --region=combined --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --impacts --region=combined --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --impacts --region=combined --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --impacts --region=combined --oneD=cHq3Re33
+## DATA IMPACTS
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --impacts --noScan --twoD=cHqMRe1122-cHqMRe33
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --impacts --noScan --twoD=cHq3MRe1122-cHq3MRe33
+#
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --impacts --noScan --twoD=cHqMRe1122-cHqMRe33 --float
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --impacts --noScan --twoD=cHq3MRe1122-cHq3MRe33 --float
+python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --impacts --noScan --fullFit
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --impacts --noScan --oneD=cHqMRe1122
+# python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --binning=A --SMZero --region=combined --impacts --noScan --oneD=cHqMRe33
 
-python runCombine_threePoint.py --year=ULRunII --unblind --light --impacts --region=combined --oneD=cHq1Re1122 --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --impacts --region=combined --oneD=cHq1Re33   --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --impacts --region=combined --oneD=cHq3Re1122 --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --impacts --region=combined --oneD=cHq3Re33   --noBB
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --impacts --region=combined --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --impacts --region=combined --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --impacts --region=combined --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --impacts --region=combined --oneD=cHq3MRe33
-
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --impacts --region=combined --oneD=cHqMRe1122  --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --impacts --region=combined --oneD=cHqMRe33    --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --impacts --region=combined --oneD=cHq3MRe1122 --noBB
-python runCombine_threePoint.py --year=ULRunII --unblind --light --minus --impacts --region=combined --oneD=cHq3MRe33   --noBB
 
 ################################################################################
 ## IMPACTS ASIMOV
-python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re1122
-python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re33
-python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq3Re1122
-python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq3Re33
-
-python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re1122 --noBB
-python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq1Re33   --noBB
-python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq3Re1122 --noBB
-python runCombine_threePoint.py --year=ULRunII --light --impacts --region=combined --oneD=cHq3Re33   --noBB
-
-python runCombine_threePoint.py --year=ULRunII --light --minus --impacts --region=combined --oneD=cHqMRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --impacts --region=combined --oneD=cHqMRe33
-python runCombine_threePoint.py --year=ULRunII --light --minus --impacts --region=combined --oneD=cHq3MRe1122
-python runCombine_threePoint.py --year=ULRunII --light --minus --impacts --region=combined --oneD=cHq3MRe33
-
-python runCombine_threePoint.py --year=ULRunII --light --minus --impacts --region=combined --oneD=cHqMRe1122  --noBB
-python runCombine_threePoint.py --year=ULRunII --light --minus --impacts --region=combined --oneD=cHqMRe33    --noBB
-python runCombine_threePoint.py --year=ULRunII --light --minus --impacts --region=combined --oneD=cHq3MRe1122 --noBB
-python runCombine_threePoint.py --year=ULRunII --light --minus --impacts --region=combined --oneD=cHq3MRe33   --noBB
+# python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --impacts --noScan --twoD=cHqMRe1122-cHqMRe33
+# python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --impacts --noScan --twoD=cHq3MRe1122-cHq3MRe33
+#
+# python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --impacts --noScan --twoD=cHqMRe1122-cHqMRe33 --float
+# python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --impacts --noScan --twoD=cHq3MRe1122-cHq3MRe33 --float
+python runCombine_threePoint.py --year=ULRunII --light --minus --binning=A --SMZero --region=combined --impacts --noScan --fullFit

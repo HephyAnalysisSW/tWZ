@@ -1,5 +1,7 @@
 import os
 import tWZ.Tools.logger as logger
+import random
+from math import pow
 logger    = logger.get_logger(   "INFO", logFile = None)
 
 def getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, additionalOptions):
@@ -62,6 +64,7 @@ argParser.add_argument('--impacts',          action='store_true', default=False)
 argParser.add_argument('--postFit',          action='store_true', default=False)
 argParser.add_argument('--light',            action='store_true', default=False)
 argParser.add_argument('--minus',            action='store_true', default=False)
+argParser.add_argument('--excludeTriplet',   action='store_true', default=False)
 argParser.add_argument('--NjetSplit',        action='store_true', default=False)
 argParser.add_argument('--scaleCorrelation', action='store_true', default=False)
 argParser.add_argument('--signalInjectionLight',  action='store_true', default=False)
@@ -70,10 +73,22 @@ argParser.add_argument('--signalInjectionMixed',  action='store_true', default=F
 argParser.add_argument('--signalInjectionWZjets',  action='store_true', default=False)
 argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=False)
 argParser.add_argument('--unblind',          action='store_true', default=False)
-argParser.add_argument('--noBB',          action='store_true', default=False)
+argParser.add_argument('--BBmode',         action='store', default="default")
 argParser.add_argument('--minimizerStrategy',action='store_true', default=False)
 argParser.add_argument('--ignoreCovWarning', action='store_true', default=False)
-argParser.add_argument('--SM',               action='store_true', default=False)
+argParser.add_argument('--noQuad',               action='store_true', default=False)
+argParser.add_argument('--SM',                     action='store_true', default=False)
+argParser.add_argument('--EFTpoint',               action='store_true', default=False)
+argParser.add_argument('--binning',          action='store', default="default")
+argParser.add_argument('--sysMode',          action='store', default="default")
+argParser.add_argument('--noScan',          action='store_true', default=False)
+argParser.add_argument('--noDefaultFit',    action='store_true', default=False)
+argParser.add_argument('--noZero', action='store_true', default=False)
+argParser.add_argument('--SMZero', action='store_true', default=False)
+argParser.add_argument('--random', action='store', default=None)
+argParser.add_argument('--fullFit', action='store_true', default=None)
+argParser.add_argument('--half', action='store_true', default=None)
+
 args = argParser.parse_args()
 
 nRegions = 4 if args.NjetSplit else 3
@@ -85,14 +100,18 @@ allWCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3R
 if args.light:
     allWCnames = ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]
     if args.minus:
-        allWCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"]
+        # allWCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"]
+        allWCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cHuRe1122", "cHuRe33", "cHdRe1122", "cHdRe33", "cW", "cWtil"]
+        if args.excludeTriplet:
+            allWCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122"]
+
 
 
 WCsInFit = []
 WCsFloat = []
 WCsMargin = []
 
-uncertaintyGroups = ["btag","jet","lepton","lumi","nonprompt","other_exp","rate_bkg","rate_sig","theory"]
+uncertaintyGroups = ["autoMCStats","btag","ewk","jet","lepton","lumi","nonprompt","other_exp","pdf","ps","rate_bkg","rate_sig","scale_bkg","scale_sig","wz","eft_bkg"]
 
 logger.info( "Run combine")
 
@@ -100,27 +119,32 @@ if args.year not in ["UL2016preVFP", "UL2016", "UL2017", "UL2018", "ULRunII"]:
     raise RuntimeError( "Year %s is not knwon", args.year)
 logger.info( "Year = %s", args.year )
 
-if not args.SM:
-    if args.oneD is not None and args.twoD is not None:
-        raise RuntimeError( "Cannot set --oneD and --twoD, decide for one of the two")
+if not args.SM and not args.EFTpoint:
+    if args.fullFit:
+        for wc in allWCnames:
+            WCsInFit.append(wc)
+        logger.info( "Fit all WCs" )
+    else:
+        if args.oneD is not None and args.twoD is not None:
+            raise RuntimeError( "Cannot set --oneD and --twoD, decide for one of the two")
 
-    if args.oneD is None and args.twoD is None:
-        raise RuntimeError( "Please set either --oneD or --twoD")
+        if args.oneD is None and args.twoD is None:
+            raise RuntimeError( "Please set either --oneD or --twoD")
 
-    if args.oneD is not None:
-        if args.oneD not in allWCnames:
-            raise RuntimeError( "Wilson coeffitient %s not known", args.oneD )
-        WCsInFit.append(args.oneD)
-        logger.info( "Fit WC = %s", args.oneD )
+        if args.oneD is not None:
+            if args.oneD not in allWCnames:
+                raise RuntimeError( "Wilson coeffitient %s not known", args.oneD )
+            WCsInFit.append(args.oneD)
+            logger.info( "Fit WC = %s", args.oneD )
 
-    if args.twoD is not None:
-        if "-" not in args.twoD:
-            raise RuntimeError( "Wilson coeffitients given in wrong format, expected --twoD=WC1-WC2" )
-        wc1 = args.twoD.split("-")[0]
-        wc2 = args.twoD.split("-")[1]
-        WCsInFit.append(wc1)
-        WCsInFit.append(wc2)
-        logger.info( "Fit WCs (2D) = %s-%s", wc1, wc2 )
+        if args.twoD is not None:
+            if "-" not in args.twoD:
+                raise RuntimeError( "Wilson coeffitients given in wrong format, expected --twoD=WC1-WC2" )
+            wc1 = args.twoD.split("-")[0]
+            wc2 = args.twoD.split("-")[1]
+            WCsInFit.append(wc1)
+            WCsInFit.append(wc2)
+            logger.info( "Fit WCs (2D) = %s-%s", wc1, wc2 )
 
 freezeGroups = []
 if args.freeze is not None:
@@ -131,8 +155,6 @@ if args.freeze is not None:
             raise RuntimeError( "Uncertainty group %s not known. You also might have used a wrong format: --freeze=btag-jec", group )
         else:
             freezeGroups.append(group)
-
-
 
 if args.float:
     logger.info( "Float, let all other WCs float")
@@ -157,16 +179,70 @@ logger.info( "Number of regions: %s", nRegions)
 dirname_suffix = ""
 if args.light:               dirname_suffix+="_light"
 if args.minus:               dirname_suffix+="_minus"
+if args.excludeTriplet:      dirname_suffix+="_excludeTriplet"
 if args.NjetSplit:           dirname_suffix+="_NjetSplit"
 if args.scaleCorrelation:    dirname_suffix+="_scaleCorrelation"
-if args.signalInjectionLight:     dirname_suffix+="_signalInjectionLight"
-if args.signalInjectionHeavy:     dirname_suffix+="_signalInjectionHeavy"
-if args.signalInjectionMixed:     dirname_suffix+="_signalInjectionMixed"
-if args.signalInjectionWZjets:    dirname_suffix+="_signalInjectionWZjets"
-if args.fluctuatePseudoData:      dirname_suffix+="_fluctuatePseudoData"
-if args.unblind:                  dirname_suffix+="_UNBLINDED"
-if args.noBB:                  dirname_suffix+="_noBB"
-if args.SM:                  dirname_suffix+="_SM"
+if args.signalInjectionLight:    dirname_suffix+="_signalInjectionLight"
+if args.signalInjectionHeavy:    dirname_suffix+="_signalInjectionHeavy"
+if args.signalInjectionMixed:    dirname_suffix+="_signalInjectionMixed"
+if args.signalInjectionWZjets:   dirname_suffix+="_signalInjectionWZjets"
+if args.fluctuatePseudoData:     dirname_suffix+="_fluctuatePseudoData"
+if args.unblind:                 dirname_suffix+="_UNBLINDED"
+if args.noQuad:                  dirname_suffix+="_noQuad"
+if args.BBmode != "default":
+    dirname_suffix+="_"+args.BBmode
+if args.SM:                      dirname_suffix+="_SM"
+if args.binning != "default":    dirname_suffix+="_binning-"+args.binning
+if args.sysMode != "default":    dirname_suffix+="_"+args.sysMode
+if args.noZero:                    dirname_suffix+="_noZero"
+if args.SMZero:                    dirname_suffix+="_SMZero"
+if args.half:                    dirname_suffix+="_HALF"
+
+
+
+bestFitestimate = {
+    "cHqMRe1122":  0.0,
+    "cHqMRe33":    0.0,
+    "cHq3MRe1122": 0.0,
+    "cHq3MRe33":   0.0,
+    "cHuRe1122":   0.0,
+    "cHuRe33":     0.0,
+    "cHdRe1122":   0.0,
+    "cHdRe33":     0.0,
+    "cW":          0.0,
+    "cWtil":       0.0,
+}
+if args.unblind:
+    bestFitestimate["cHqMRe1122"] = -0.25
+    bestFitestimate["cHqMRe33"] = -0.1
+    bestFitestimate["cHq3MRe1122"] = -0.1
+    bestFitestimate["cHq3MRe33"] = 0.0
+    bestFitestimate["cW"] = 0.0
+    bestFitestimate["cWtil"] = 0.0
+
+ranges = {
+    "cHqMRe1122":  "-3,3",
+    "cHqMRe33":    "-7,20",
+    "cHq3MRe1122": "-0.3,0.3",
+    "cHq3MRe33":   "-10,10",
+    "cHuRe1122":   "-7,7",
+    "cHuRe33":     "-7,7",
+    "cHdRe1122":   "-7,7",
+    "cHdRe33":     "-40,40",
+    "cW":          "-0.3,0.3",
+    "cWtil":       "-0.3,0.3",
+}
+if args.noQuad:
+    ranges["cW"] = "-5,15"
+    ranges["cWtil"] = "-5,15"
+    ranges["cHq3MRe33"] = "-15,25"
+
+if args.float:
+    ranges["cHqMRe1122"] = "-5,5"
+    ranges["cHqMRe33"] = "-10,30"
+    ranges["cHq3MRe33"] = "-15,15"
+    ranges["cHuRe33"] = "-30,30"
+
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
@@ -181,54 +257,109 @@ else:
 for region in allRegions:
     infile = "topEFT_%s_%s_13TeV_%s.root"%(args.year, region, args.year)
     outname = "."+infile.replace(".root", "")
-    if not args.SM:
+    if not args.SM and not args.EFTpoint and not args.fullFit:
         outname += "_2D-"+args.twoD if args.twoD is not None else "_1D-"+args.oneD
         outname += "_float" if args.float else "_margin"
+    if args.EFTpoint:
+        outname += "_EFTpoint"
+    if args.fullFit:
+        outname += "_fullFit"
     if args.freeze is not None:
         outname += "_freeze-"+args.freeze
     if args.statOnly:
         outname += "_statOnly"
+    if args.noScan:
+        outname += "_noScan"
+    if args.random is not None:
+        outname += "_random_"+args.random
     # create a list of POIs
     poi_list = ""
-    for i, wcname in enumerate(WCsInFit):
+    for i, wcname in enumerate(allWCnames):
         if i > 0:
             poi_list += ","
         poi_list += "k_"+wcname
-    # create a list of parameters to freeze
+    # Now put here the parameters for the scan
+    scan_list = ""
+    for wcname in WCsInFit:
+        scan_list +=" -P k_"+wcname
+    # Freeze r parameter
     freeze_list = "r"
-    for i, wcname in enumerate(WCsMargin):
-        freeze_list += ",k_"+wcname
     if args.statOnly:
         freeze_list += ",allConstrainedNuisances"
     # create a list and set r=1 and marginalized WCs to 0
     set_list = "r=1"
     for i, wcname in enumerate(WCsMargin):
-        set_list += ",k_"+wcname+"=0"
+        if not args.EFTpoint:
+            set_list += ",k_"+wcname+"=0"
+        else:
+            if wcname == "cHqMRe1122":
+                set_list += ",k_"+wcname+"=-3.4"
+            elif wcname == "cHqMRe33":
+                set_list += ",k_"+wcname+"=9.9"
+            else:
+                set_list += ",k_"+wcname+"=0"
+    # Also set initial value for WCs in fit
+    for wcname in WCsInFit+WCsFloat:
+        if args.random is not None:
+            minValue = -5.
+            maxValue = 5.
+            randomInitialValue = random.uniform(minValue, maxValue)
+            logger.info( "Random initial value for %s: %.2f", wcname, randomInitialValue)
+            set_list += ",k_"+wcname+"=%.2f"%(randomInitialValue)
+        else:
+            if wcname in bestFitestimate.keys():
+                set_list += ",k_"+wcname+"=%.2f"%(bestFitestimate[wcname])
+            else:
+                set_list += ",k_"+wcname+"=0"
+
     # Number of scaned EFT points
-    Npoints = "10201" if args.twoD is not None else "200"
-    if args.oneD in ["cHq3Re11", "cHq3Re1122", "cHq3MRe11", "cHq3MRe1122"]:
-        Npoints = "400"
-    if args.SM:
+    # Npoints = "1000" if args.twoD is not None else "200"
+    Npoints = "5000" if args.twoD is not None else "200"
+    # if args.oneD in ["cHq3Re11", "cHq3Re1122", "cHq3MRe11", "cHq3MRe1122"]:
+    #     Npoints = "100"
+    if args.SM or args.EFTpoint:
         Npoints = "1"
 
     # create a list of parameter ranges
     range_list = ""
     for i, wcname in enumerate(WCsInFit):
-        if wcname in ["cHq3Re11", "cHq3Re1122", "cHq3MRe11", "cHq3MRe1122"]:
-            range = "-1,1"
+        if wcname in ranges.keys():
+            range = ranges[wcname]
         else:
-            range = "-7,7"
+            range = "-10,10"
         if i > 0:
             range_list += ":"
         range_list += "k_"+wcname+"="+range
+
+    # for wcname in WCsFloat:
+    #     if wcname in ranges.keys():
+    #         range = ranges[wcname]
+    #     else:
+    #         range = "-10,10"
+    #     range_list += ":k_"+wcname+"="+range
+
+
+
+
     # Now put together combine command
-    cmd_combine =  "combine -M MultiDimFit INROOTFILE --algo=grid --points NPOINTS -m 125 -t -1 -n OUTNAME --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST --verbose -1 --saveToys --saveWorkspace"
+    cmd_combine =  "combine -M MultiDimFit INROOTFILE --algo=grid --points NPOINTS -m 125 -t -1 -n OUTNAME --redefineSignalPOIs POILIST SCANPARAMETERS --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST --verbose 2 --saveToys --saveWorkspace --saveInactivePOI=1"
+    # cmd_combine += " --fastScan"
+    # cmd_combine += " --autoRange 4"
+    if args.float:
+        cmd_combine += " --floatOtherPOIs=1"
+    else:
+        cmd_combine += " --floatOtherPOIs=0"
+
+    if args.noScan:
+        cmd_combine = cmd_combine.replace("--algo=grid --points NPOINTS", "--algo=singles --cl=0.68")
+
     if args.unblind or args.signalInjectionLight or args.signalInjectionHeavy or args.signalInjectionMixed or args.signalInjectionWZjets:
         cmd_combine = cmd_combine.replace("-t -1", "")
     cmd_combine = cmd_combine.replace("INROOTFILE", infile)
     cmd_combine = cmd_combine.replace("NPOINTS", Npoints)
     cmd_combine = cmd_combine.replace("OUTNAME", outname)
     cmd_combine = cmd_combine.replace("POILIST", poi_list)
+    cmd_combine = cmd_combine.replace("SCANPARAMETERS", scan_list)
     if poi_list=="":
         cmd_combine = cmd_combine.replace("--redefineSignalPOIs", "")
     cmd_combine = cmd_combine.replace("FREEZELIST", freeze_list)
@@ -243,9 +374,13 @@ for region in allRegions:
                 cmd_combine += ","
             cmd_combine += group
     logger.info( "-----------------------------------------------------------" )
-    logger.info( "Run combine in region %s", region )
-    logger.info( "Command = %s", cmd_combine )
-    os.system(cmd_combine)
+    if args.noDefaultFit:
+        logger.info( "Skiping the default fit" )
+    else:
+        logger.info( "Run combine in region %s", region )
+        logger.info( "Command = %s", cmd_combine )
+        os.system(cmd_combine)
+        logger.info( "Wrote output file %s", dataCard_dir+"higgsCombine"+outname+".MultiDimFit.mH125.123456.root" )
     if args.impacts:
         logger.info( "Also create impact plot" )
         impact_dir = dataCard_dir+"Impacts__"+outname.replace(".", "")+"/"
