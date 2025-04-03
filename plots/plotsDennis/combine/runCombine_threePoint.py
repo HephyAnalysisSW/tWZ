@@ -4,27 +4,44 @@ import random
 from math import pow
 logger    = logger.get_logger(   "INFO", logFile = None)
 
-def getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, additionalOptions):
-    cmd = "combine INROOTFILE -M FitDiagnostics --saveShapes --saveWithUnc --numToysForShape 2000   --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST --preFitValue 0 --plots -n OUTNAME"
-    cmd += additionalOptions
-    if "cminDefaultMinimizerStrategy" in additionalOptions:
-        outname += "_minimizerStrategy"
-    if "ignoreCovWarning" in additionalOptions:
-        outname += "_ignoreCovWarning"
-    cmd = cmd.replace("INROOTFILE", dataCard_dir+infile)
-    cmd = cmd.replace("POILIST", poi_list)
-    if poi_list=="":
-        cmd = cmd.replace("--redefineSignalPOIs", "")
-    cmd = cmd.replace("FREEZELIST", freeze_list)
-    cmd = cmd.replace("SETLIST", set_list)
-    cmd = cmd.replace("RANGELIST", range_list)
-    if range_list=="":
-        cmd = cmd.replace("--setParameterRanges", "")
-    cmd = cmd.replace("OUTNAME", outname+"_SHAPES")
+# def getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, additionalOptions, Ntoys, seedOption):
+#     cmd = "combine INROOTFILE -M FitDiagnostics --saveShapes --saveWithUnc --saveToys --numToysForShape NTOYS --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST --preFitValue 0 --plots -n OUTNAME"
+#     if seedOption is not None:
+#         cmd += seedOption
+#     cmd += additionalOptions
+#     if "cminDefaultMinimizerStrategy" in additionalOptions:
+#         outname += "_minimizerStrategy"
+#     if "ignoreCovWarning" in additionalOptions:
+#         outname += "_ignoreCovWarning"
+#     cmd = cmd.replace("INROOTFILE", dataCard_dir+infile)
+#     if Ntoys is None:
+#         cmd = cmd.replace("--numToysForShape NTOYS ", "")
+#     else:
+#         cmd = cmd.replace("NTOYS", Ntoys)
+#     cmd = cmd.replace("POILIST", poi_list)
+#     if poi_list=="":
+#         cmd = cmd.replace("--redefineSignalPOIs", "")
+#     cmd = cmd.replace("FREEZELIST", freeze_list)
+#     cmd = cmd.replace("SETLIST", set_list)
+#     cmd = cmd.replace("RANGELIST", range_list)
+#     if range_list=="":
+#         cmd = cmd.replace("--setParameterRanges", "")
+#     cmd = cmd.replace("OUTNAME", outname+"_SHAPES")
+#     return cmd
+
+def getShapesCommand(datacard, fitresultfile, outfile):
+    cmd = "PostFitShapesFromWorkspace -w <ROOTFILE> --output <OUTPUTFILE> -m 120 -f <FITRESULTFILE>:fit_mdf --skip-prefit --postfit --covariance --sampling --samples 10000 --print"
+    cmd = cmd.replace("<ROOTFILE>", datacard)
+    cmd = cmd.replace("<OUTPUTFILE>", outfile)
+    cmd = cmd.replace("<FITRESULTFILE>", fitresultfile)
     return cmd
 
-def getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, doAsimov):
+
+
+def getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, doAsimov, seedOption):
     base_cmd =  "combineTool.py -M Impacts -d INROOTFILE -m 125 -t -1 --redefineSignalPOIs POILIST --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST"
+    # if seedOption is not None:
+    #     base_cmd += seedOption
     if not doAsimov:
         base_cmd = base_cmd.replace("-t -1", "")
     base_cmd = base_cmd.replace("INROOTFILE", dataCard_dir+infile)
@@ -39,12 +56,32 @@ def getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, ran
 
     json_name = outname.replace(".", "")+".json"
     pdf_name = outname.replace(".", "")
+    # parallel_suffix = "" if args.nCPU == 1 else "--parallel %i"%(args.nCPU)
 
     cmds = []
     cmds.append(base_cmd+" --doInitialFit --robustFit 1")
     cmds.append(base_cmd+" --robustFit 1 --doFits")
     cmds.append(base_cmd+" -o "+json_name)
     cmds.append("plotImpacts.py -i "+json_name+" -o "+pdf_name)
+    if args.initial:
+        cmds = []
+        cmds.append(base_cmd+" --doInitialFit --robustFit 1")
+    if args.uncert is not None:
+        cmds = []
+        uncertList = "--named "
+        for i,u in enumerate(args.uncert.split("-")):
+            if i > 0:
+                uncertList += ","
+            uncertList += u
+        cmds.append(base_cmd+" --robustFit 1 --doFits "+uncertList)
+    if args.json:
+        cmds = []
+        cmds.append(base_cmd+" -o "+json_name)
+    if args.impactPlot is not None:
+        cmds = []
+        cmds.append("plotImpacts.py -i "+json_name+" -o "+pdf_name+"__"+args.impactPlot+" --POI "+args.impactPlot)
+
+
     return cmds
 
 ################################################################################
@@ -75,6 +112,7 @@ argParser.add_argument('--fluctuatePseudoData',  action='store_true', default=Fa
 argParser.add_argument('--unblind',          action='store_true', default=False)
 argParser.add_argument('--BBmode',         action='store', default="default")
 argParser.add_argument('--minimizerStrategy',action='store_true', default=False)
+argParser.add_argument('--minimizerStrategyTwo',action='store_true', default=False)
 argParser.add_argument('--ignoreCovWarning', action='store_true', default=False)
 argParser.add_argument('--noQuad',               action='store_true', default=False)
 argParser.add_argument('--SM',                     action='store_true', default=False)
@@ -88,7 +126,16 @@ argParser.add_argument('--SMZero', action='store_true', default=False)
 argParser.add_argument('--random', action='store', default=None)
 argParser.add_argument('--fullFit', action='store_true', default=None)
 argParser.add_argument('--half', action='store_true', default=None)
-
+argParser.add_argument('--cmd', action='store_true', default=None)
+argParser.add_argument('--nJobs', action='store',type=int, default=1)
+argParser.add_argument('--job', action='store',type=int, default=0)
+argParser.add_argument('--nCPU', action='store',type=int, default=1)
+argParser.add_argument('--initial', action='store_true', default=None)
+argParser.add_argument('--json', action='store_true', default=None)
+argParser.add_argument('--uncert', action='store', type=str, default=None)
+argParser.add_argument('--impactPlot', action='store', type=str, default=None)
+argParser.add_argument('--noToys', action='store_true', default=None)
+argParser.add_argument('--robust', action='store_true', default=None)
 args = argParser.parse_args()
 
 nRegions = 4 if args.NjetSplit else 3
@@ -199,7 +246,6 @@ if args.SMZero:                    dirname_suffix+="_SMZero"
 if args.half:                    dirname_suffix+="_HALF"
 
 
-
 bestFitestimate = {
     "cHqMRe1122":  0.0,
     "cHqMRe33":    0.0,
@@ -237,12 +283,36 @@ if args.noQuad:
     ranges["cWtil"] = "-5,15"
     ranges["cHq3MRe33"] = "-15,25"
 
-if args.float:
+if args.float or args.fullFit:
     ranges["cHqMRe1122"] = "-5,5"
     ranges["cHqMRe33"] = "-10,30"
     ranges["cHq3MRe33"] = "-15,15"
     ranges["cHuRe33"] = "-30,30"
 
+if args.twoD is not None:
+    ranges["cHqMRe1122"] =  "-4,4"
+    ranges["cHqMRe33"] =    "-6,6"
+    ranges["cHq3MRe1122"] = "-0.3,0.3"
+    ranges["cHq3MRe33"] =   "-17,17"
+    ranges["cHuRe1122"] =   "-12,12"
+    ranges["cHuRe33"] =     "-12,12"
+    ranges["cHdRe1122"] =   "-10,10"
+    ranges["cHdRe33"] =     "-50,50"
+    ranges["cW"] =          "-0.28,0.28"
+    ranges["cWtil"] =       "-0.28,0.28"
+    if args.float:
+        ranges["cHqMRe33"] = "-20,50"
+        ranges["cHuRe33"] = "-40,40"
+
+if args.float and args.twoD == "cHuRe1122-cHuRe33":
+    ranges["cHqMRe33"] = None
+
+if args.float and args.oneD == "cHuRe33":
+    ranges["cHqMRe33"] = None
+
+if args.twoD == "cHuRe33-cHqMRe33":
+    ranges["cHqMRe33"] = "-50,50"
+    ranges["cHuRe33"] = "-50,50"
 
 this_dir = os.getcwd()
 dataCard_dir = this_dir+"/DataCards_threePoint"+dirname_suffix+"/"+args.year+"/"
@@ -272,6 +342,12 @@ for region in allRegions:
         outname += "_noScan"
     if args.random is not None:
         outname += "_random_"+args.random
+    if args.noToys:
+        outname += "_noToys"
+    if args.minimizerStrategyTwo:
+        outname += "_minimizerStrategy2"
+    if args.nJobs > 1:
+        outname += "_SPLIT_%i"%(args.job)
     # create a list of POIs
     poi_list = ""
     for i, wcname in enumerate(allWCnames):
@@ -313,12 +389,24 @@ for region in allRegions:
                 set_list += ",k_"+wcname+"=0"
 
     # Number of scaned EFT points
-    # Npoints = "1000" if args.twoD is not None else "200"
     Npoints = "5000" if args.twoD is not None else "200"
-    # if args.oneD in ["cHq3Re11", "cHq3Re1122", "cHq3MRe11", "cHq3MRe1122"]:
-    #     Npoints = "100"
+    if args.oneD == "cHuRe33" and args.float:
+        Npoints = "300"
+    seedOption = None
     if args.SM or args.EFTpoint:
         Npoints = "1"
+    if args.nJobs > 1:
+        pointsPerJob = int(Npoints)/args.nJobs
+        rest = int(Npoints) % args.nJobs
+        firstPoint = 1 + args.job * pointsPerJob
+        lastPoint = (args.job+1) * pointsPerJob
+        if args.job == args.nJobs-1:
+            # for last job add the rest of integer division
+            lastPoint = (args.job+1) * pointsPerJob + rest
+        Npoints += " --firstPoint %i --lastPoint %i"%(firstPoint, lastPoint)
+        # seedOption = " -s %i"%(args.job)
+
+
 
     # create a list of parameter ranges
     range_list = ""
@@ -329,7 +417,8 @@ for region in allRegions:
             range = "-10,10"
         if i > 0:
             range_list += ":"
-        range_list += "k_"+wcname+"="+range
+        if range is not None:
+            range_list += "k_"+wcname+"="+range
 
     # for wcname in WCsFloat:
     #     if wcname in ranges.keys():
@@ -343,6 +432,15 @@ for region in allRegions:
 
     # Now put together combine command
     cmd_combine =  "combine -M MultiDimFit INROOTFILE --algo=grid --points NPOINTS -m 125 -t -1 -n OUTNAME --redefineSignalPOIs POILIST SCANPARAMETERS --freezeParameters FREEZELIST --setParameters SETLIST --setParameterRanges RANGELIST --verbose 2 --saveToys --saveWorkspace --saveInactivePOI=1"
+    if args.postFit:
+        cmd_combine = cmd_combine.replace("--saveToys --saveWorkspace --saveInactivePOI=1", "--saveFitResult")
+    if args.robust:
+        cmd_combine += " --robustFit=1"
+    if args.minimizerStrategyTwo:
+        cmd_combine += " --cminDefaultMinimizerStrategy=2"
+
+    # if seedOption is not None:
+    #     cmd_combine += seedOption
     # cmd_combine += " --fastScan"
     # cmd_combine += " --autoRange 4"
     if args.float:
@@ -350,7 +448,7 @@ for region in allRegions:
     else:
         cmd_combine += " --floatOtherPOIs=0"
 
-    if args.noScan:
+    if args.noScan or args.postFit:
         cmd_combine = cmd_combine.replace("--algo=grid --points NPOINTS", "--algo=singles --cl=0.68")
 
     if args.unblind or args.signalInjectionLight or args.signalInjectionHeavy or args.signalInjectionMixed or args.signalInjectionWZjets:
@@ -379,7 +477,11 @@ for region in allRegions:
     else:
         logger.info( "Run combine in region %s", region )
         logger.info( "Command = %s", cmd_combine )
-        os.system(cmd_combine)
+        if args.cmd:
+            logger.info( "Not running combine, only show command" )
+        else:
+            os.system(cmd_combine)
+
         logger.info( "Wrote output file %s", dataCard_dir+"higgsCombine"+outname+".MultiDimFit.mH125.123456.root" )
     if args.impacts:
         logger.info( "Also create impact plot" )
@@ -389,22 +491,26 @@ for region in allRegions:
         doAsimov = True
         if args.unblind or args.signalInjectionLight or args.signalInjectionHeavy or args.signalInjectionMixed or args.signalInjectionWZjets:
             doAsimov = False
-        cmds_impact = getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, doAsimov)
+        cmds_impact = getImpactCommands(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, doAsimov, seedOption)
         for cmd in cmds_impact:
             logger.info( "Command = %s", cmd )
-            os.system(cmd)
+            if args.cmd:
+                logger.info( "Not running combine, only show command" )
+            else:
+                os.system(cmd)
         os.chdir(dataCard_dir)
     if args.postFit:
-        logger.info( "Also run FitDiagnostics and save shapes" )
-        additionalOptions = ""
-        if args.minimizerStrategy:
-            additionalOptions += " --cminDefaultMinimizerStrategy 0 "
-        if args.ignoreCovWarning:
-            additionalOptions += " --ignoreCovWarning "
+        logger.info( "Also run script to make postFit hists" )
+        fitresultfile = "multidimfit"+outname+".root"
+        postfitfile = fitresultfile.replace("multidimfit", "POSTFITSHAPES")
+        cmd_shapes = getShapesCommand(infile, fitresultfile, postfitfile)
 
-        cmd_shapes = getShapesCommand(dataCard_dir, infile, poi_list, freeze_list, set_list, range_list, outname, additionalOptions)
         logger.info( "Command = %s", cmd_shapes )
-        os.system(cmd_shapes)
+        if args.cmd:
+            logger.info( "Not running combine, only show command" )
+        else:
+            os.system(cmd_shapes)
+        logger.info("Saved PostFit shapes in %s"%(postfitfile) )
 
 
 logger.info( "-----------------------------------------------------------" )

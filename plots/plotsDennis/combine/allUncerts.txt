@@ -1,0 +1,22 @@
+allUncerts =
+[
+  "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson","ISR_ggToZZ",
+  "FSR",
+  "muR_ttZ","muR_WZ","muR_ZZ",
+  "muF_ttZ","muF_WZ","muF_ZZ",
+  "muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",
+  "muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",
+  "WZ_Njet_reweight", "WZ_heavyFlavour"
+  "EWK_mul_WZ", "EWK_mul_ZZ",
+  "EWK_add_WZ", "EWK_add_ZZ",
+  "rate_ttZ", "rate_WZ", "rate_ZZ",
+  "rate_ttX", "rate_triBoson", "rate_tWZ", "rate_tZq", "rate_ggToZZ",
+  "eft_tWZ", "eft_tZq",
+  "Fakerate", "FakerateClosure_correlated_elec", "FakerateClosure_uncorrelated_elec_2016preVFP", "FakerateClosure_uncorrelated_elec_2016", "FakerateClosure_uncorrelated_elec_2017", "FakerateClosure_uncorrelated_elec_2018", "FakerateClosure_correlated_muon", "FakerateClosure_uncorrelated_muon_2016preVFP", "FakerateClosure_uncorrelated_muon_2016", "FakerateClosure_uncorrelated_muon_2017", "FakerateClosure_uncorrelated_muon_2018", "FakerateClosure_correlated_both", "FakerateClosure_uncorrelated_both_2016preVFP", "FakerateClosure_uncorrelated_both_2016", "FakerateClosure_uncorrelated_both_2017", "FakerateClosure_uncorrelated_both_2018",
+  "Lumi_uncorrelated_2016","Lumi_uncorrelated_2017","Lumi_uncorrelated_2018","Lumi_correlated_161718","Lumi_correlated_1718",
+  "BTag_b_correlated","BTag_l_correlated","BTag_b_uncorrelated_2016preVFP","BTag_l_uncorrelated_2016preVFP","BTag_b_uncorrelated_2016","BTag_l_uncorrelated_2016","BTag_b_uncorrelated_2017","BTag_l_uncorrelated_2017","BTag_b_uncorrelated_2018","BTag_l_uncorrelated_2018",
+  "LepReco", "LepIDsys_muon","LepIDstat_muon_2016preVFP","LepIDstat_muon_2016","LepIDstat_muon_2017","LepIDstat_muon_2018", "LepIDsys_elec","LepIDstat_elec_2016preVFP","LepIDstat_elec_2016","LepIDstat_elec_2017","LepIDstat_elec_2018",
+  "Trigger_2016preVFP", "Trigger_2016", "Trigger_2017", "Trigger_2018", "PU", "Prefire",
+  "JER_2016preVFP", "JER_2016", "JER_2017", "JER_2018", "Unclustered_2016preVFP", "Unclustered_2016", "Unclustered_2017", "Unclustered_2018", "JES_AbsoluteMPFBias",    "JES_AbsoluteScale",  "JES_AbsoluteStat_2016preVFP",  "JES_AbsoluteStat_2016",  "JES_AbsoluteStat_2017",  "JES_AbsoluteStat_2018",  "JES_RelativeBal",  "JES_RelativeFSR",  "JES_RelativeJEREC1_2016preVFP",  "JES_RelativeJEREC1_2016",  "JES_RelativeJEREC1_2017",  "JES_RelativeJEREC1_2018",  "JES_RelativeJEREC2_2016preVFP",  "JES_RelativeJEREC2_2016",  "JES_RelativeJEREC2_2017",  "JES_RelativeJEREC2_2018",  "JES_RelativeJERHF",  "JES_RelativePtBB",  "JES_RelativePtEC1_2016preVFP",  "JES_RelativePtEC1_2016",  "JES_RelativePtEC1_2017",  "JES_RelativePtEC1_2018",  "JES_RelativePtEC2_2016preVFP",  "JES_RelativePtEC2_2016",  "JES_RelativePtEC2_2017",  "JES_RelativePtEC2_2018",  "JES_RelativePtHF",  "JES_RelativeStatEC_2016preVFP",  "JES_RelativeStatEC_2016",  "JES_RelativeStatEC_2017",  "JES_RelativeStatEC_2018",  "JES_RelativeStatFSR_2016preVFP",  "JES_RelativeStatFSR_2016",  "JES_RelativeStatFSR_2017",  "JES_RelativeStatFSR_2018",  "JES_RelativeStatHF_2016preVFP",  "JES_RelativeStatHF_2016",  "JES_RelativeStatHF_2017",  "JES_RelativeStatHF_2018",  "JES_RelativeSample_2016preVFP",  "JES_RelativeSample_2016",  "JES_RelativeSample_2017",  "JES_RelativeSample_2018", "JES_PileUpDataMC",  "JES_PileUpPtBB",  "JES_PileUpPtEC1",  "JES_PileUpPtEC2",  "JES_PileUpPtHF",  "JES_PileUpPtRef",  "JES_FlavorQCD",  "JES_Fragmentation",  "JES_SinglePionECAL","JES_SinglePionHCAL","JES_TimePtEta_2016preVFP","JES_TimePtEta_2016","JES_TimePtEta_2017","JES_TimePtEta_2018",
+  "PDF_1","PDF_2","PDF_3","PDF_4","PDF_5","PDF_6","PDF_7","PDF_8","PDF_9","PDF_10","PDF_11","PDF_12","PDF_13","PDF_14","PDF_15","PDF_16","PDF_17","PDF_18","PDF_19","PDF_20","PDF_21","PDF_22","PDF_23","PDF_24","PDF_25","PDF_26","PDF_27","PDF_28","PDF_29","PDF_30","PDF_31","PDF_32","PDF_33","PDF_34","PDF_35","PDF_36","PDF_37","PDF_38","PDF_39","PDF_40","PDF_41","PDF_42","PDF_43","PDF_44","PDF_45","PDF_46","PDF_47","PDF_48","PDF_49","PDF_50","PDF_51","PDF_52","PDF_53","PDF_54","PDF_55","PDF_56","PDF_57","PDF_58","PDF_59","PDF_60","PDF_61","PDF_62","PDF_63","PDF_64","PDF_65","PDF_66","PDF_67","PDF_68","PDF_69","PDF_70","PDF_71","PDF_72","PDF_73","PDF_74","PDF_75","PDF_76","PDF_77","PDF_78","PDF_79","PDF_80","PDF_81","PDF_82","PDF_83","PDF_84","PDF_85","PDF_86","PDF_87","PDF_88","PDF_89","PDF_90","PDF_91","PDF_92","PDF_93","PDF_94","PDF_95","PDF_96","PDF_97","PDF_98","PDF_99","PDF_100",
+]
