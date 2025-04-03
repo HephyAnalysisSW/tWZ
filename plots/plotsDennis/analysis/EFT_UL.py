@@ -1941,6 +1941,23 @@ def HEMissue( event, sample ):
     event.NjetsPass = NjetsPass
 sequence.append(HEMissue)
 
+def constructNewVariables( event, sample ):
+    if event.Nlep_passTight < 4:
+        event.deltaPhiLeptons = float('nan')
+        event.deltaPhiZs = float('nan')
+    else:
+        Z2_idxs = []
+        for lep_idx in [event.l1_index, event.l2_index, event.l3_index, event.l4_index]:
+            if lep_idx not in [event.Z1_l1_index, event.Z1_l2_index]:
+                Z2_idxs.append(lep_idx)
+        event.deltaPhiLeptons = abs(event.lep_phi[Z2_idxs[0]]-event.lep_phi[Z2_idxs[1]])
+        lep1,lep2,Z2 = ROOT.TLorentzVector(),ROOT.TLorentzVector(),ROOT.TLorentzVector()
+        lep1.SetPtEtaPhiM(event.lep_pt[Z2_idxs[0]], event.lep_eta[Z2_idxs[0]], event.lep_phi[Z2_idxs[0]], 0)
+        lep2.SetPtEtaPhiM(event.lep_pt[Z2_idxs[1]], event.lep_eta[Z2_idxs[1]], event.lep_phi[Z2_idxs[1]], 0)
+        Z2 = lep1 + lep2
+        event.deltaPhiZs = abs(event.Z1_phi-Z2.Phi())
+sequence.append(constructNewVariables)
+
 ################################################################################
 # Read variables
 
@@ -2301,6 +2318,26 @@ for i_mode, mode in enumerate(allModes):
         binning=[30, -3, 3],
     ))
 
+    plots.append(Plot(
+        name = "deltaPhiLeptons",
+        texX = '#Delta #phi', texY = 'Number of Events',
+        addOverFlowBin='both',
+        attribute = lambda event, sample: event.deltaPhiLeptons,
+        binning=[30, 0, 6],
+    ))
+
+    plots.append(Plot(
+        name = "deltaPhiZs",
+        texX = '#Delta #phi', texY = 'Number of Events',
+        addOverFlowBin='both',
+        attribute = lambda event, sample: event.deltaPhiZs,
+        binning=[30, 0, 6],
+    ))
+
+
+
+
+
     if args.doTTbarReco:
         plots.append(Plot(
             name = "minimax",
@@ -2645,6 +2682,7 @@ if args.nicePlots and args.sys == "central":
 
 # Write Result Hist in root file
 plots_root = ["Z1_pt", "M3l", "l1_pt", "l2_pt", "l3_pt", "yield", "FakeCategory", "N_jets", "N_bjets", "N_jets_passHEM", "l1_eta", "l1_phi"]
+plots_root += ["deltaPhiLeptons", "deltaPhiZs"]
 logger.info( "Now write results in root files." )
 for mode in allModes+["all"]:
     logger.info( "Write file for channel: %s", mode )
