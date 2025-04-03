@@ -1,6 +1,7 @@
 import ROOT
 import os
 import Analysis.Tools.syncer
+from math import sqrt,pi
 from tWZ.Tools.user                              import plot_directory
 from tWZ.Tools.histogramHelper import WClatexNames
 
@@ -30,6 +31,40 @@ def getValues(path, wcname, floatingOtherWCs, factor):
     bestfit, sigma1, sigma2 = readDataFromFile(path,factor)
     return bestfit, sigma1, sigma2
 
+def calcLambda(dsigma, ci):
+    return sqrt(ci/dsigma)
+
+def getLambdaGraph(values, WCnames, ci, color):
+    graph = ROOT.TGraphAsymmErrors(len(WCnames))
+    for i,wcname in enumerate(WCnames):
+        bestfit, sigma1intervals, sigma2intervals = values[wcname]
+        lambda_min = 10000000000000
+        for (down, up) in sigma2intervals:
+            dsigma_up = up - bestfit
+            dsigma_down = bestfit - down
+            this_lambda = min( calcLambda(dsigma_up,ci), calcLambda(dsigma_up,ci))
+            # print(wcname, this_lambda)
+            lambda_min = min(this_lambda, lambda_min)
+        xpos = i+1
+        graph.SetPoint(i, xpos, lambda_min/2)
+        graph.SetPointError(i, 0.2, 0.2, lambda_min/2, lambda_min/2)
+    setStyleLambda(graph, color)
+    return graph
+
+
+def printInterval(intervals):
+    string = ""
+    if len(intervals) > 1:
+        string += "["
+    for i, (down, up) in enumerate(intervals):
+        if i > 0:
+            string += ","
+        string += "[%.3f, %.3f]"%(down, up)
+    if len(intervals) > 1:
+        string += "]"
+    return string
+
+
 def makeGraph(values, WCnames, offset, color, markerstyle, asimov=False):
     # per WC make multiple graphs:
     # - the first with only the best fit point
@@ -55,6 +90,7 @@ def makeGraph(values, WCnames, offset, color, markerstyle, asimov=False):
             xerr = 0.05
 
         # First fill best fit
+        print(WCname, asimov, bestfit, ypos+offset)
         g_best.SetPoint(i, bestfit, ypos+offset)
         g_best.SetPointError(i, 0.0, 0.0, 0.0, 0.0)
         # Iterate through 1 sigma intervals
@@ -113,35 +149,40 @@ def setStyle(g, markercol, markerstyle, markersize, linecol, linewidth, linestyl
     g.SetLineWidth(linewidth)
     g.SetLineStyle(linestyle)
 
+def setStyleLambda(g, color):
+    g.SetMarkerSize(0.0)
+    g.SetFillColor(color)
+
+
 def setStyle_asimov(g, col):
     g.SetFillColor(col)
     g.SetLineColor(col)
 
 
-def getCMS(factor=1.0):
+def getCMS(factor=1.0, x=0.01, y=0.99):
     cmstext = ROOT.TLatex(3.5, 24, "CMS")
     cmstext.SetNDC()
     cmstext.SetTextAlign(13)
     cmstext.SetTextFont(62)
     cmstext.SetTextSize(0.08*factor)
-    cmstext.SetX(0.01)
-    cmstext.SetY(0.99)
+    cmstext.SetX(x)
+    cmstext.SetY(y)
     return cmstext
 
-def getPrelim():
+def getPrelim(x=0.01, y=0.92):
     prelim = ROOT.TLatex(3.5, 24, "Preliminary")
     prelim.SetNDC()
     prelim.SetTextAlign(13)
     prelim.SetTextFont(52)
     prelim.SetTextSize(0.05)
-    prelim.SetX(0.01)
-    prelim.SetY(0.92)
+    prelim.SetX(x)
+    prelim.SetY(y)
     return prelim
 
-def addText(x, y, text, font=43, size=12, color=1):
+def addText(x, y, text, font=43, size=12, color=1, align=12):
     latex = ROOT.TLatex(3.5, 24, text)
     latex.SetNDC()
-    latex.SetTextAlign(12)
+    latex.SetTextAlign(align)
     latex.SetTextFont(font)
     latex.SetTextSize(size)
     latex.SetTextColor(color)
@@ -153,7 +194,9 @@ def addText(x, y, text, font=43, size=12, color=1):
 ################################################################################
 ################################################################################
 
-WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cHuRe1122", "cHuRe33", "cHdRe1122", "cHdRe33","cW", "cWtil"]
+# WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cHuRe1122", "cHuRe33", "cHdRe1122", "cHdRe33","cW", "cWtil"]
+WCnames = ["cHqMRe1122", "cHq3MRe1122", "cHuRe1122", "cHdRe1122", "cHqMRe33", "cHq3MRe33", "cHuRe33", "cHdRe33","cW", "cWtil"]
+
 path_data = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/Limits_UL_threePoint_light_minus_UNBLINDED_binning-A_SMZero/ULRunII/1D__ULRunII__WCNAME__combined__FLOATMARGIN.txt"
 path_data_noQuad = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/Limits_UL_threePoint_light_minus_UNBLINDED_noQuad_binning-A_SMZero/ULRunII/1D__ULRunII__WCNAME__combined__FLOATMARGIN.txt"
 path_asimov = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/Limits_UL_threePoint_light_minus_binning-A_SMZero/ULRunII/1D__ULRunII__WCNAME__combined__FLOATMARGIN.txt"
@@ -163,15 +206,28 @@ path_data_half = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/Limits_UL_three
 factors = {
     "cHqMRe1122" :   1.0,
     "cHqMRe33" :     0.1,
-    "cHq3MRe1122" : 10.0,
-    "cHq3MRe33" :    0.5,
+    "cHq3MRe1122" :  1.0, #10
+    "cHq3MRe33" :    0.1,
     "cHuRe1122" :    1.0,
     "cHuRe33" :      0.1,
     "cHdRe1122" :    1.0,
     "cHdRe33" :      0.1,
-    "cW" :          10.0,
-    "cWtil" :       10.0,
+    "cW" :           1.0, #10
+    "cWtil" :        1.0, #10
 }
+
+# factors = {
+#     "cHqMRe1122" :   1.0,
+#     "cHqMRe33" :     1.0,
+#     "cHq3MRe1122" :  1.0,
+#     "cHq3MRe33" :    1.0,
+#     "cHuRe1122" :    1.0,
+#     "cHuRe33" :      1.0,
+#     "cHdRe1122" :    1.0,
+#     "cHdRe33" :      1.0,
+#     "cW" :          1.0,
+#     "cWtil" :       1.0,
+# }
 
 if args.noQuad:
     factors["cWtil"] = 0.5
@@ -214,16 +270,16 @@ for WCname in WCnames:
 plotdir = plot_directory+"/PaperPlots/"
 if not os.path.exists( plotdir ): os.makedirs( plotdir )
 
-xmin,xmax = -6.3, 6.7
+xmin,xmax = -3.1, 3.1
 ymin, ymax = 0.4, 12.8 # 0.4, 5.2
 if args.both:
     xmin,xmax = -6.3, 6.7
     ymin, ymax = 0.4, 9.0
 if args.addExpected or args.addHalf:
-    ymin, ymax = 0.4, 9.0, # 0.4, 6.0
-margin_top = 0.01
-margin_left = 0.29
-margin_right = 0.02
+    ymin, ymax = 0.4, 14.0, # 0.4, 6.0
+margin_top = 0.04
+margin_left = 0.23#0.29
+margin_right = 0.001
 margin_bottom = 0.1
 ROOT.gStyle.SetPadTickX(1)
 ROOT.gStyle.SetPadTickY(1)
@@ -316,22 +372,22 @@ labels = []
 for i,WCname in enumerate(WCnames):
     ypos = len(WCnames)-i
     ypos_canvas = margin_bottom + (ypos-ymin)*(1-margin_top-margin_bottom)/(ymax-ymin)
-    labels.append(addText(0.01, ypos_canvas, WClatexNames[WCname].replace("/#Lambda^{2} [TeV^{-2}]",""), font=43, size=30, color=1))
+    labels.append(addText(0.01, ypos_canvas, WClatexNames[WCname].replace("/#Lambda^{2} [TeV^{-2}]",""), font=43, size=28, color=1))
     if abs(factors[WCname]-1.0) > 0.000001:
-        labels.append(addText(0.185, ypos_canvas, "[#times %.1f]"%(factors[WCname]), font=43, size=15, color=12))
+        labels.append(addText(0.15, ypos_canvas, "[#times %.1f]"%(factors[WCname]), font=43, size=15, color=12))
 
 
 
 for l in labels:
     l.Draw()
 
-l_cms=getCMS()
-l_prelim=getPrelim()
+l_cms=getCMS(factor=1.1, y=0.985)
 l_cms.Draw()
-l_prelim.Draw()
+# l_prelim=getPrelim()
+# l_prelim.Draw()
 
-leg_left = margin_left-0.035
-leg_right = 1-margin_right-0.05
+leg_left = margin_left#-0.035
+leg_right = 1-margin_right#-0.05
 leg_top = 0.95
 leg_bottom1 = 0.85
 leg_bottom2 = 0.85
@@ -368,6 +424,17 @@ if args.addHalf:
     leg2.SetTextSize(0.03)
 leg2.Draw()
 
+infotext = "138 fb^{-1} (13 TeV)"
+lumitext = ROOT.TLatex(3.5, 24, infotext)
+lumitext.SetNDC()
+lumitext.SetTextAlign(31)
+lumitext.SetTextFont(42)
+lumitext.SetX(1-margin_right)
+lumitext.SetTextSize(0.035)
+lumitext.SetY(1-margin_top+0.01)
+lumitext.Draw()
+
+
 ROOT.gPad.RedrawAxis()
 outname = plotdir+"Summary.pdf"
 if args.noQuad:
@@ -380,3 +447,123 @@ if args.addExpected:
 if args.addHalf:
     outname = outname.replace(".pdf", "_addHalf.pdf")
 canvas.Print(outname)
+
+################################################################################
+# Make also lambda limits
+
+c_lambda = ROOT.TCanvas("clambda", "", 1200, 600)
+xmin, xmax = 0.5, 10.5
+ymin, ymax = 0.001, 300
+margin_top = 0.1
+margin_left = 0.1
+margin_right = 0.01
+margin_bottom = 0.15
+ROOT.gStyle.SetPadTickX(1)
+ROOT.gStyle.SetPadTickY(1)
+ROOT.gStyle.SetOptStat(0)
+ROOT.gStyle.SetEndErrorSize(0.0)
+ROOT.gStyle.SetLegendBorderSize(0)
+
+ROOT.gPad.SetTopMargin(margin_top)
+ROOT.gPad.SetLeftMargin(margin_left)
+ROOT.gPad.SetRightMargin(margin_right)
+ROOT.gPad.SetBottomMargin(margin_bottom)
+ROOT.gPad.SetLogy()
+dummy2 = ROOT.TGraph(2)
+dummy2.SetPoint(0,xmin,ymin)
+dummy2.SetPoint(1,xmax,ymax)
+dummy2.SetMarkerSize(0.0)
+dummy2.Draw("AP")
+dummy2.SetTitle("")
+dummy2.GetXaxis().SetTitle("")
+dummy2.GetYaxis().SetTitle("#Lambda = #sqrt{c_{i} / c_{ }(q_{ }=_{ }3.84)} [TeV]")
+dummy2.GetXaxis().SetTitleSize(0.0)
+dummy2.GetXaxis().SetLabelSize(0.0)
+dummy2.GetXaxis().SetLabelSize(0.0)
+dummy2.GetXaxis().SetTickLength(0.0)
+dummy2.GetYaxis().SetTitleSize(0.06)
+dummy2.GetYaxis().SetTitleOffset(0.65)
+dummy2.GetXaxis().SetRangeUser(xmin,xmax)
+dummy2.GetYaxis().SetRangeUser(ymin,ymax)
+values_data_noFactor = {}
+
+for WCname in WCnames:
+    values_data_noFactor[WCname] = getValues(path_data, WCname, False, 1.0)
+
+leg = ROOT.TLegend(.4, .79, .8, .88)
+leg.SetNColumns(3)
+cis = [
+    (16*pi*pi, "(4#pi)^{2}", ROOT.kAzure-9),
+    (1.0, "1.0", ROOT.kAzure+7),
+    (0.01, "0.01", ROOT.kAzure-1),
+
+]
+
+graphs_lambda = []
+for cival, cistring, col in cis:
+    g = getLambdaGraph(values_data_noFactor, WCnames, cival, col)
+    graphs_lambda.append(g)
+
+for i,g in enumerate(graphs_lambda):
+    cival, cistring, col = cis[i]
+    g.Draw("E2 SAME")
+    leg.AddEntry(g, "c_{i} = %s"%(cistring), "f")
+leg.SetTextSize(0.04)
+leg.Draw()
+
+
+labels = []
+for i,WCname in enumerate(WCnames):
+    xpos = i+1
+    xpos_canvas = margin_left + (xpos-xmin)*(1-margin_right-margin_left)/(xmax-xmin)
+    # xpos_canvas += -0.01
+    labels.append(addText(xpos_canvas, 0.05, WClatexNames[WCname].replace("/#Lambda^{2} [TeV^{-2}]",""), font=43, size=30, color=1, align=21))
+for l in labels:
+    l.Draw()
+
+l_cms=getCMS(factor=1.1, x = margin_left, y = 0.97)
+l_cms.Draw()
+# l_prelim=getPrelim(x = margin_left+0.03, y = 0.85)
+# l_prelim.Draw()
+
+infotext = "138 fb^{-1} (13 TeV)"
+lumitext = ROOT.TLatex(3.5, 24, infotext)
+lumitext.SetNDC()
+lumitext.SetTextAlign(31)
+lumitext.SetTextFont(42)
+lumitext.SetX(1-margin_right)
+lumitext.SetTextSize(0.05)
+lumitext.SetY(1-margin_top+0.01)
+lumitext.Draw()
+
+
+c_lambda.Print(outname.replace("Summary", "Summary_Lambda"))
+
+
+# ALSO WRITE VALUES IN A file
+resultfile = outname.replace(".pdf", ".txt")
+with open(resultfile, "w") as file:
+    file.write("WC; bestfit; bestfit_float; sigma1_intervals; sigma1_intervals_float; sigma2_intervals; sigma2_intervals_float\n")
+    for WCname in WCnames:
+        bestfit, sigma1, sigma2 = getValues(path_data, WCname, False, 1.0)
+        bestfit_float, sigma1_float, sigma2_float = getValues(path_data, WCname, True, 1.0)
+        resultstring = "%s;%.3f;%.3f;"%(WCname, bestfit, bestfit_float)
+        resultstring += printInterval(set(sigma1))+";"
+        resultstring += printInterval(set(sigma1_float))+";"
+        resultstring += printInterval(set(sigma2))+";"
+        resultstring += printInterval(set(sigma2_float))+"\n"
+        file.write(resultstring)
+
+print("Wrote outputfile %s"%(resultfile))
+
+resultfile_lambda = outname.replace("Summary", "Summary_Lambda").replace(".pdf", ".txt")
+with open(resultfile_lambda, "w") as file:
+    file.write("WC, ci, lambda\n")
+    for cival, cistring, col in cis:
+        g = getLambdaGraph(values_data_noFactor, WCnames, cival, col)
+        for i, WCname in enumerate(WCnames):
+            yerr = g.GetErrorYhigh(i)
+            resultstring = "%s, %.3f, %.3f\n"%(WCname, cival, 2*yerr)
+            file.write(resultstring)
+
+print("Wrote outputfile %s"%(resultfile_lambda))

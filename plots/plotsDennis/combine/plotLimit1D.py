@@ -19,16 +19,22 @@ def getGraphFromTree(filename, wcname):
     tree = getattr(rf, "limit")
     if tree.GetEntry(0)<=0:
         raise RuntimeError( "Tree of file %s is empty", filename)
+    minDelta = 0
     for point in tree:
         if point.deltaNLL > 0.000000001:
             # first value is the best fit with deltaNLL=0, jump this one
             wcvalues.append(eval("point."+branchname))
             twodeltaNLLs.append(2*point.deltaNLL)
+            if 2*point.deltaNLL < minDelta:
+                minDelta = 2*point.deltaNLL
     rf.Close()
     # print len(wcvalues)
     if len(wcvalues) == 0:
         wcvalues.append(0)
         twodeltaNLLs.append(0)
+    # for i in range(len(twodeltaNLLs)):
+    #     twodeltaNLLs[i] = twodeltaNLLs[i]-minDelta
+
     graph = ROOT.TGraph(len(wcvalues), wcvalues, twodeltaNLLs)
     graph = setDrawStyle(graph, wcname)
     return graph
@@ -287,7 +293,11 @@ for r in range(nRegions)+["combined"]:
         filename = filename.replace(".MultiDimFit", "_freeze-"+args.freeze+".MultiDimFit")
     if args.statOnly:
         filename = filename.replace(".MultiDimFit", "_statOnly.MultiDimFit")
-    graphs[region] = getGraphFromTree(dataCard_dir+filename, args.wc)
+
+    if region == "combined" and args.float and args.wc == "cHuRe33" and not args.statOnly:
+        graphs[region] = getGraphFromTree(dataCard_dir+filename.replace(".MultiDimFit", "_random_13.MultiDimFit"), args.wc)
+    else:
+        graphs[region] = getGraphFromTree(dataCard_dir+filename, args.wc)
     outname = "1D__"+args.year+"__"+args.wc+"__"+str(region)+"__"+marginfloat+".pdf"
     if args.freeze is not None:
         outname = outname.replace(".pdf", "_freeze-"+args.freeze+".pdf")

@@ -108,9 +108,14 @@ for (regionname, path, regiontext) in regions:
             p.xtitle = xtitles[histname]
             p.ytitle = "Events / GeV"
             p.divideByWidth = True
-            p.subtext = "Preliminary"
             p.legshift = (-0.1, -0.1, 0.0, 0.0)
             p.yfactor = 1.4
+            p.legtextsize = 0.05
+            p.horizontalErrors = True
+            p.logoAbovePlot = True
+            p.subtext = ""
+            # p.simtext = "Simulation"
+
             if histname == "yield" and not log:
                 p.yfactor = 3.0
                 p.legshift = (-0.1, 0.1, 0.0, 0.0)
@@ -120,7 +125,7 @@ for (regionname, path, regiontext) in regions:
                     p.setCustomYRange(0.001, 400)
                 elif regionname == "ttZ_CR":
                     p.setCustomYRange(0.001, 40)
-            p.addText(0.22, 0.75, regiontext, font=43, size=16)
+            p.addText(0.25, 0.8, regiontext, font=43, size=20)
             processes = signals+backgrounds
             if regionname in ["ttZ_CR", "WZ_CR"]:
                 processes = processes_CR

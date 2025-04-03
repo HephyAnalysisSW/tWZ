@@ -208,7 +208,7 @@ WCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33
 if args.light:
     WCnames = ["cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"]
     if args.minus:
-        WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"]
+        WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cHuRe1122", "cHuRe33","cHdRe1122", "cHdRe33",]
         if args.excludeTriplet:
             WCnames = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122"]
 

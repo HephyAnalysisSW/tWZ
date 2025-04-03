@@ -142,6 +142,9 @@ if args.region == "combined":
 else:
     regions = ["topEFT_ULRunII_"+args.region+"_13TeV"]
 
+# fname = "DataCards_threePoint_light_minus_UNBLINDED_binning-A_SMZero/ULRunII/fitDiagnostics.topEFT_ULRunII_combined_13TeV_ULRunII_1D-cHqMRe1122_float_noScan_noToys_SHAPES.root"
+# print("Input file:", fname)
+
 for region in regions:
     for doLog in [True,False]:
         bins=[]

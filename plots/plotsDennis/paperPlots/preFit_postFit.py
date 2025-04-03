@@ -19,6 +19,38 @@ logger    = logger.get_logger(   "INFO", logFile = None)
 
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
+def getHistRunII(fname, hname, bins):
+    if "ULRunII" in fname:
+        # Get histograms from each era
+        hist_18 = getObjFromFile(fname.replace("/ULRunII/", "/UL2018/"), hname)
+        hist_17 = getObjFromFile(fname.replace("/ULRunII/", "/UL2017/"), hname)
+        hist_16 = getObjFromFile(fname.replace("/ULRunII/", "/UL2016/"), hname)
+        hist_16preVFP = getObjFromFile(fname.replace("/ULRunII/", "/UL2016preVFP/"), hname)
+        # add them
+        hist = hist_18.Clone(hist_18.GetName()+"_RunIIcombination")
+        hist.Add(hist_17)
+        hist.Add(hist_16)
+        hist.Add(hist_16preVFP)
+    else:
+        hist = getObjFromFile(fname, hname)
+    if bins is not None:
+        hist = hist.Rebin(len(bins)-1, hist.GetName()+"_rebin", array.array('d',bins))
+    return hist
+
+def getEnvelop(sigtotal, central):
+    up = sigtotal.Clone("total_up")
+    down = sigtotal.Clone("total_down")
+    up.Reset()
+    down.Reset()
+    Nbins = sigtotal.GetSize()-2
+    for i in range(Nbins):
+        bin = i+1
+        c = central.GetBinContent(bin)
+        e = sigtotal.GetBinError(bin)
+        up.SetBinContent(bin, c+e)
+        down.SetBinContent(bin, c-e)
+    return up, down
+
 
 def getHist(fname, hname, bins, isGraph=False):
     # print("-----------------------")
@@ -90,8 +122,10 @@ dir = "/users/dennis.schwarz/CMSSW_10_6_28/src/tWZ/plots/plotsDennis/combine/Dat
 filename = "POSTFITSHAPES.topEFT_ULRunII_combined_13TeV_ULRunII_fullFit_noScan.root"
 # filename = "POSTFITSHAPES.topEFT_ULRunII_combined_13TeV_ULRunII_1D-cHqMRe33_float_noScan.root"
 # filename = "POSTFITSHAPES.topEFT_ULRunII_combined_13TeV_ULRunII_1D-cHqMRe33_margin_noScan.root"
-
 postFitFile = os.path.join(dir, filename)
+postFitFile = "PostFitShapes.root"
+
+
 plotdir = plot_directory+"/PaperPlots/"
 if not os.path.exists( plotdir ): os.makedirs( plotdir )
 
@@ -106,9 +140,12 @@ if args.binning == "A":
     bins_ZZ  = [40, 60, 80, 120, 200, 1000]
 ################################################################################
 
+path_ZZ     = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v15_reduceEFT_threePoint_noData/ULRunII/all/qualepT-minDLmass12-onZ1-onZ2/Results.root"
+path_WZ     = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v15_reduceEFT_threePoint_noData/ULRunII/all/trilepT-minDLmass12-onZ1-btag0-met60/Results.root"
+path_ttZ    = "/groups/hephy/cms/dennis.schwarz/www/tWZ/plots/analysisPlots/EFT_UL_v15_reduceEFT_threePoint_noData/ULRunII/all/trilepT-minDLmass12-onZ1-njet3p-btag1p/Results.root"
 
 processinfo = {
-    "TotalSig":  ("t#bar{t}Z + WZ + ZZ", CMScolors["sm"]),
+    "Signal":  ("t#bar{t}Z + WZ + ZZ", CMScolors["sm"]),
     # "SignalSum":  ("t#bar{t}Z + WZ + ZZ", CMScolors["sm"]),
     "tWZ":       ("tWZ", CMScolors["tWZ"]),
     "ttX":       ("t#bar{t}X", CMScolors["ttX"]),
@@ -128,22 +165,38 @@ lumi = {
 
 regions = ["ttZ", "WZ", "ZZ"]
 rootDir = {
-    "ttZ": "ch3_postfit",
-    "WZ" : "ch2_postfit",
-    "ZZ" : "ch1_postfit",
+    "ttZ": "ch3_prefit",
+    "WZ" : "ch2_prefit",
+    "ZZ" : "ch1_prefit",
+}
+
+rates = {
+        "tWZ":       0.20,
+        "ttX":       0.20,
+        "tZq":       0.10,
+        "triBoson":  0.20,
+        "ggToZZ":    0.2,
 }
 
 for region in regions:
     for doLog in [True,False]:
         bins=[]
+        prefitfile = None
+        mainprocess = None
         if region in ["ttZ", "topEFT_ULRunII_3_13TeV"]:
             bins = bins_ttZ
+            prefitfile = path_ttZ
+            mainprocess = "t#bar{t}Z"
         elif region in ["WZ", "topEFT_ULRunII_2_13TeV"]:
             bins = bins_WZ
+            prefitfile = path_WZ
+            mainprocess = "WZ"
         elif region in ["ZZ", "topEFT_ULRunII_1_13TeV"]:
             bins = bins_ZZ
+            prefitfile = path_ZZ
+            mainprocess = "ZZ"
 
-        plotname = "PostFit__"+region
+        plotname = "PrePostFit__"+region
 
         if doLog:
             plotname+="__log"
@@ -152,20 +205,27 @@ for region in regions:
         p.lumi = lumi["ULRunII"]
         p.xtitle = "Z boson candidate #it{p}_{T} [GeV]"
         p.ytitle = "Events / GeV"
-        p.ratiotitle = "#frac{Data}{Pred.}"
+        p.ratiotitle = "#splitline{Ratio to}{PreFit}"
         p.drawRatio = True
-        p.ratiorange = (0.2, 1.8)
+        p.ratiorange = (0.7, 1.3)
+        if region == "WZ":
+            p.ratiorange = (0.55, 1.15)
         p.divideByWidth = True
-        p.subtext = "Preliminary"
         p.legshift = (-0.1, 0., 0., 0.)
+        p.legtextsize = 0.045
+        p.horizontalErrors = True
+        p.logoAbovePlot = True
+        p.subtext = ""
+
+
         if doLog:
             p.log = True
             if region in ["WZ", "topEFT_ULRunII_2_13TeV"]:
-                p.setCustomYRange(0.0008, 10000)
+                p.setCustomYRange(0.0008, 50000)
             elif region in ["ZZ", "topEFT_ULRunII_1_13TeV"]:
                 p.setCustomYRange(0.0008, 1000)
             elif region in ["ttZ", "topEFT_ULRunII_3_13TeV"]:
-                p.setCustomYRange(0.0008, 1000)
+                p.setCustomYRange(0.0008, 5000)
         for process in processinfo.keys():
             # print(process)
             if region in ["ZZ", "topEFT_ULRunII_1_13TeV"] and process == "nonprompt":
@@ -177,15 +237,35 @@ for region in regions:
                 dir = "ch2"
             elif region == "ZZ":
                 dir = "ch1"
-            if process == "SignalSum":
-                hist = getSumOfSignals(postFitFile, rootDir[region], bins)
+            if process == "Signal":
+                hist_ZZ = getHistRunII(prefitfile, "Z1_pt__ZZ_powheg", bins)
+                hist_WZ = getHistRunII(prefitfile, "Z1_pt__WZTo3LNu", bins)
+                hist_ttZ = getHistRunII(prefitfile, "Z1_pt__ttZ_sm", bins)
+                p.addBackground(hist_ZZ, "ZZ", CMScolors["ZZ"])
+                p.addBackground(hist_WZ, "WZ", CMScolors["WZ"])
+                p.addBackground(hist_ttZ, "t#bar{t}Z", CMScolors["ttZ"])
+                # Also get SM hist prefit for uncertainties
+                sigtotal = getHist(postFitFile, rootDir[region]+"/TotalSig", bins)
+                if region == "ttZ":
+                    up, down = getEnvelop(sigtotal, hist_ttZ)
+                    p.addSystematic(up, down, "total_sig_sys", "t#bar{t}Z")
+                elif region == "WZ":
+                    up, down = getEnvelop(sigtotal, hist_WZ)
+                    p.addSystematic(up, down, "total_sig_sys", "WZ")
+                elif region == "ZZ":
+                    up, down = getEnvelop(sigtotal, hist_ZZ)
+                    p.addSystematic(up, down, "total_sig_sys", "ZZ")
+                # p.addNormSystematic(self, bkgname, size)
+
             else:
                 hist = getHist(postFitFile, rootDir[region]+"/"+process, bins)
-            p.addBackground(hist, processinfo[process][0], processinfo[process][1])
+                p.addBackground(hist, processinfo[process][0], processinfo[process][1])
+                if process in rates.keys():
+                    p.addNormSystematic(processinfo[process][0], rates[process])
         h_data = getHist(postFitFile, rootDir[region]+"/data_obs", bins, False)
         p.addData(h_data)
-        # h_prefit_total = getHist(postFitFile, rootDir[region].replace("postfit", "prefit")+"/TotalProcs", bins)
-        # p.addSignal(h_prefit_total, "PreFit", ROOT.kRed)
+        h_post_total = getHist(postFitFile, rootDir[region].replace("prefit", "postfit")+"/TotalProcs", bins)
+        p.addSignal(h_post_total, "PostFit", ROOT.kRed)
         regiontext = "SR"
         if region == "ttZ":
             regiontext+="_{t#bar{t}Z}"
@@ -193,6 +273,6 @@ for region in regions:
             regiontext+="_{WZ}"
         elif region == "ZZ":
             regiontext+="_{ZZ}"
-        regiontext+=", PostFit"
-        p.addText(0.22, 0.7, regiontext, font=43, size=16)
+        # regiontext+=", PostFit"
+        p.addText(0.25, 0.8, regiontext, font=43, size=20)
         p.draw()

@@ -8,7 +8,7 @@ from math                                        import sqrt
 from tWZ.Tools.helpers                           import getObjFromFile
 from tWZ.Tools.user                              import plot_directory
 from tWZ.Tools.histogramHelper                   import WClatexNames
-from MyRootTools.plotter.Plotter                 import Plotter
+from Plotter_custom                              import Plotter
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 import tWZ.Tools.logger as logger
@@ -46,16 +46,35 @@ sys = [
     "muR_ttZ", "muR_WZ", "muR_ZZ",
 ]
 histname = "Z1_pt"
+
+allWCs = ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cHuRe1122", "cHuRe33", "cHdRe1122", "cHdRe33", "cW", "cWtil"]
+allWCs = []
 for region in ["ttZ", "WZ", "ZZ"]:
-    for wc in ["cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cW", "cWtil"]:
+    signalName = region.replace("ttZ", "t#bar{t}Z")+" (SM)"
+    for wc in allWCs+["special"]:
         h_sm = getObjFromFile(combineInput, region+"__"+histname+"/sm")
         wcvalueUp = 1
         wcvalueDown = -1
         if region == "WZ" and wc in ["cHq3Re1122","cHq3MRe1122", "cW", "cWtil"]:
             wcvalueUp = 0.1
             wcvalueDown = -0.1
-        h_eftUp   = getEFTatWCpoint(combineInput, region, histname, wc, wcvalueUp)
-        h_eftDown = getEFTatWCpoint(combineInput, region, histname, wc, wcvalueDown)
+
+        eftLines = []
+        if wc == "special":
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cHqMRe1122", 1.0), WClatexNames["cHqMRe1122"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 1", ROOT.kRed, 1, 2, 3) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cHq3MRe1122", 0.1), WClatexNames["cHq3MRe1122"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 0.1", ROOT.kGreen+2, 2, 2, 3) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cHuRe1122", 1.0), WClatexNames["cHuRe1122"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 1", ROOT.kBlack, 7, 2, 3) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cHdRe1122", 1.0), WClatexNames["cHdRe1122"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 1", ROOT.kPink+6, 5, 2, 3) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cHqMRe33", 1.0), WClatexNames["cHqMRe33"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 1", ROOT.kBlue, 1, 2, 2) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cHq3MRe33", 1.0), WClatexNames["cHq3MRe33"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 1", ROOT.kMagenta, 2, 2, 2) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cHuRe33", 1.0), WClatexNames["cHuRe33"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 1", ROOT.kCyan+2, 7, 2, 2) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cHdRe33", 1.0), WClatexNames["cHdRe33"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 1", ROOT.kAzure+7, 5, 2, 2) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cW", 0.1), WClatexNames["cW"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 0.1", ROOT.kViolet+5, 1, 2, 1) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, "cWtil", 0.1), WClatexNames["cWtil"].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = 0.1", ROOT.kOrange+7, 2, 2, 1) )
+
+        else:
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, wc, wcvalueUp), WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueUp)+"", ROOT.kRed, 2, 2) )
+            eftLines.append( (getEFTatWCpoint(combineInput, region, histname, wc, wcvalueDown),  WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueDown)+"", ROOT.kAzure+7, 1, 2) )
         for log in [False, True]:
             suffix = ""
             if log:
@@ -69,10 +88,19 @@ for region in ["ttZ", "WZ", "ZZ"]:
             p.drawRatio = True
             p.ratiotitle = "#splitline{Ratio}{to SM}"
             p.simtext = "Simulation"
-            p.subtext = "Preliminary"
-            p.legshift = (0.1, -0.3, 0.0, 0.0)
-            p.ratiorange = 0.7, 1.3
-            p.NcolumnsLegend = 1
+            p.subtext = ""
+            p.logoAbovePlot = True
+            p.legshift = (-0.05, -0.3, 0.05, 0.0)
+            p.legtextsize = 0.05 #0.045
+            p.ratiorange = 0.7, 1.7
+            p.ratiodivision = 503
+            # if region == "ZZ":
+            #     p.ratiorange = 0.85, 1.15
+            # elif region == "WZ":
+            #     p.ratiorange = 0.7, 1.7
+            #     p.ratiodivision = 503
+
+            p.NcolumnsLegend = 2
             p.totalUncText = "#mu_{R}/#mu_{F} uncertainties"
             regiontext = "SR"
             if region == "ttZ":
@@ -81,7 +109,12 @@ for region in ["ttZ", "WZ", "ZZ"]:
                 regiontext+="_{WZ}"
             elif region == "ZZ":
                 regiontext+="_{ZZ}"
-            p.addText(0.22, 0.65, regiontext, font=43, size=16)
+            p.addText(0.25, 0.8, regiontext, font=43, size=20)
+            if wc == "special":
+                p.addText(0.25, 0.84, "light quark", font=43, size=18, pad=4)
+                p.addText(0.25, 0.84, "heavy quark", font=43, size=18, pad=3)
+                p.addText(0.25, 0.91, "EW", font=43, size=18, pad=2)
+
             if log:
                 p.log = True
                 if region == "WZ":
@@ -90,12 +123,16 @@ for region in ["ttZ", "WZ", "ZZ"]:
                     p.setCustomYRange(0.02, 900)
                 elif region == "ttZ":
                     p.setCustomYRange(0.02, 300)
-            signalName = region.replace("ttZ", "t#bar{t}Z")+" (SM)"
+            else:
+                p.yfactor = 1.4
             p.addBackground(h_sm, signalName, 17)
             for s in sys:
                 h_up = getObjFromFile(combineInput, region+"__"+histname+"/sm__"+s+"Up")
                 h_down = getObjFromFile(combineInput, region+"__"+histname+"/sm__"+s+"Down")
                 p.addSystematic(h_up, h_down, s, signalName)
-            p.addSignal(h_eftUp,   signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueUp)+")", ROOT.kRed, lineStyle=2, lineWidth=2)
-            p.addSignal(h_eftDown, signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueDown)+")", ROOT.kAzure+7, lineWidth=2)
+
+            for (hist, legtext, col, linestyle, linewidth, ratioPad) in eftLines:
+                p.addSignal(hist, legtext, col, lineStyle=linestyle, lineWidth=linewidth, ratioPad=ratioPad)
+            # p.addSignal(h_eftUp,   signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueUp)+")", ROOT.kRed, lineStyle=2, lineWidth=2)
+            # p.addSignal(h_eftDown, signalName.replace("(SM)", "")+"("+WClatexNames[wc].replace("/#Lambda^{2} [TeV^{-2}]", "")+" = "+str(wcvalueDown)+")", ROOT.kAzure+7, lineWidth=2)
             p.draw()

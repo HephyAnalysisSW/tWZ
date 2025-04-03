@@ -37,7 +37,7 @@ def getCMS(x,y,x2,y2,prelim=False):
     lumitext.SetNDC()
     lumitext.SetTextAlign(31)
     lumitext.SetTextFont(42)
-    lumitext.SetTextSize(0.032)
+    lumitext.SetTextSize(0.045)
     lumitext.SetX(x2)
     lumitext.SetY(y2)
     labels.append(lumitext)
@@ -56,41 +56,36 @@ def getCMS(x,y,x2,y2,prelim=False):
 #         y = 0
 #         print x, y, g.Interpolate(x, y)
 
-def getHist2DFromTree(filename, wcname1, wcname2):
-    logger.info( "Reading file = %s", filename )
+def getHist2DFromTree(filenames, wcname1, wcname2):
     wc1values, wc2values, twodeltaNLLs = array.array( 'd' ), array.array( 'd' ), array.array( 'd' )
     branchname1 = "k_"+wcname1
     branchname2 = "k_"+wcname2
-    rf = ROOT.TFile.Open(filename)
-    tree = getattr(rf, "limit")
-    if tree.GetEntry(0)<=0:
-        raise RuntimeError( "Tree of file %s is empty", filename)
-
-
     bestFit_wc1 = 0
     bestFit_wc2 = 0
-    # First find minimum
     minDeltaNLL = 10000000000000000
-    for point in tree:
-        if args.ignoreNegative and point.deltaNLL < 0:
+    for filename in filenames:
+        logger.info( "Reading file = %s", filename )
+        if not os.path.exists(filename):
+            print("File %s Does not exist! Skipping..."%(filename))
             continue
-        if point.deltaNLL < minDeltaNLL:
-            minDeltaNLL = point.deltaNLL
-            bestFit_wc1 = eval("point."+branchname1)
-            bestFit_wc2 = eval("point."+branchname2)
-
+        rf = ROOT.TFile.Open(filename)
+        tree = getattr(rf, "limit")
+        if tree.GetEntry(0)<=0:
+            raise RuntimeError( "Tree of file %s is empty", filename)
+        # First find minimum
+        for point in tree:
+            wc1values.append(eval("point."+branchname1))
+            wc2values.append(eval("point."+branchname2))
+            twodeltaNLLs.append(2*(point.deltaNLL-minDeltaNLL))
+            if args.ignoreNegative and point.deltaNLL < 0:
+                continue
+            if point.deltaNLL < minDeltaNLL:
+                minDeltaNLL = point.deltaNLL
+                bestFit_wc1 = eval("point."+branchname1)
+                bestFit_wc2 = eval("point."+branchname2)
+        rf.Close()
 
     print "min(deltaNLL) = %.3f"%(minDeltaNLL)
-
-    # Now fill hist
-    for i, point in enumerate(tree):
-        if args.ignoreNegative and point.deltaNLL < 0:
-            continue
-        wc1values.append(eval("point."+branchname1))
-        wc2values.append(eval("point."+branchname2))
-        twodeltaNLLs.append(2*(point.deltaNLL-minDeltaNLL))
-
-    rf.Close()
     graph = ROOT.TGraph2D( len(twodeltaNLLs), wc1values, wc2values, twodeltaNLLs)
     NpointsOneAxis = int(sqrt(len(twodeltaNLLs)))
     # scanGraph(graph)
@@ -133,7 +128,7 @@ def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_w
     zmax = h.GetMaximum()
     h.GetZaxis().SetRangeUser(0.01, zmax)
     if not args.unblind:
-        h.GetZaxis().SetRangeUser(0.000000001, zmax)
+        h.GetZaxis().SetRangeUser(0.01, zmax)
 
     ROOT.gPad.SetLogz()
 
@@ -181,12 +176,13 @@ def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_w
     BFpoint.SetMarkerColor(ROOT.kCyan-3)
     BFpoint.Draw("p same")
     # legend
-    leg = ROOT.TLegend(.53, .7, 1.0-rightmargin-0.03, 1.0-topmargin-0.03)
+    leg = ROOT.TLegend(.15, .77, 1.0-rightmargin-0.03, 1.0-topmargin-0.02)
     leg.SetTextSize(.035)
+    leg.SetNColumns(2)
     leg.SetHeader(legname)
     leg.AddEntry( BFpoint, "Best fit","p")
-    leg.AddEntry( SMpoint, "SM","p")
     leg.AddEntry( cont_p1.At(0), "-2 #Delta ln L < 2.28", "l")
+    leg.AddEntry( SMpoint, "SM","p")
     leg.AddEntry( cont_p2.At(0), "-2 #Delta ln L < 5.99", "l")
     leg.Draw()
     # CMSlabel
@@ -194,7 +190,7 @@ def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_w
     y_CMS = 1.0-topmargin+0.01
     x_lumi = 1.0-rightmargin
     y_lumi = 1.0-topmargin+0.01
-    labels = getCMS(x_CMS, y_CMS, x_lumi, y_lumi, True)
+    labels = getCMS(x_CMS, y_CMS, x_lumi, y_lumi, False)
     for l in labels:
         l.Draw()
     # Draw
@@ -230,11 +226,30 @@ argParser.add_argument('--onlyRegion',          action='store', default=None)
 argParser.add_argument('--ignoreNegative',  action='store_true', default=False)
 argParser.add_argument('--noZero', action='store_true', default=False)
 argParser.add_argument('--SMZero', action='store_true', default=False)
-
-
+argParser.add_argument('--split', action='store', type=int, default=None)
 args = argParser.parse_args()
 
 logger.info( "Make 2D limit plot")
+ranges = {
+    "cHqMRe1122":  (-2.5, 2.5),
+    "cHqMRe33":    (-5.5,5.5),
+    "cHq3MRe1122": (-0.28,0.28),
+    "cHq3MRe33":   (-14.5,14.5),
+    "cHuRe1122":   (-6.9,6.9),
+    "cHuRe33":     (-9.9,9.9),
+    "cHdRe1122":   (-5.9,5.9),
+    "cHdRe33":     (-34,49),
+    "cW":          (-0.26,0.26),
+    "cWtil":       (-0.26,0.26),
+}
+
+if args.float:
+    ranges["cHqMRe33"] = (-9.0, 39)
+    ranges["cHuRe33"] = (-29, 33)
+
+if "cHuRe33" in args.wc and "cHqMRe33" in args.wc:
+    ranges["cHqMRe33"] = (-45, 45)
+    ranges["cHuRe33"] = (-45, 45)
 
 WCnames = ["cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33"]
 if args.light:
@@ -312,7 +327,7 @@ plotstyle = {
     1: ("ZZ region", ROOT.kGreen+3),
     2: ("WZ region", ROOT.kRed-2),
     3: ("ttZ region", ROOT.kAzure+4),
-    "combined": ("Combination", 1),
+    "combined": ("", 1),
     "ZZ-WZ": ("ZZ+WZ regions", 1),
     "ZZ-ttZ": ("ZZ+ttZ regions", 1),
     "WZ-ttZ": ("WZ+ttZ regions", 1),
@@ -334,7 +349,13 @@ for r in range(nRegions)+extraRegion:
         filename = filename.replace(".MultiDimFit", "_freeze-"+args.freeze+".MultiDimFit")
     if args.statOnly:
         filename = filename.replace(".MultiDimFit", "_statOnly.MultiDimFit")
-    hist, bestFit_wc1, bestFit_wc2 = getHist2DFromTree(dataCard_dir+filename, wcname1, wcname2)
+
+    if args.split is not None:
+        filenames = [dataCard_dir+filename.replace(".MultiDimFit", "_SPLIT_%i.MultiDimFit"%(i)) for i in range(args.split)]
+    else:
+        filenames = [dataCard_dir+filename]
+
+    hist, bestFit_wc1, bestFit_wc2 = getHist2DFromTree(filenames, wcname1, wcname2)
     outname = "2D__"+args.year+"__"+args.wc+"__"+str(region)+"__"+marginfloat+".pdf"
     if args.freeze is not None:
         outname = outname.replace(".pdf", "_freeze-"+args.freeze+".pdf")
@@ -342,10 +363,15 @@ for r in range(nRegions)+extraRegion:
         outname = outname.replace(".pdf", "_statOnly.pdf")
     if args.ignoreNegative:
         outname = outname.replace(".pdf", "_ignoreNegative.pdf")
-    xmin, xmax = -7.5, 7.5
-    if wcname1 in ["cHq3Re11","cHq3Re1122", "cHq3MRe11","cHq3MRe1122", "cW", "cWtil"]:
-        xmin, xmax = -0.4, 0.4
-    ymin, ymax = -7.5, 7.5
-    if wcname2 in ["cHq3Re11","cHq3Re1122", "cHq3MRe11","cHq3MRe1122", "cW", "cWtil"]:
-        ymin, ymax = -0.4, 0.4
-    plot2Dlimit(hist, plotstyle[region][0], plotdir+outname, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2)
+    xmin, xmax = ranges[wcname1]
+    ymin, ymax = ranges[wcname2]
+    legheader =  plotstyle[region][0]+" (profiled)" if args.float else plotstyle[region][0]+" (fixed)"
+    if region == "combined":
+        legheader = "profiled" if args.float else "fixed"
+
+    plot2Dlimit(hist, legheader, plotdir+outname, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2)
+    resultfile = plotdir+outname.replace(".pdf", ".root")
+    f_out = ROOT.TFile(resultfile, "RECREATE")
+    f_out.cd()
+    hist.Write("scan")
+    f_out.Close()
