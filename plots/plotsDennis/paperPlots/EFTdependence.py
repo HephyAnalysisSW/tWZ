@@ -86,13 +86,15 @@ for region in ["ttZ", "WZ", "ZZ"]:
             p.ytitle = "Events / GeV"
             p.divideByWidth = True
             p.drawRatio = True
-            p.ratiotitle = "#splitline{Ratio}{to SM}"
+            p.ratiotitle = "#splitline{Ratios}{to SM}"
             p.simtext = "Simulation"
             p.subtext = ""
             p.logoAbovePlot = True
             p.legshift = (-0.05, -0.3, 0.05, 0.0)
             p.legtextsize = 0.05 #0.045
             p.ratiorange = 0.7, 1.7
+            if region == "ZZ":
+                p.ratiorange = 0.85, 1.35
             p.ratiodivision = 503
             # if region == "ZZ":
             #     p.ratiorange = 0.85, 1.15
@@ -101,7 +103,7 @@ for region in ["ttZ", "WZ", "ZZ"]:
             #     p.ratiodivision = 503
 
             p.NcolumnsLegend = 2
-            p.totalUncText = "#mu_{R}/#mu_{F} uncertainties"
+            p.totalUncText = "#mu_{R}+^{ }#mu_{F} uncertainties"
             regiontext = "SR"
             if region == "ttZ":
                 regiontext+="_{t#bar{t}Z}"
@@ -109,10 +111,10 @@ for region in ["ttZ", "WZ", "ZZ"]:
                 regiontext+="_{WZ}"
             elif region == "ZZ":
                 regiontext+="_{ZZ}"
-            p.addText(0.25, 0.8, regiontext, font=43, size=20)
+            p.addText(0.25, 0.8, regiontext, font=63, size=20)
             if wc == "special":
-                p.addText(0.25, 0.84, "light quark", font=43, size=18, pad=4)
-                p.addText(0.25, 0.84, "heavy quark", font=43, size=18, pad=3)
+                p.addText(0.25, 0.84, "Light quark", font=43, size=18, pad=4)
+                p.addText(0.25, 0.84, "Heavy quark", font=43, size=18, pad=3)
                 p.addText(0.25, 0.91, "EW", font=43, size=18, pad=2)
 
             if log:

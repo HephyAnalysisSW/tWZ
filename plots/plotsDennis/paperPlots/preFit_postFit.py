@@ -118,11 +118,9 @@ args = argParser.parse_args()
 
 logger.info( "Make PostFit plot")
 
-dir = "/users/dennis.schwarz/CMSSW_10_6_28/src/tWZ/plots/plotsDennis/combine/DataCards_threePoint_light_minus_UNBLINDED_binning-A_SMZero/ULRunII"
-filename = "POSTFITSHAPES.topEFT_ULRunII_combined_13TeV_ULRunII_fullFit_noScan.root"
-# filename = "POSTFITSHAPES.topEFT_ULRunII_combined_13TeV_ULRunII_1D-cHqMRe33_float_noScan.root"
-# filename = "POSTFITSHAPES.topEFT_ULRunII_combined_13TeV_ULRunII_1D-cHqMRe33_margin_noScan.root"
-postFitFile = os.path.join(dir, filename)
+# dir = "/users/dennis.schwarz/CMSSW_10_6_28/src/tWZ/plots/plotsDennis/combine/DataCards_threePoint_light_minus_UNBLINDED_binning-A_SMZero/ULRunII"
+# filename = "POSTFITSHAPES.topEFT_ULRunII_combined_13TeV_ULRunII_fullFit_noScan.root"
+# postFitFile = os.path.join(dir, filename)
 postFitFile = "PostFitShapes.root"
 
 
@@ -209,7 +207,7 @@ for region in regions:
         p.drawRatio = True
         p.ratiorange = (0.7, 1.3)
         if region == "WZ":
-            p.ratiorange = (0.55, 1.15)
+            p.ratiorange = (0.55, 1.19)
         p.divideByWidth = True
         p.legshift = (-0.1, 0., 0., 0.)
         p.legtextsize = 0.045
@@ -238,30 +236,39 @@ for region in regions:
             elif region == "ZZ":
                 dir = "ch1"
             if process == "Signal":
+                # For signal get prefit distributions of ZZ/ttZ/WZ from prefit file
                 hist_ZZ = getHistRunII(prefitfile, "Z1_pt__ZZ_powheg", bins)
                 hist_WZ = getHistRunII(prefitfile, "Z1_pt__WZTo3LNu", bins)
                 hist_ttZ = getHistRunII(prefitfile, "Z1_pt__ttZ_sm", bins)
                 p.addBackground(hist_ZZ, "ZZ", CMScolors["ZZ"])
                 p.addBackground(hist_WZ, "WZ", CMScolors["WZ"])
                 p.addBackground(hist_ttZ, "t#bar{t}Z", CMScolors["ttZ"])
-                # Also get SM hist prefit for uncertainties
+                # Get total signal uncertainty from postfit file
+                # Do the same for sum of backgrounds
+                # Now estimate the total up/down shift for both (from GetBinError)
+                # Add both as uncertainty to largest signal sample in each region
                 sigtotal = getHist(postFitFile, rootDir[region]+"/TotalSig", bins)
+                bkgtotal = getHist(postFitFile, rootDir[region]+"/TotalBkg", bins)
                 if region == "ttZ":
-                    up, down = getEnvelop(sigtotal, hist_ttZ)
-                    p.addSystematic(up, down, "total_sig_sys", "t#bar{t}Z")
+                    up_sig, down_sig = getEnvelop(sigtotal, hist_ttZ)
+                    p.addSystematic(up_sig, down_sig, "total_sig_sys", "t#bar{t}Z")
+                    up_bkg, down_bkg = getEnvelop(sigtotal, hist_ttZ)
+                    p.addSystematic(up_bkg, down_bkg, "total_bkg_sys", "t#bar{t}Z")
                 elif region == "WZ":
-                    up, down = getEnvelop(sigtotal, hist_WZ)
-                    p.addSystematic(up, down, "total_sig_sys", "WZ")
+                    up_sig, down_sig = getEnvelop(sigtotal, hist_WZ)
+                    p.addSystematic(up_sig, down_sig, "total_sig_sys", "WZ")
+                    up_bkg, down_bkg = getEnvelop(bkgtotal, hist_WZ)
+                    p.addSystematic(up_bkg, down_bkg, "total_bkg_sys", "WZ")
                 elif region == "ZZ":
-                    up, down = getEnvelop(sigtotal, hist_ZZ)
-                    p.addSystematic(up, down, "total_sig_sys", "ZZ")
-                # p.addNormSystematic(self, bkgname, size)
-
+                    up_sig, down_sig = getEnvelop(sigtotal, hist_ZZ)
+                    p.addSystematic(up_sig, down_sig, "total_sig_sys", "ZZ")
+                    up_bkg, down_bkg = getEnvelop(sigtotal, hist_ZZ)
+                    p.addSystematic(up_bkg, down_bkg, "total_bkg_sys", "ZZ")
             else:
+                # Get backgrounds from prefit directory in postfit file
                 hist = getHist(postFitFile, rootDir[region]+"/"+process, bins)
                 p.addBackground(hist, processinfo[process][0], processinfo[process][1])
-                if process in rates.keys():
-                    p.addNormSystematic(processinfo[process][0], rates[process])
+                # Rate uncertainties are already included in the total bkg uncerts
         h_data = getHist(postFitFile, rootDir[region]+"/data_obs", bins, False)
         p.addData(h_data)
         h_post_total = getHist(postFitFile, rootDir[region].replace("prefit", "postfit")+"/TotalProcs", bins)
@@ -274,5 +281,5 @@ for region in regions:
         elif region == "ZZ":
             regiontext+="_{ZZ}"
         # regiontext+=", PostFit"
-        p.addText(0.25, 0.8, regiontext, font=43, size=20)
+        p.addText(0.25, 0.8, regiontext, font=63, size=24)
         p.draw()

@@ -94,8 +94,12 @@ for (regionname, path, regiontext) in regions:
         if histname == "Z1_pt":
             if regionname in ["ttZ", "ttZ_CR"]:
                 bins = bins_ttZ
+                if regionname == "ttZ_CR":
+                    bins = [40, 80, 120, 160, 200, 260, 340] # adjust range for showing the CR
             elif regionname in ["WZ", "WZ_CR"]:
                 bins = bins_WZ
+                if regionname == "WZ_CR":
+                    bins = [40, 60, 80, 100, 120, 140, 180, 220, 260, 300, 340] # adjust range for showing the CR
             else:
                 bins = bins_ZZ
         for log in [False, True]:
@@ -108,9 +112,9 @@ for (regionname, path, regiontext) in regions:
             p.xtitle = xtitles[histname]
             p.ytitle = "Events / GeV"
             p.divideByWidth = True
-            p.legshift = (-0.1, -0.1, 0.0, 0.0)
+            p.legshift = (-0.1, 0.1, 0.0, 0.0)
             p.yfactor = 1.4
-            p.legtextsize = 0.05
+            p.legtextsize = 0.04
             p.horizontalErrors = True
             p.logoAbovePlot = True
             p.subtext = ""
@@ -125,12 +129,16 @@ for (regionname, path, regiontext) in regions:
                     p.setCustomYRange(0.001, 400)
                 elif regionname == "ttZ_CR":
                     p.setCustomYRange(0.001, 40)
-            p.addText(0.25, 0.8, regiontext, font=43, size=20)
+            else:
+                if regionname == "WZ_CR":
+                    p.setCustomYRange(0.0, 45)
+                elif regionname == "ttZ_CR":
+                    p.setCustomYRange(0.0, 5.5)
+            p.addText(0.25, 0.8, regiontext, font=63, size=24) #20
             processes = signals+backgrounds
             if regionname in ["ttZ_CR", "WZ_CR"]:
                 processes = processes_CR
             for process in processes:
-                altbinning = True if regionname in ["ZZ", "ttZ_CR", "WZ_CR"] else False
                 hist = getHist(path, histname+"__"+process, bins)
                 p.addBackground(hist, processinfo[process][0], processinfo[process][1])
             if "_CR" in regionname:

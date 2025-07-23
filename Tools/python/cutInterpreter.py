@@ -58,6 +58,7 @@ special_cuts = {
     "vetoMET" :            "met_pt<20",
     "vetoMET60" :          "met_pt<60&&met_pt>20",
     "vetoMET60v2" :        "met_pt<60",
+    "minDLmassVETO":       "minDLmass<12",
   }
 
 continous_variables = [ ('ht','Sum$(JetGood_pt*(JetGood_pt>30&&abs(JetGood_eta)<2.4))'), ("met", "met_pt"), ("Z2mass", "Z2_mass"), ("Z1mass", "Z1_mass"), ("minDLmass", "minDLmass"), ("mT", "mT")]

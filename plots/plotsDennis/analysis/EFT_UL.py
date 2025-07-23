@@ -78,6 +78,8 @@ argParser.add_argument('--ttWonly',        action='store_true', default=False)
 argParser.add_argument('--moreEFToperators',action='store_true', default=False)
 args = argParser.parse_args()
 
+maxZpt = 0
+events_above_1k = 0
 ################################################################################
 # Logger
 import tWZ.Tools.logger as logger
@@ -1958,6 +1960,16 @@ def constructNewVariables( event, sample ):
         event.deltaPhiZs = abs(event.Z1_phi-Z2.Phi())
 sequence.append(constructNewVariables)
 
+def updateMaxZPt( event, sample ):
+    global maxZpt
+    if event.Z1_pt > maxZpt:
+        maxZpt = event.Z1_pt
+
+    global events_above_1k
+    if event.Z1_pt > 1000:
+        events_above_1k += 1
+sequence.append(updateMaxZPt)
+
 ################################################################################
 # Read variables
 
@@ -2753,3 +2765,5 @@ for mode in allModes+["all"]:
 
 
 logger.info( "Done with prefix %s and selectionString %s", args.selection, selection_string )
+logger.info(" Max Z pt = %.3f", maxZpt)
+logger.info(" Events above 1000 = %.3f", events_above_1k)

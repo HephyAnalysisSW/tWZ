@@ -411,16 +411,16 @@ leg1.SetTextSize(0.0375)
 leg1.Draw()
 
 leg2 = ROOT.TLegend(leg_split, leg_bottom2, leg_right, leg_top)
-leg2.AddEntry(graph_1SD_float, "-2 #Delta ln L < 1.0", "l")
-leg2.AddEntry(graph_2SD_float, "-2 #Delta ln L < 3.84", "l")
+leg2.AddEntry(graph_1SD_float, "#minus 2 #Delta ln L < 1", "l")
+leg2.AddEntry(graph_2SD_float, "#minus 2 #Delta ln L < 3.84", "l")
 leg2.SetTextSize(0.0375)
 if args.addExpected:
-    leg2.AddEntry(g_asimov_1SD, "-2 #Delta ln L < 1.0 (exp.)", "f")
-    leg2.AddEntry(g_asimov_2SD, "-2 #Delta ln L < 3.84 (exp.)", "f")
+    leg2.AddEntry(g_asimov_1SD, "#minus 2 #Delta ln L < 1 (exp.)", "f")
+    leg2.AddEntry(g_asimov_2SD, "#minus 2 #Delta ln L < 3.84 (exp.)", "f")
     leg2.SetTextSize(0.03)
 if args.addHalf:
-    leg2.AddEntry(g_asimov_1SD, "-2 #Delta ln L < 1.0 (half stats)", "f")
-    leg2.AddEntry(g_asimov_2SD, "-2 #Delta ln L < 3.84 (half stats)", "f")
+    leg2.AddEntry(g_asimov_1SD, "#minus 2 #Delta ln L < 1 (half stats)", "f")
+    leg2.AddEntry(g_asimov_2SD, "#minus 2 #Delta ln L < 3.84 (half stats)", "f")
     leg2.SetTextSize(0.03)
 leg2.Draw()
 
@@ -494,7 +494,7 @@ leg = ROOT.TLegend(.4, .79, .8, .88)
 leg.SetNColumns(3)
 cis = [
     (16*pi*pi, "(4#pi)^{2}", ROOT.kAzure-9),
-    (1.0, "1.0", ROOT.kAzure+7),
+    (1.0, "1", ROOT.kAzure+7),
     (0.01, "0.01", ROOT.kAzure-1),
 
 ]

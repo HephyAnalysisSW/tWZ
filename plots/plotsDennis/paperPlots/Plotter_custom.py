@@ -464,7 +464,7 @@ class Plotter:
         xpos, ypos = 0.22, 0.855
         if self.logoAbovePlot:
             xpos += -0.027
-            if self.drawRatio: ypos += 0.12
+            if self.drawRatio: ypos += 0.125
             else             : ypos += 0.10
         cmstext = ROOT.TLatex(3.5, 24, "CMS")
         cmstext.SetNDC()
@@ -486,7 +486,7 @@ class Plotter:
             ypos = 0.935
             xpos = 0.315
         if self.logoAbovePlot and self.drawRatio:
-            ypos = 0.96
+            ypos = 0.9675
             xpos = 0.30
 
         simtext = ROOT.TLatex(3.5, 24, self.simtext)
@@ -590,18 +590,20 @@ class Plotter:
 
     ############################################################################
     # Private, set draw options for the ratio
-    def __setRatioDrawOptions(self, ratio, isData=False, drawXaxis=True, xticklength=0.07, yticklength=0.07):
+    def __setRatioDrawOptions(self, ratio, isData=False, drawXaxis=True, xticklength=0.07, yticklength=0.07, noytitle=False):
         (ymin, ymax) = self.ratiorange
         ratio.SetTitle('')
         ratio.GetYaxis().SetTitle(self.ratiotitle)
+        if noytitle:
+            ratio.GetYaxis().SetTitle("")
         if self.__customXrange:
             ratio.GetXaxis().SetRangeUser(self.__xmin_draw, self.__xmax_draw)
         ratio.GetYaxis().SetRangeUser(ymin, ymax)
         ratio.GetYaxis().SetNdivisions(self.ratiodivision)
         ratio.GetYaxis().CenterTitle()
-        ratio.GetYaxis().SetTitleSize(20)
+        ratio.GetYaxis().SetTitleSize(24) #20
         ratio.GetYaxis().SetTitleFont(43)
-        ratio.GetYaxis().SetTitleOffset(2.2)
+        ratio.GetYaxis().SetTitleOffset(2.0) #2.2
         ratio.GetYaxis().SetLabelFont(43)
         ratio.GetYaxis().SetLabelSize(19)
         ratio.GetYaxis().SetLabelOffset(0.009)
@@ -776,7 +778,7 @@ class Plotter:
             pad2.cd()
             if self.debug: print("Draw ratio line")
             ratioline_pad2 = self.__getRatioLine("line2")
-            self.__setRatioDrawOptions(ratioline_pad2, xticklength=0.09, yticklength=0.05)
+            self.__setRatioDrawOptions(ratioline_pad2, xticklength=0.09, yticklength=0.05, noytitle=True)
             ratioline_pad2.SetFillColor(0)
             ratioline_pad2.SetLineColor(15)
             ratioline_pad2.SetLineWidth(2)
@@ -792,12 +794,12 @@ class Plotter:
                     if sig["ratioPad"] == 1:
                         ratios_sig_pad2.append(self.__getRatio(sig["hist"], self.__bkgtotal, sig["color"], sig["linestyle"], sig["linewidth"]) )
                 for r in ratios_sig_pad2:
-                    self.__setRatioDrawOptions(r)
+                    self.__setRatioDrawOptions(r, noytitle=True)
                     r.Draw("HIST SAME")
             if self.__hasData:
                 if self.debug: print("Draw data ratio")
                 ratio_data = self.__getRatio(self.__data["hist"], self.__bkgtotal)
-                self.__setRatioDrawOptions(ratio_data, isData=True)
+                self.__setRatioDrawOptions(ratio_data, isData=True, noytitle=True)
                 ratio_data.Draw("P SAME")
                 if self.debug: print("Draw data ratio outside")
                 ratio_data_outside = self.__getRatioOutside(ratio_data)
@@ -848,7 +850,7 @@ class Plotter:
             pad4.cd()
             if self.debug: print("Draw ratio line")
             ratioline_pad4 = self.__getRatioLine("line4")
-            self.__setRatioDrawOptions(ratioline_pad4, drawXaxis=False, xticklength=0.18, yticklength=0.025)
+            self.__setRatioDrawOptions(ratioline_pad4, drawXaxis=False, xticklength=0.18, yticklength=0.025, noytitle=True)
             ratioline_pad4.SetFillColor(0)
             ratioline_pad4.SetLineColor(15)
             ratioline_pad4.SetLineWidth(2)
@@ -864,12 +866,12 @@ class Plotter:
                     if sig["ratioPad"] == 3:
                         ratios_sig_pad4.append(self.__getRatio(sig["hist"], self.__bkgtotal, sig["color"], sig["linestyle"], sig["linewidth"]) )
                 for r in ratios_sig_pad4:
-                    self.__setRatioDrawOptions(r, drawXaxis=False)
+                    self.__setRatioDrawOptions(r, drawXaxis=False, noytitle=True)
                     r.Draw("HIST SAME")
             if self.__hasData:
                 if self.debug: print("Draw data ratio")
                 ratio_data = self.__getRatio(self.__data["hist"], self.__bkgtotal)
-                self.__setRatioDrawOptions(ratio_data, isData=True, drawXaxis=False)
+                self.__setRatioDrawOptions(ratio_data, isData=True, drawXaxis=False, noytitle=True  )
                 ratio_data.Draw("P SAME")
                 if self.debug: print("Draw data ratio outside")
                 ratio_data_outside = self.__getRatioOutside(ratio_data)

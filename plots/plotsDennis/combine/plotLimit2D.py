@@ -102,7 +102,7 @@ def setDrawStyle(h, wcname1, wcname2):
     h.SetTitle('')
     h.GetXaxis().SetTitle(WClatexNames[wcname1])
     h.GetYaxis().SetTitle(WClatexNames[wcname2])
-    h.GetZaxis().SetTitle('-2 #Delta ln L')
+    h.GetZaxis().SetTitle('#minus 2 #Delta ln L')
     h.GetXaxis().SetTitleOffset(1.1)
     h.GetYaxis().SetTitleOffset(0.9)
     h.GetZaxis().SetTitleOffset(1.1)
@@ -110,7 +110,7 @@ def setDrawStyle(h, wcname1, wcname2):
     h.GetYaxis().SetNdivisions(505)
     return h
 
-def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2):
+def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2, addText=None):
     c = ROOT.TCanvas(name, "", 700, 600)
     topmargin = 0.08
     rightmargin = 0.18
@@ -176,14 +176,16 @@ def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_w
     BFpoint.SetMarkerColor(ROOT.kCyan-3)
     BFpoint.Draw("p same")
     # legend
-    leg = ROOT.TLegend(.15, .77, 1.0-rightmargin-0.03, 1.0-topmargin-0.02)
+    # leg = ROOT.TLegend(.15, .77, 1.0-rightmargin-0.03, 1.0-topmargin-0.02)
+    leg = ROOT.TLegend(.25, .77, 0.7, 1.0-topmargin-0.02)
     leg.SetTextSize(.035)
     leg.SetNColumns(2)
-    leg.SetHeader(legname)
+    if legname is not None:
+        leg.SetHeader(legname)
     leg.AddEntry( BFpoint, "Best fit","p")
-    leg.AddEntry( cont_p1.At(0), "-2 #Delta ln L < 2.28", "l")
+    leg.AddEntry( cont_p1.At(0), "#minus 2 #Delta ln L < 2.28", "l")
     leg.AddEntry( SMpoint, "SM","p")
-    leg.AddEntry( cont_p2.At(0), "-2 #Delta ln L < 5.99", "l")
+    leg.AddEntry( cont_p2.At(0), "#minus 2 #Delta ln L < 5.99", "l")
     leg.Draw()
     # CMSlabel
     x_CMS = leftmargin
@@ -193,6 +195,23 @@ def plot2Dlimit(h, legname, name, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_w
     labels = getCMS(x_CMS, y_CMS, x_lumi, y_lumi, False)
     for l in labels:
         l.Draw()
+
+    # add text
+    texts = []
+    if addText is not None:
+        latex = ROOT.TLatex(3.5, 24, addText)
+        latex.SetNDC()
+        latex.SetTextAlign(13)
+        latex.SetTextFont(63)
+        latex.SetTextSize(24)
+        latex.SetX(0.15)
+        latex.SetY(0.22)
+        texts.append(latex)
+    for t in texts:
+        t.Draw()
+
+
+
     # Draw
     ROOT.gPad.RedrawAxis()
     c.Print(name)
@@ -366,10 +385,12 @@ for r in range(nRegions)+extraRegion:
     xmin, xmax = ranges[wcname1]
     ymin, ymax = ranges[wcname2]
     legheader =  plotstyle[region][0]+" (profiled)" if args.float else plotstyle[region][0]+" (fixed)"
+    addText = None
     if region == "combined":
-        legheader = "profiled" if args.float else "fixed"
+        legheader = None
+        addText = "Profiled" if args.float else "Fixed"
 
-    plot2Dlimit(hist, legheader, plotdir+outname, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2)
+    plot2Dlimit(hist, legheader, plotdir+outname, xmin, xmax, ymin, ymax, bestFit_wc1, bestFit_wc2, addText)
     resultfile = plotdir+outname.replace(".pdf", ".root")
     f_out = ROOT.TFile(resultfile, "RECREATE")
     f_out.cd()
